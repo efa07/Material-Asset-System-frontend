@@ -1,0 +1,405 @@
+import type {
+  Asset,
+  AssetCategory,
+  Store,
+  Shelf,
+  AssignmentRequest,
+  TransferRequest,
+  MaintenanceTask,
+  AuditLog,
+  AssetHistoryEntry,
+  DashboardStats,
+} from '@/types';
+
+// Asset Categories
+export const mockCategories: AssetCategory[] = [
+  { id: '1', name: 'Electronics', description: 'Electronic devices and equipment', createdAt: '2024-01-01' },
+  { id: '2', name: 'Furniture', description: 'Office furniture and fixtures', createdAt: '2024-01-01' },
+  { id: '3', name: 'Vehicles', description: 'Company vehicles and transportation', createdAt: '2024-01-01' },
+  { id: '4', name: 'IT Equipment', description: 'Servers, networking, and IT infrastructure', parentId: '1', createdAt: '2024-01-15' },
+  { id: '5', name: 'Office Supplies', description: 'General office supplies', createdAt: '2024-02-01' },
+];
+
+// Stores
+export const mockStores: Store[] = [
+  { id: '1', name: 'Main Warehouse', location: 'Building A, Floor 1', managerId: '2', capacity: 1000, currentOccupancy: 756, createdAt: '2024-01-01' },
+  { id: '2', name: 'IT Storage', location: 'Building B, Floor 2', managerId: '2', capacity: 500, currentOccupancy: 342, createdAt: '2024-01-15' },
+  { id: '3', name: 'Vehicle Depot', location: 'Compound C', managerId: '2', capacity: 50, currentOccupancy: 28, createdAt: '2024-02-01' },
+  { id: '4', name: 'Regional Office Store', location: 'Regional HQ', managerId: '2', capacity: 300, currentOccupancy: 187, createdAt: '2024-03-01' },
+];
+
+// Shelves
+export const mockShelves: Shelf[] = [
+  { id: '1', storeId: '1', name: 'Shelf A1', code: 'MWH-A1', capacity: 100, currentOccupancy: 85 },
+  { id: '2', storeId: '1', name: 'Shelf A2', code: 'MWH-A2', capacity: 100, currentOccupancy: 92 },
+  { id: '3', storeId: '1', name: 'Shelf B1', code: 'MWH-B1', capacity: 100, currentOccupancy: 67 },
+  { id: '4', storeId: '2', name: 'Server Rack 1', code: 'IT-SR1', capacity: 50, currentOccupancy: 45 },
+  { id: '5', storeId: '2', name: 'Server Rack 2', code: 'IT-SR2', capacity: 50, currentOccupancy: 38 },
+];
+
+// Assets
+export const mockAssets: Asset[] = [
+  {
+    id: '1',
+    name: 'Dell Latitude 5540',
+    code: 'AST-001',
+    categoryId: '1',
+    storeId: '2',
+    shelfId: '4',
+    status: 'IN_USE',
+    purchaseDate: '2024-03-15',
+    purchasePrice: 1200,
+    currentValue: 1000,
+    assignedTo: '5',
+    serialNumber: 'DL5540-2024-001',
+    createdAt: '2024-03-15',
+    updatedAt: '2025-01-10',
+  },
+  {
+    id: '2',
+    name: 'HP ProBook 450',
+    code: 'AST-002',
+    categoryId: '1',
+    storeId: '2',
+    status: 'AVAILABLE',
+    purchaseDate: '2024-04-20',
+    purchasePrice: 980,
+    currentValue: 850,
+    serialNumber: 'HP450-2024-002',
+    createdAt: '2024-04-20',
+    updatedAt: '2024-12-01',
+  },
+  {
+    id: '3',
+    name: 'Executive Desk',
+    code: 'AST-003',
+    categoryId: '2',
+    storeId: '1',
+    shelfId: '1',
+    status: 'IN_USE',
+    purchaseDate: '2024-01-10',
+    purchasePrice: 450,
+    currentValue: 400,
+    assignedTo: '3',
+    createdAt: '2024-01-10',
+    updatedAt: '2024-06-15',
+  },
+  {
+    id: '4',
+    name: 'Toyota Hilux',
+    code: 'AST-004',
+    categoryId: '3',
+    storeId: '3',
+    status: 'MAINTENANCE',
+    purchaseDate: '2023-06-01',
+    purchasePrice: 35000,
+    currentValue: 28000,
+    serialNumber: 'TH-2023-001',
+    createdAt: '2023-06-01',
+    updatedAt: '2025-01-15',
+  },
+  {
+    id: '5',
+    name: 'Dell PowerEdge R750',
+    code: 'AST-005',
+    categoryId: '4',
+    storeId: '2',
+    shelfId: '4',
+    status: 'IN_USE',
+    purchaseDate: '2024-02-28',
+    purchasePrice: 8500,
+    currentValue: 7500,
+    serialNumber: 'PE-R750-2024-001',
+    createdAt: '2024-02-28',
+    updatedAt: '2024-11-20',
+  },
+  {
+    id: '6',
+    name: 'Cisco Switch 48-Port',
+    code: 'AST-006',
+    categoryId: '4',
+    storeId: '2',
+    shelfId: '5',
+    status: 'AVAILABLE',
+    purchaseDate: '2024-05-10',
+    purchasePrice: 2200,
+    currentValue: 2000,
+    serialNumber: 'CS48-2024-001',
+    createdAt: '2024-05-10',
+    updatedAt: '2024-10-05',
+  },
+  {
+    id: '7',
+    name: 'Conference Table',
+    code: 'AST-007',
+    categoryId: '2',
+    storeId: '1',
+    shelfId: '2',
+    status: 'DISPOSED',
+    purchaseDate: '2020-03-15',
+    purchasePrice: 1200,
+    currentValue: 0,
+    createdAt: '2020-03-15',
+    updatedAt: '2025-01-05',
+  },
+  {
+    id: '8',
+    name: 'Lenovo ThinkPad X1',
+    code: 'AST-008',
+    categoryId: '1',
+    storeId: '4',
+    status: 'RESERVED',
+    purchaseDate: '2024-08-20',
+    purchasePrice: 1500,
+    currentValue: 1400,
+    serialNumber: 'LTX1-2024-001',
+    createdAt: '2024-08-20',
+    updatedAt: '2025-01-18',
+  },
+];
+
+// Assignment Requests
+export const mockAssignmentRequests: AssignmentRequest[] = [
+  {
+    id: '1',
+    assetId: '2',
+    requesterId: '5',
+    status: 'PENDING',
+    reason: 'Need laptop for field work assignment',
+    requestedAt: '2025-01-18T14:30:00Z',
+  },
+  {
+    id: '2',
+    assetId: '6',
+    requesterId: '4',
+    status: 'APPROVED',
+    reason: 'Required for network expansion project',
+    requestedAt: '2025-01-15T09:00:00Z',
+    processedAt: '2025-01-16T11:30:00Z',
+    processedBy: '2',
+  },
+  {
+    id: '3',
+    assetId: '8',
+    requesterId: '5',
+    status: 'REJECTED',
+    reason: 'Personal use request',
+    requestedAt: '2025-01-10T16:45:00Z',
+    processedAt: '2025-01-11T08:15:00Z',
+    processedBy: '2',
+  },
+];
+
+// Transfer Requests
+export const mockTransferRequests: TransferRequest[] = [
+  {
+    id: '1',
+    assetId: '5',
+    fromStoreId: '2',
+    toStoreId: '4',
+    requesterId: '3',
+    status: 'PENDING',
+    reason: 'Regional office needs server capacity',
+    requestedAt: '2025-01-17T10:00:00Z',
+  },
+  {
+    id: '2',
+    assetId: '3',
+    fromStoreId: '1',
+    toStoreId: '4',
+    requesterId: '3',
+    status: 'APPROVED',
+    reason: 'Office relocation',
+    requestedAt: '2025-01-12T14:20:00Z',
+    processedAt: '2025-01-13T09:45:00Z',
+    processedBy: '2',
+  },
+];
+
+// Maintenance Tasks
+export const mockMaintenanceTasks: MaintenanceTask[] = [
+  {
+    id: '1',
+    assetId: '4',
+    technicianId: '4',
+    type: 'corrective',
+    status: 'IN_PROGRESS',
+    priority: 'high',
+    description: 'Engine maintenance and oil change',
+    scheduledDate: '2025-01-15',
+    createdAt: '2025-01-14T08:00:00Z',
+  },
+  {
+    id: '2',
+    assetId: '5',
+    technicianId: '4',
+    type: 'preventive',
+    status: 'SCHEDULED',
+    priority: 'medium',
+    description: 'Server firmware update and health check',
+    scheduledDate: '2025-01-25',
+    createdAt: '2025-01-10T10:30:00Z',
+  },
+  {
+    id: '3',
+    assetId: '1',
+    technicianId: '4',
+    type: 'inspection',
+    status: 'COMPLETED',
+    priority: 'low',
+    description: 'Annual laptop inspection and cleaning',
+    scheduledDate: '2025-01-05',
+    completedDate: '2025-01-05',
+    notes: 'Laptop in good condition, battery replaced',
+    createdAt: '2024-12-28T09:15:00Z',
+  },
+  {
+    id: '4',
+    assetId: '6',
+    technicianId: '4',
+    type: 'preventive',
+    status: 'SCHEDULED',
+    priority: 'critical',
+    description: 'Security patch installation',
+    scheduledDate: '2025-01-20',
+    createdAt: '2025-01-18T11:00:00Z',
+  },
+];
+
+// Audit Logs
+export const mockAuditLogs: AuditLog[] = [
+  {
+    id: '1',
+    userId: '1',
+    action: 'USER_LOGIN',
+    entityType: 'User',
+    entityId: '1',
+    details: 'Admin user logged in successfully',
+    ipAddress: '192.168.1.100',
+    timestamp: '2025-01-19T08:00:00Z',
+  },
+  {
+    id: '2',
+    userId: '3',
+    action: 'ASSET_CREATED',
+    entityType: 'Asset',
+    entityId: '8',
+    details: 'New asset "Lenovo ThinkPad X1" registered',
+    ipAddress: '192.168.1.105',
+    timestamp: '2025-01-18T14:30:00Z',
+  },
+  {
+    id: '3',
+    userId: '2',
+    action: 'REQUEST_APPROVED',
+    entityType: 'AssignmentRequest',
+    entityId: '2',
+    details: 'Assignment request approved for Cisco Switch',
+    ipAddress: '192.168.1.102',
+    timestamp: '2025-01-16T11:30:00Z',
+  },
+  {
+    id: '4',
+    userId: '4',
+    action: 'MAINTENANCE_STARTED',
+    entityType: 'MaintenanceTask',
+    entityId: '1',
+    details: 'Started maintenance on Toyota Hilux',
+    ipAddress: '192.168.1.110',
+    timestamp: '2025-01-15T09:00:00Z',
+  },
+  {
+    id: '5',
+    userId: '2',
+    action: 'REQUEST_REJECTED',
+    entityType: 'AssignmentRequest',
+    entityId: '3',
+    details: 'Assignment request rejected - Invalid reason',
+    ipAddress: '192.168.1.102',
+    timestamp: '2025-01-11T08:15:00Z',
+  },
+];
+
+// Asset History
+export const mockAssetHistory: AssetHistoryEntry[] = [
+  {
+    id: '1',
+    assetId: '1',
+    action: 'CREATED',
+    newStatus: 'AVAILABLE',
+    performedBy: '3',
+    details: 'Asset registered in the system',
+    timestamp: '2024-03-15T10:00:00Z',
+  },
+  {
+    id: '2',
+    assetId: '1',
+    action: 'ASSIGNED',
+    previousStatus: 'AVAILABLE',
+    newStatus: 'IN_USE',
+    performedBy: '2',
+    details: 'Assigned to Emily Brown',
+    timestamp: '2024-04-01T14:30:00Z',
+  },
+  {
+    id: '3',
+    assetId: '1',
+    action: 'MAINTENANCE',
+    previousStatus: 'IN_USE',
+    newStatus: 'MAINTENANCE',
+    performedBy: '4',
+    details: 'Scheduled for annual inspection',
+    timestamp: '2025-01-03T09:00:00Z',
+  },
+  {
+    id: '4',
+    assetId: '1',
+    action: 'MAINTENANCE_COMPLETED',
+    previousStatus: 'MAINTENANCE',
+    newStatus: 'IN_USE',
+    performedBy: '4',
+    details: 'Inspection completed, battery replaced',
+    timestamp: '2025-01-05T16:00:00Z',
+  },
+];
+
+// Dashboard Stats
+export const mockDashboardStats: DashboardStats = {
+  totalAssets: 847,
+  assetsInUse: 523,
+  pendingRequests: 12,
+  maintenanceTasks: 8,
+  totalStores: 4,
+  totalUsers: 156,
+};
+
+// Chart data for dashboards
+export const assetsByStatusData = [
+  { status: 'In Use', value: 523, fill: 'var(--chart-1)' },
+  { status: 'Available', value: 189, fill: 'var(--chart-2)' },
+  { status: 'Maintenance', value: 45, fill: 'var(--chart-3)' },
+  { status: 'Reserved', value: 67, fill: 'var(--chart-4)' },
+  { status: 'Disposed', value: 23, fill: 'var(--chart-5)' },
+];
+
+export const assetsTrendData = [
+  { month: 'Jul', assets: 720, requests: 45 },
+  { month: 'Aug', assets: 745, requests: 52 },
+  { month: 'Sep', assets: 780, requests: 38 },
+  { month: 'Oct', assets: 805, requests: 61 },
+  { month: 'Nov', assets: 825, requests: 48 },
+  { month: 'Dec', assets: 840, requests: 55 },
+  { month: 'Jan', assets: 847, requests: 42 },
+];
+
+export const maintenanceByTypeData = [
+  { type: 'Preventive', count: 34, fill: 'var(--chart-1)' },
+  { type: 'Corrective', count: 18, fill: 'var(--chart-2)' },
+  { type: 'Inspection', count: 25, fill: 'var(--chart-3)' },
+];
+
+export const storeOccupancyData = mockStores.map((store) => ({
+  name: store.name,
+  occupancy: Math.round((store.currentOccupancy / store.capacity) * 100),
+  fill: `var(--chart-${mockStores.indexOf(store) + 1})`,
+}));
