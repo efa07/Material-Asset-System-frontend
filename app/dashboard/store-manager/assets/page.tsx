@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Filter, Download, Eye } from 'lucide-react';
+import { Search, Download, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,9 +12,6 @@ import { DataTable, type Column } from '@/components/dashboard/data-table';
 import { StatusBadge } from '@/components/dashboard/status-badge';
 import { mockAssets, mockStores, mockCategories } from '@/lib/mock-data';
 import type { Asset } from '@/types';
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
-import Loading from './loading';
 
 const columns: Column<Asset>[] = [
   {
@@ -77,7 +74,6 @@ const columns: Column<Asset>[] = [
 ];
 
 export default function AssetOverviewPage() {
-  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [storeFilter, setStoreFilter] = useState('all');
@@ -99,17 +95,16 @@ export default function AssetOverviewPage() {
   };
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="Asset Overview"
-          description="View and manage all assets across stores"
-        >
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-        </PageHeader>
+    <div className="space-y-6">
+      <PageHeader
+        title="Asset Overview"
+        description="View and manage all assets across stores"
+      >
+        <Button variant="outline">
+          <Download className="mr-2 h-4 w-4" />
+          Export
+        </Button>
+      </PageHeader>
 
         {/* Quick Stats */}
         <div className="grid gap-4 md:grid-cols-4">
@@ -201,7 +196,6 @@ export default function AssetOverviewPage() {
             />
           </CardContent>
         </Card>
-      </div>
-    </Suspense>
+    </div>
   );
 }

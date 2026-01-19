@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AreaChartGradient } from "@/components/dashboard/area-chart-gradient";
 import {
   ClipboardCheck,
   FileSearch,
@@ -35,6 +36,15 @@ export default function AuditorDashboard() {
   const recentAudits = auditRecords.slice(0, 5);
   const pendingDisposals = disposalRecords.filter((d) => d.status === "PENDING");
 
+  const auditVelocity = [
+    { month: "Jan", completed: 18 },
+    { month: "Feb", completed: 22 },
+    { month: "Mar", completed: 24 },
+    { month: "Apr", completed: 21 },
+    { month: "May", completed: 26 },
+    { month: "Jun", completed: 28 },
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -46,31 +56,52 @@ export default function AuditorDashboard() {
         <StatsCard
           title="Scheduled Audits"
           value={scheduledAudits.length}
-          icon={Clock}
+          icon={<Clock className="h-5 w-5" />}
           description="Upcoming"
+          trend={{ value: 4.2, label: "next 30 days" }}
         />
         <StatsCard
           title="In Progress"
           value={pendingAudits.length}
-          icon={FileSearch}
+          icon={<FileSearch className="h-5 w-5" />}
           description="Active audits"
+          trend={{ value: 2.3, label: "week over week" }}
         />
         <StatsCard
           title="Completed"
           value={completedAudits.length}
-          icon={CheckCircle}
-          trend={{ value: 15, isPositive: true }}
+          icon={<CheckCircle className="h-5 w-5" />}
+          trend={{ value: 15, label: "vs last cycle" }}
         />
         <StatsCard
           title="Discrepancies"
           value={totalDiscrepancies}
-          icon={AlertTriangle}
+          icon={<AlertTriangle className="h-5 w-5" />}
           description="Found issues"
+          trend={{ value: -3.4, label: "resolution trend" }}
         />
       </div>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold">Audit Completion Velocity</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Completed audits over the last six months
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" className="gap-2">
+            View reports
+            <ArrowUpRight className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <AreaChartGradient data={auditVelocity} xKey="month" yKey="completed" />
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-semibold">
               Recent Audits
@@ -139,7 +170,7 @@ export default function AuditorDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-semibold">
               Pending Reviews
@@ -191,7 +222,7 @@ export default function AuditorDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader>
             <CardTitle className="text-lg font-semibold">
               Audit Statistics
@@ -232,7 +263,7 @@ export default function AuditorDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm lg:col-span-2">
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
           </CardHeader>

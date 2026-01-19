@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,15 +45,24 @@ import {
   Calendar,
   AlertTriangle,
 } from "lucide-react";
-import type { AuditType } from "@/types";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Loading from "./loading";
+import { mockStores } from "@/lib/mock-data";
 
 export default function AuditorAuditsPage() {
-  const searchParams = useSearchParams();
-  const { auditRecords, stores, currentUser, addAuditRecord, updateAuditRecord } =
-    useAppStore();
+  const stores = mockStores;
+  const auditRecords: Array<{
+    id: string;
+    storeId: string;
+    type: string;
+    auditDate: string;
+    status: "SCHEDULED" | "IN_PROGRESS" | "COMPLETED";
+    assetsAudited?: number;
+    discrepanciesFound?: number;
+    findings?: string;
+  }> = [
+    { id: "a1", storeId: stores[0]?.id ?? "1", type: "PERIODIC", auditDate: "2025-01-10", status: "COMPLETED", assetsAudited: 120, discrepanciesFound: 2, findings: "2 minor discrepancies resolved." },
+    { id: "a2", storeId: stores[1]?.id ?? "2", type: "COMPLIANCE", auditDate: "2025-01-18", status: "IN_PROGRESS", assetsAudited: 60, discrepanciesFound: 1, findings: "Ongoing." },
+    { id: "a3", storeId: stores[2]?.id ?? "3", type: "RANDOM", auditDate: "2025-02-05", status: "SCHEDULED" },
+  ];
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isNewAuditDialogOpen, setIsNewAuditDialogOpen] = useState(false);
@@ -64,7 +72,7 @@ export default function AuditorAuditsPage() {
 
   const [newAudit, setNewAudit] = useState({
     storeId: "",
-    type: "PERIODIC" as AuditType,
+    type: "PERIODIC",
     auditDate: "",
     notes: "",
   });
@@ -91,14 +99,6 @@ export default function AuditorAuditsPage() {
   };
 
   const handleCreateAudit = () => {
-    addAuditRecord({
-      storeId: newAudit.storeId,
-      auditorId: currentUser?.id || "",
-      auditDate: newAudit.auditDate,
-      type: newAudit.type,
-      status: "SCHEDULED",
-      findings: newAudit.notes,
-    });
     setIsNewAuditDialogOpen(false);
     setNewAudit({
       storeId: "",
@@ -109,116 +109,115 @@ export default function AuditorAuditsPage() {
   };
 
   const handleStartAudit = (auditId: string) => {
-    updateAuditRecord(auditId, { status: "IN_PROGRESS" });
+    // mock-only
   };
 
   const handleCompleteAudit = (auditId: string) => {
-    updateAuditRecord(auditId, { status: "COMPLETED" });
+    // mock-only
   };
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="Audit Management"
-          description="Schedule, conduct, and review audits"
-          action={
-            <Dialog
-              open={isNewAuditDialogOpen}
-              onOpenChange={setIsNewAuditDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Schedule Audit
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Schedule New Audit</DialogTitle>
-                  <DialogDescription>
-                    Create a new audit schedule for a store.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
+    <div className="space-y-6">
+      <PageHeader
+        title="Audit Management"
+        description="Schedule, conduct, and review audits (read-only mock)"
+        action={
+          <Dialog
+            open={isNewAuditDialogOpen}
+            onOpenChange={setIsNewAuditDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Schedule Audit
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Schedule New Audit</DialogTitle>
+                <DialogDescription>
+                  Create a new audit schedule for a store.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="store">Store</Label>
+                  <Select
+                    value={newAudit.storeId}
+                    onValueChange={(value) =>
+                      setNewAudit({ ...newAudit, storeId: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select store" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stores.map((store) => (
+                        <SelectItem key={store.id} value={store.id}>
+                          {store.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="store">Store</Label>
+                    <Label htmlFor="type">Audit Type</Label>
                     <Select
-                      value={newAudit.storeId}
+                      value={newAudit.type}
                       onValueChange={(value) =>
-                        setNewAudit({ ...newAudit, storeId: value })
+                        setNewAudit({ ...newAudit, type: value })
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select store" />
+                        <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {stores.map((store) => (
-                          <SelectItem key={store.id} value={store.id}>
-                            {store.name}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="PERIODIC">Periodic</SelectItem>
+                        <SelectItem value="RANDOM">Random</SelectItem>
+                        <SelectItem value="COMPLIANCE">Compliance</SelectItem>
+                        <SelectItem value="SPECIAL">Special</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="type">Audit Type</Label>
-                      <Select
-                        value={newAudit.type}
-                        onValueChange={(value) =>
-                          setNewAudit({ ...newAudit, type: value as AuditType })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="PERIODIC">Periodic</SelectItem>
-                          <SelectItem value="RANDOM">Random</SelectItem>
-                          <SelectItem value="COMPLIANCE">Compliance</SelectItem>
-                          <SelectItem value="SPECIAL">Special</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="auditDate">Audit Date</Label>
-                      <Input
-                        id="auditDate"
-                        type="date"
-                        value={newAudit.auditDate}
-                        onChange={(e) =>
-                          setNewAudit({ ...newAudit, auditDate: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="notes">Notes</Label>
-                    <Textarea
-                      id="notes"
-                      value={newAudit.notes}
+                    <Label htmlFor="auditDate">Audit Date</Label>
+                    <Input
+                      id="auditDate"
+                      type="date"
+                      value={newAudit.auditDate}
                       onChange={(e) =>
-                        setNewAudit({ ...newAudit, notes: e.target.value })
+                        setNewAudit({ ...newAudit, auditDate: e.target.value })
                       }
-                      placeholder="Any special instructions or focus areas..."
-                      rows={3}
                     />
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsNewAuditDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCreateAudit}>Schedule Audit</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          }
-        />
+                <div className="grid gap-2">
+                  <Label htmlFor="notes">Notes</Label>
+                  <Textarea
+                    id="notes"
+                    value={newAudit.notes}
+                    onChange={(e) =>
+                      setNewAudit({ ...newAudit, notes: e.target.value })
+                    }
+                    placeholder="Any special instructions or focus areas..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsNewAuditDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateAudit}>Schedule Audit</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
@@ -426,8 +425,7 @@ export default function AuditorAuditsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </Suspense>
+    </div>
   );
 }
 

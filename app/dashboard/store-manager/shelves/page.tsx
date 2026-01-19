@@ -1,8 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
 import { Plus, Search, Archive, MoreHorizontal, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,10 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PageHeader } from '@/components/dashboard/page-header';
 import { mockShelves, mockStores } from '@/lib/mock-data';
 
-const Loading = () => null;
-
 export default function ShelvesPage() {
-  const searchParams = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStore, setSelectedStore] = useState<string>('all');
@@ -48,64 +43,63 @@ export default function ShelvesPage() {
   });
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="Shelf Management"
-          description="Organize and manage storage shelves across stores"
-        >
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Shelf
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Shelf</DialogTitle>
-                <DialogDescription>
-                  Create a new shelf in a storage location.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="store">Store</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select store" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mockStores.map((store) => (
-                        <SelectItem key={store.id} value={store.id}>
-                          {store.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="shelf-name">Shelf Name</Label>
-                  <Input id="shelf-name" placeholder="e.g., Shelf A1" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="shelf-code">Shelf Code</Label>
-                  <Input id="shelf-code" placeholder="e.g., MWH-A1" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="capacity">Capacity (units)</Label>
-                  <Input id="capacity" type="number" placeholder="Enter capacity" />
-                </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Shelf Management"
+        description="Organize and manage storage shelves across stores"
+      >
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Shelf
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Shelf</DialogTitle>
+              <DialogDescription>
+                Create a new shelf in a storage location.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="store">Store</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select store" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockStores.map((store) => (
+                      <SelectItem key={store.id} value={store.id}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={() => setIsDialogOpen(false)}>Create Shelf</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </PageHeader>
+              <div className="grid gap-2">
+                <Label htmlFor="shelf-name">Shelf Name</Label>
+                <Input id="shelf-name" placeholder="e.g., Shelf A1" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="shelf-code">Shelf Code</Label>
+                <Input id="shelf-code" placeholder="e.g., MWH-A1" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="capacity">Capacity (units)</Label>
+                <Input id="capacity" type="number" placeholder="Enter capacity" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setIsDialogOpen(false)}>Create Shelf</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </PageHeader>
 
         {/* Filters */}
         <Card>
@@ -217,7 +211,6 @@ export default function ShelvesPage() {
             </Card>
           );
         })}
-      </div>
-    </Suspense>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 // User Roles
-export type UserRole = 
+export type UserRole =
   | 'admin'
   | 'store-manager'
   | 'asset-manager'
@@ -20,7 +20,7 @@ export interface User {
 }
 
 // Asset Status
-export type AssetStatus = 
+export type AssetStatus =
   | 'AVAILABLE'
   | 'IN_USE'
   | 'MAINTENANCE'
@@ -29,7 +29,7 @@ export type AssetStatus =
   | 'RESERVED';
 
 // Request Status
-export type RequestStatus = 
+export type RequestStatus =
   | 'PENDING'
   | 'APPROVED'
   | 'REJECTED'
@@ -41,7 +41,8 @@ export type MaintenanceStatus =
   | 'SCHEDULED'
   | 'IN_PROGRESS'
   | 'COMPLETED'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'PENDING'; // Added PENDING
 
 // Asset Category
 export interface AssetCategory {
@@ -123,24 +124,30 @@ export interface MaintenanceTask {
   id: string;
   assetId: string;
   technicianId: string;
-  type: 'preventive' | 'corrective' | 'inspection';
+  type: 'preventive' | 'corrective' | 'inspection' | 'EMERGENCY';
   status: MaintenanceStatus;
   priority: 'low' | 'medium' | 'high' | 'critical';
   description: string;
   scheduledDate: string;
   completedDate?: string;
+  startDate?: string; // Added startDate
   notes?: string;
   createdAt: string;
 }
 
 // Audit Log
+// Audit Log
 export interface AuditLog {
   id: string;
   userId: string;
+  userName?: string;
+  userRole?: string;
   action: string;
   entityType: string;
   entityId: string;
+  target?: string;
   details: string;
+  status?: 'Success' | 'Warning' | 'Error';
   ipAddress?: string;
   timestamp: string;
 }
@@ -186,4 +193,15 @@ export interface NavItem {
   roles: UserRole[];
   badge?: number;
   children?: NavItem[];
+}
+
+// Assignment
+export interface Assignment {
+  id: string;
+  assetId: string;
+  userId: string;
+  status: 'ACTIVE' | 'PENDING' | 'COMPLETED' | 'RETURNED';
+  assignedDate: string;
+  dueDate?: string;
+  notes?: string;
 }

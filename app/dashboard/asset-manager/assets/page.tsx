@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,16 +39,14 @@ import {
   Filter,
   Eye,
   Edit,
-  Trash2,
   QrCode,
 } from "lucide-react";
-import type { Asset, AssetCategory, AssetCondition, AssetStatus } from "@/types";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Loading from "./loading";
+import type { Asset, AssetStatus } from "@/types";
+import { mockAssets, mockCategories, mockStores } from "@/lib/mock-data";
 
 export default function AssetManagerAssetsPage() {
-  const { assets, stores, addAsset } = useAppStore();
+  const [assets, setAssets] = useState<Asset[]>(mockAssets);
+  const stores = mockStores;
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -59,7 +56,7 @@ export default function AssetManagerAssetsPage() {
   const [newAsset, setNewAsset] = useState({
     name: "",
     serialNumber: "",
-    category: "IT_EQUIPMENT" as AssetCategory,
+    categoryId: mockCategories[0]?.id ?? "1",
     description: "",
     purchaseDate: "",
     purchasePrice: "",
@@ -78,23 +75,28 @@ export default function AssetManagerAssetsPage() {
   });
 
   const handleAddAsset = () => {
-    addAsset({
+    const now = new Date().toISOString();
+    const created: Asset = {
+      id: crypto.randomUUID(),
       name: newAsset.name,
-      serialNumber: newAsset.serialNumber,
-      category: newAsset.category,
-      description: newAsset.description,
-      purchaseDate: newAsset.purchaseDate,
-      purchasePrice: Number.parseFloat(newAsset.purchasePrice),
-      currentValue: Number.parseFloat(newAsset.purchasePrice),
+      code: `AST-${String(assets.length + 1).padStart(3, "0")}`,
+      categoryId: newAsset.categoryId,
+      storeId: newAsset.storeId || stores[0]?.id || "1",
       status: "AVAILABLE",
-      condition: "EXCELLENT",
-      storeId: newAsset.storeId,
-    });
+      purchaseDate: newAsset.purchaseDate || now,
+      purchasePrice: Number.parseFloat(newAsset.purchasePrice || "0"),
+      currentValue: Number.parseFloat(newAsset.purchasePrice || "0"),
+      description: newAsset.description || undefined,
+      serialNumber: newAsset.serialNumber || undefined,
+      createdAt: now,
+      updatedAt: now,
+    };
+    setAssets((prev) => [created, ...prev]);
     setIsAddDialogOpen(false);
     setNewAsset({
       name: "",
       serialNumber: "",
-      category: "IT_EQUIPMENT",
+      categoryId: mockCategories[0]?.id ?? "1",
       description: "",
       purchaseDate: "",
       purchasePrice: "",
@@ -103,151 +105,126 @@ export default function AssetManagerAssetsPage() {
   };
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="Asset Management"
-          description="View and manage all assets in the system"
-          action={
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Asset
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>Add New Asset</DialogTitle>
-                  <DialogDescription>
-                    Enter the details for the new asset.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
+    <div className="space-y-6">
+      <PageHeader
+        title="Asset Management"
+        description="View and manage all assets in the system"
+        action={
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Asset
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Add New Asset</DialogTitle>
+                <DialogDescription>
+                  Enter the details for the new asset.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Asset Name</Label>
+                  <Input
+                    id="name"
+                    value={newAsset.name}
+                    onChange={(e) => setNewAsset({ ...newAsset, name: e.target.value })}
+                    placeholder="Enter asset name"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="serialNumber">Serial Number</Label>
+                  <Input
+                    id="serialNumber"
+                    value={newAsset.serialNumber}
+                    onChange={(e) => setNewAsset({ ...newAsset, serialNumber: e.target.value })}
+                    placeholder="Enter serial number"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="name">Asset Name</Label>
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={newAsset.categoryId}
+                      onValueChange={(value) => setNewAsset({ ...newAsset, categoryId: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockCategories.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="store">Store</Label>
+                    <Select
+                      value={newAsset.storeId}
+                      onValueChange={(value) => setNewAsset({ ...newAsset, storeId: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select store" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stores.map((store) => (
+                          <SelectItem key={store.id} value={store.id}>
+                            {store.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="purchaseDate">Purchase Date</Label>
                     <Input
-                      id="name"
-                      value={newAsset.name}
-                      onChange={(e) =>
-                        setNewAsset({ ...newAsset, name: e.target.value })
-                      }
-                      placeholder="Enter asset name"
+                      id="purchaseDate"
+                      type="date"
+                      value={newAsset.purchaseDate}
+                      onChange={(e) => setNewAsset({ ...newAsset, purchaseDate: e.target.value })}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="serialNumber">Serial Number</Label>
+                    <Label htmlFor="purchasePrice">Purchase Price</Label>
                     <Input
-                      id="serialNumber"
-                      value={newAsset.serialNumber}
-                      onChange={(e) =>
-                        setNewAsset({ ...newAsset, serialNumber: e.target.value })
-                      }
-                      placeholder="Enter serial number"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select
-                        value={newAsset.category}
-                        onValueChange={(value) =>
-                          setNewAsset({
-                            ...newAsset,
-                            category: value as AssetCategory,
-                          })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="IT_EQUIPMENT">IT Equipment</SelectItem>
-                          <SelectItem value="FURNITURE">Furniture</SelectItem>
-                          <SelectItem value="VEHICLE">Vehicle</SelectItem>
-                          <SelectItem value="MACHINERY">Machinery</SelectItem>
-                          <SelectItem value="OFFICE_SUPPLIES">
-                            Office Supplies
-                          </SelectItem>
-                          <SelectItem value="SECURITY_EQUIPMENT">
-                            Security Equipment
-                          </SelectItem>
-                          <SelectItem value="OTHER">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="store">Store</Label>
-                      <Select
-                        value={newAsset.storeId}
-                        onValueChange={(value) =>
-                          setNewAsset({ ...newAsset, storeId: value })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select store" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {stores.map((store) => (
-                            <SelectItem key={store.id} value={store.id}>
-                              {store.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="purchaseDate">Purchase Date</Label>
-                      <Input
-                        id="purchaseDate"
-                        type="date"
-                        value={newAsset.purchaseDate}
-                        onChange={(e) =>
-                          setNewAsset({ ...newAsset, purchaseDate: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="purchasePrice">Purchase Price</Label>
-                      <Input
-                        id="purchasePrice"
-                        type="number"
-                        value={newAsset.purchasePrice}
-                        onChange={(e) =>
-                          setNewAsset({ ...newAsset, purchasePrice: e.target.value })
-                        }
-                        placeholder="0.00"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={newAsset.description}
-                      onChange={(e) =>
-                        setNewAsset({ ...newAsset, description: e.target.value })
-                      }
-                      placeholder="Enter asset description"
-                      rows={3}
+                      id="purchasePrice"
+                      type="number"
+                      value={newAsset.purchasePrice}
+                      onChange={(e) => setNewAsset({ ...newAsset, purchasePrice: e.target.value })}
+                      placeholder="0.00"
                     />
                   </div>
                 </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsAddDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={handleAddAsset}>Add Asset</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          }
-        />
+                <div className="grid gap-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newAsset.description}
+                    onChange={(e) => setNewAsset({ ...newAsset, description: e.target.value })}
+                    placeholder="Enter asset description"
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddAsset} disabled={!newAsset.name.trim()}>
+                  Add Asset
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader>
@@ -330,15 +307,13 @@ export default function AssetManagerAssetsPage() {
                       <TableCell className="font-mono text-sm">
                         {asset.serialNumber}
                       </TableCell>
-                      <TableCell className="capitalize">
-                        {asset.category.toLowerCase().replace("_", " ")}
+                      <TableCell>
+                        {mockCategories.find((c) => c.id === asset.categoryId)?.name ?? '—'}
                       </TableCell>
                       <TableCell>
                         <StatusBadge status={asset.status} />
                       </TableCell>
-                      <TableCell>
-                        <StatusBadge status={asset.condition} type="condition" />
-                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">—</TableCell>
                       <TableCell>
                         ${asset.currentValue.toLocaleString()}
                       </TableCell>
@@ -442,6 +417,5 @@ export default function AssetManagerAssetsPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </Suspense>
   );
 }

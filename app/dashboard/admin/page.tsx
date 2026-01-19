@@ -1,70 +1,69 @@
 'use client';
 
-import { Package, Users, Building2, Wrench, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Package, Users, AlertTriangle, Activity } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { PageHeader } from '@/components/dashboard/page-header';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { DataTable, type Column } from '@/components/dashboard/data-table';
 import { StatusBadge } from '@/components/dashboard/status-badge';
-import { mockDashboardStats, mockAssets, mockAuditLogs, assetsByStatusData, assetsTrendData } from '@/lib/mock-data';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart, Pie } from 'recharts';
-import type { Asset, AuditLog } from '@/types';
+import { AreaChartGradient } from '@/components/dashboard/area-chart-gradient';
+import { Progress } from '@/components/ui/progress';
+import { mockDashboardStats, mockAuditLogs, assetsTrendData } from '@/lib/mock-data';
+import type { AuditLog } from '@/types';
 
-const recentAssetsColumns: Column<Asset>[] = [
+
+
+import { cn } from '@/lib/utils';
+
+const auditLogsColumns: Column<AuditLog>[] = [
   {
-    key: 'code',
-    header: 'Asset Code',
-    cell: (asset) => <span className="font-mono text-xs">{asset.code}</span>,
-  },
-  {
-    key: 'name',
-    header: 'Name',
-    cell: (asset) => <span className="font-medium">{asset.name}</span>,
-  },
-  {
-    key: 'status',
-    header: 'Status',
-    cell: (asset) => <StatusBadge status={asset.status} />,
-  },
-  {
-    key: 'updatedAt',
-    header: 'Last Updated',
-    cell: (asset) => (
-      <span className="text-xs text-muted-foreground">
-        {new Date(asset.updatedAt).toLocaleDateString()}
+    key: 'timestamp',
+    header: 'Timestamp',
+    cell: (log) => (
+      <span className="text-xs text-muted-foreground font-mono">
+        {log.timestamp.replace('T', ' ').replace('Z', '')}
       </span>
     ),
   },
-];
-
-const auditLogsColumns: Column<AuditLog>[] = [
+  {
+    key: 'userName',
+    header: 'User',
+    cell: (log) => (
+      <div className="flex items-center gap-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/80 text-[10px] font-bold text-foreground/70">
+          {log.userId}
+        </div>
+        <div className="flex flex-col">
+          <span className="text-xs font-semibold text-foreground">{log.userName}</span>
+          <span className="text-[10px] text-muted-foreground">{log.userRole}</span>
+        </div>
+      </div>
+    ),
+  },
   {
     key: 'action',
     header: 'Action',
     cell: (log) => (
-      <span className="font-medium text-xs">{log.action.replace(/_/g, ' ')}</span>
+      <span className="text-xs font-medium">{log.action}</span>
     ),
   },
   {
-    key: 'entityType',
-    header: 'Entity',
-    cell: (log) => <span className="text-xs text-muted-foreground">{log.entityType}</span>,
+    key: 'target',
+    header: 'Target',
+    cell: (log) => <span className="text-xs font-mono text-muted-foreground/80">{log.target}</span>,
   },
   {
-    key: 'details',
-    header: 'Details',
+    key: 'status',
+    header: 'Status',
     cell: (log) => (
-      <span className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
-        {log.details}
-      </span>
-    ),
-  },
-  {
-    key: 'timestamp',
-    header: 'Time',
-    cell: (log) => (
-      <span className="text-xs text-muted-foreground">
-        {new Date(log.timestamp).toLocaleString()}
+      <span
+        className={cn(
+          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border",
+          log.status === 'Success' && "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+          log.status === 'Warning' && "bg-amber-500/10 text-amber-500 border-amber-500/20",
+          log.status === 'Error' && "bg-rose-500/10 text-rose-500 border-rose-500/20"
+        )}
+      >
+        {log.status}
       </span>
     ),
   },
@@ -73,208 +72,131 @@ const auditLogsColumns: Column<AuditLog>[] = [
 export default function AdminDashboard() {
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Admin Dashboard"
-        description="System overview and key performance indicators"
-      />
-
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Assets"
-          value={mockDashboardStats.totalAssets}
-          icon={<Package className="h-5 w-5" />}
-          trend={{ value: 8.2, label: 'from last month' }}
+          value="14,203"
+          icon={<Package className="h-6 w-6" />}
+          trend={{ value: 5, label: 'from last month' }}
+          accentColor="hsl(217 91% 60%)"
         />
         <StatsCard
-          title="Assets In Use"
-          value={mockDashboardStats.assetsInUse}
-          icon={<CheckCircle2 className="h-5 w-5" />}
-          trend={{ value: 12.5, label: 'utilization rate' }}
+          title="Active Users"
+          value="89"
+          icon={<Users className="h-6 w-6" />}
+          trend={{ value: 0, label: 'stable' }}
+          accentColor="hsl(217 91% 60%)"
         />
         <StatsCard
-          title="Pending Requests"
-          value={mockDashboardStats.pendingRequests}
-          icon={<AlertTriangle className="h-5 w-5" />}
-          trend={{ value: -4.3, label: 'from yesterday' }}
+          title="System Health"
+          value="99.9%"
+          icon={<Activity className="h-6 w-6" />}
+          trend={{ value: 0.1, label: 'uptime' }}
+          accentColor="hsl(142 76% 36%)"
         />
         <StatsCard
-          title="Total Users"
-          value={mockDashboardStats.totalUsers}
-          icon={<Users className="h-5 w-5" />}
-          trend={{ value: 2.1, label: 'this week' }}
+          title="Security Alerts"
+          value="3"
+          icon={<AlertTriangle className="h-6 w-6" />}
+          trend={{ value: 2, label: 'requires attention' }}
+          accentColor="hsl(0 62% 30%)"
         />
       </div>
 
-      {/* Charts Row */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Asset Trend Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Asset Inventory Trend</CardTitle>
-            <CardDescription>Monthly asset count over time</CardDescription>
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* System Traffic Chart */}
+        <Card className="lg:col-span-2 border-border/50 bg-card/50">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-lg font-medium">System Traffic & Asset Requests</CardTitle>
+              <CardDescription>Overview of system load over the last 7 days</CardDescription>
+            </div>
+            <div className="flex bg-secondary/50 rounded-lg p-1">
+              <div className="px-3 py-1 bg-background rounded-md text-xs font-medium shadow-sm">Week</div>
+              <div className="px-3 py-1 text-muted-foreground text-xs font-medium">Month</div>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="h-[240px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={assetsTrendData}>
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false} 
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false}
-                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Bar dataKey="assets" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="mb-6 flex items-baseline gap-2">
+              <span className="text-3xl font-bold">2,403</span>
+              <span className="text-sm font-medium text-muted-foreground mr-2">Requests</span>
+              <span className="text-sm font-medium text-emerald-500">+12% vs last week</span>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Asset Distribution Pie Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Asset Distribution</CardTitle>
-            <CardDescription>Assets by current status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[240px] flex items-center gap-4">
-              <div className="flex-1">
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={assetsByStatusData}
-                      dataKey="value"
-                      nameKey="status"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      strokeWidth={2}
-                      stroke="hsl(var(--background))"
-                    >
-                      {assetsByStatusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--card))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-2">
-                {assetsByStatusData.map((item) => (
-                  <div key={item.status} className="flex items-center gap-2">
-                    <div
-                      className="h-3 w-3 rounded-full"
-                      style={{ backgroundColor: item.fill }}
-                    />
-                    <span className="text-xs text-muted-foreground">{item.status}</span>
-                    <span className="text-xs font-medium ml-auto">{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/20">
-                <Building2 className="h-6 w-6 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-foreground">{mockDashboardStats.totalStores}</p>
-                <p className="text-sm text-muted-foreground">Active Stores</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 border-amber-500/20">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/20">
-                <Wrench className="h-6 w-6 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-foreground">{mockDashboardStats.maintenanceTasks}</p>
-                <p className="text-sm text-muted-foreground">Maintenance Tasks</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/20">
-                <CheckCircle2 className="h-6 w-6 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-semibold text-foreground">98.5%</p>
-                <p className="text-sm text-muted-foreground">System Uptime</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tables Row */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* Recent Assets */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Recent Assets</CardTitle>
-            <CardDescription>Latest asset updates in the system</CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <DataTable
-              columns={recentAssetsColumns}
-              data={mockAssets.slice(0, 5)}
-              className="border-0 rounded-none"
+            <AreaChartGradient
+              data={assetsTrendData}
+              xKey="month"
+              yKey="assets"
+              stroke="hsl(217 91% 60%)"
+              height={300}
             />
           </CardContent>
         </Card>
 
-        {/* Recent Audit Logs */}
-        <Card>
+        {/* System Status */}
+        <Card className="border-border/50 bg-card/50">
           <CardHeader>
-            <CardTitle className="text-base font-medium">Recent Activity</CardTitle>
-            <CardDescription>Latest system audit logs</CardDescription>
+            <CardTitle className="text-lg font-medium">System Status</CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <DataTable
-              columns={auditLogsColumns}
-              data={mockAuditLogs.slice(0, 5)}
-              className="border-0 rounded-none"
-            />
+          <CardContent className="space-y-8">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-muted-foreground">Server Load</span>
+                <span className="font-bold">45%</span>
+              </div>
+              <Progress value={45} className="h-2" indicatorClassName="bg-blue-500" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-muted-foreground">Database Storage</span>
+                <span className="font-bold">72%</span>
+              </div>
+              <Progress value={72} className="h-2" indicatorClassName="bg-violet-500" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-muted-foreground">Memory Usage</span>
+                <span className="font-bold">28%</span>
+              </div>
+              <Progress value={28} className="h-2" indicatorClassName="bg-emerald-500" />
+            </div>
+
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-amber-500">Maintenance Scheduled</p>
+                  <p className="text-xs text-muted-foreground">
+                    System maintenance is scheduled for Sunday at 02:00 AM UTC. Expected downtime: 30 mins.
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Audit Logs */}
+      <Card className="border-border/50 bg-card/50">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="space-y-1">
+            <CardTitle className="text-lg font-medium">Recent Audit Logs</CardTitle>
+            <CardDescription>Latest administrative actions tracked by the system.</CardDescription>
+          </div>
+          <div className="text-sm font-medium text-primary cursor-pointer hover:underline">
+            View All &rarr;
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <DataTable
+            columns={auditLogsColumns}
+            data={mockAuditLogs}
+            className="border-0 rounded-none"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

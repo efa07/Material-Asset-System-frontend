@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,13 +40,11 @@ import {
   Calendar,
 } from "lucide-react";
 import type { Asset } from "@/types";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Loading from "./loading"; // Import the Loading component
+import { mockAssets, mockStores } from "@/lib/mock-data";
 
 export default function AuditorAssetsPage() {
-  const searchParams = useSearchParams(); // Use useSearchParams here
-  const { assets, stores, assignments, maintenanceRecords } = useAppStore();
+  const assets = mockAssets;
+  const stores = mockStores;
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [storeFilter, setStoreFilter] = useState<string>("all");
@@ -71,11 +68,11 @@ export default function AuditorAssetsPage() {
   };
 
   const getAssetAssignments = (assetId: string) => {
-    return assignments.filter((a) => a.assetId === assetId);
+    return [];
   };
 
   const getAssetMaintenance = (assetId: string) => {
-    return maintenanceRecords.filter((m) => m.assetId === assetId);
+    return [];
   };
 
   const highValueAssets = assets.filter((a) => a.currentValue > 5000);
@@ -84,12 +81,8 @@ export default function AuditorAssetsPage() {
   );
 
   return (
-    <Suspense fallback={<Loading />}> {/* Wrap the main content in Suspense */}
-      <div className="space-y-6">
-        <PageHeader
-          title="Asset Review"
-          description="Review and audit asset records"
-        />
+    <div className="space-y-6">
+      <PageHeader title="Asset Review" description="Review and audit asset records (read-only, mock)" />
 
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
@@ -338,7 +331,6 @@ export default function AuditorAssetsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </Suspense>
+    </div>
   );
 }

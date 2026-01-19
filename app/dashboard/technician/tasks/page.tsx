@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,14 +35,11 @@ import {
   Package,
   Calendar,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Loading from "./loading"; // Import the Loading component
+import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
 
 export default function TechnicianTasksPage() {
-  const { maintenanceRecords, assets, currentUser, updateMaintenanceRecord } =
-    useAppStore();
-  const searchParams = useSearchParams();
+  const maintenanceRecords = mockMaintenanceTasks;
+  const assets = mockAssets;
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedTask, setSelectedTask] = useState<
@@ -52,9 +48,7 @@ export default function TechnicianTasksPage() {
   const [completionNotes, setCompletionNotes] = useState("");
   const [completionCost, setCompletionCost] = useState("");
 
-  const myTasks = maintenanceRecords.filter(
-    (m) => m.technicianId === currentUser?.id
-  );
+  const myTasks = maintenanceRecords;
 
   const filteredTasks = myTasks.filter((task) => {
     const asset = assets.find((a) => a.id === task.assetId);
@@ -74,20 +68,11 @@ export default function TechnicianTasksPage() {
   };
 
   const handleStartTask = (taskId: string) => {
-    updateMaintenanceRecord(taskId, {
-      status: "IN_PROGRESS",
-      startDate: new Date().toISOString(),
-    });
+    // mock-only: no persistence
   };
 
   const handleCompleteTask = () => {
     if (!selectedTask) return;
-    updateMaintenanceRecord(selectedTask.id, {
-      status: "COMPLETED",
-      completedDate: new Date().toISOString(),
-      notes: completionNotes,
-      cost: completionCost ? Number.parseFloat(completionCost) : undefined,
-    });
     setSelectedTask(null);
     setCompletionNotes("");
     setCompletionCost("");
@@ -174,12 +159,11 @@ export default function TechnicianTasksPage() {
   };
 
   return (
-    <Suspense fallback={<Loading />}> {/* Wrap the main content in Suspense */}
-      <div className="space-y-6">
-        <PageHeader
-          title="My Maintenance Tasks"
-          description="View and manage your assigned maintenance work"
-        />
+    <div className="space-y-6">
+      <PageHeader
+        title="My Maintenance Tasks"
+        description="View and manage your assigned maintenance work (mock)"
+      />
 
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader>
@@ -272,7 +256,7 @@ export default function TechnicianTasksPage() {
           </CardContent>
         </Card>
 
-        <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
+      <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Complete Maintenance Task</DialogTitle>
@@ -309,8 +293,7 @@ export default function TechnicianTasksPage() {
               <Button onClick={handleCompleteTask}>Mark as Completed</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
-      </div>
-    </Suspense>
+      </Dialog>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,34 +24,26 @@ import {
   Calendar,
   QrCode,
 } from "lucide-react";
-import type { Asset, Assignment } from "@/types";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Loading from "./loading";
+import type { Asset } from "@/types";
+import { useAppStore } from "@/store/useAppStore";
+import { mockAssets } from "@/lib/mock-data";
 
 export default function EmployeeMyAssetsPage() {
-  const searchParams = useSearchParams();
-  const { assignments, assets, currentUser } = useAppStore();
+  const { user } = useAppStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [issueDescription, setIssueDescription] = useState("");
 
-  const myAssignments = assignments.filter(
-    (a) => a.userId === currentUser?.id && a.status === "ACTIVE"
-  );
+  // mock: show assets that are assignedTo current user (from lib/mock-data)
+  const myAssets = mockAssets.filter((a) => !!user && a.assignedTo === user.id);
 
-  const filteredAssignments = myAssignments.filter((assignment) => {
-    const asset = assets.find((a) => a.id === assignment.assetId);
+  const filteredAssets = myAssets.filter((asset) => {
     return (
-      asset?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset?.serialNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (asset.serialNumber || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
-
-  const getAssetDetails = (assetId: string) => {
-    return assets.find((a) => a.id === assetId);
-  };
 
   const handleReportIssue = () => {
     // In a real app, this would create a maintenance request
@@ -62,18 +53,17 @@ export default function EmployeeMyAssetsPage() {
   };
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="My Assigned Assets"
-          description="View and manage assets assigned to you"
-        />
+    <div className="space-y-6">
+      <PageHeader
+        title="My Assigned Assets"
+        description="View and manage assets assigned to you (mock)"
+      />
 
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardHeader>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="text-lg font-semibold">
-                Assets ({filteredAssignments.length})
+                Assets ({filteredAssets.length})
               </CardTitle>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -87,7 +77,7 @@ export default function EmployeeMyAssetsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {filteredAssignments.length === 0 ? (
+            {filteredAssets.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground">
                 <Package className="mx-auto mb-4 h-12 w-12 opacity-50" />
                 <p className="text-lg font-medium">No assets assigned</p>
@@ -97,12 +87,10 @@ export default function EmployeeMyAssetsPage() {
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredAssignments.map((assignment) => {
-                  const asset = getAssetDetails(assignment.assetId);
-                  if (!asset) return null;
+                {filteredAssets.map((asset) => {
                   return (
                     <div
-                      key={assignment.id}
+                      key={asset.id}
                       className="rounded-xl border border-border/50 bg-background/50 p-4"
                     >
                       <div className="flex items-start justify-between">
@@ -123,18 +111,16 @@ export default function EmployeeMyAssetsPage() {
                         <div className="flex items-center justify-between">
                           <span className="text-muted-foreground">Category</span>
                           <span className="capitalize">
-                            {asset.category.toLowerCase().replace("_", " ")}
+                              {asset.categoryId}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-muted-foreground">
-                            Assigned Date
+                              Status
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            {new Date(
-                              assignment.assignedDate
-                            ).toLocaleDateString()}
+                              {asset.status}
                           </span>
                         </div>
                       </div>
@@ -274,7 +260,6 @@ export default function EmployeeMyAssetsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </Suspense>
+    </div>
   );
 }

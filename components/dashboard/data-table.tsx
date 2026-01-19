@@ -35,7 +35,12 @@ export function DataTable<T extends { id: string }>({
   onRowClick,
 }: DataTableProps<T>) {
   return (
-    <div className={cn('rounded-lg border border-border overflow-hidden', className)}>
+    <div
+      className={cn(
+        'overflow-hidden rounded-2xl border border-border/70 bg-card/60 shadow-[0_10px_40px_-24px_rgba(47,17,120,0.35)] backdrop-blur-sm',
+        className
+      )}
+    >
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
@@ -43,7 +48,7 @@ export function DataTable<T extends { id: string }>({
               <TableHead
                 key={column.key}
                 className={cn(
-                  'text-xs font-semibold uppercase tracking-wide text-muted-foreground h-11',
+                  'h-11 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground',
                   column.className
                 )}
               >

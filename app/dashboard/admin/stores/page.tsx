@@ -27,14 +27,10 @@ import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { mockStores, mockShelves } from '@/lib/mock-data';
 import { mockUsers } from '@/store/useAppStore';
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
-import Loading from './loading';
 
 export default function StoresPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const searchParams = useSearchParams();
 
   const filteredStores = mockStores.filter(
     (store) =>
@@ -43,49 +39,48 @@ export default function StoresPage() {
   );
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="Store Registration"
-          description="Manage storage facilities and their capacities"
-        >
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Store
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Register New Store</DialogTitle>
-                <DialogDescription>
-                  Add a new storage facility to the system.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="store-name">Store Name</Label>
-                  <Input id="store-name" placeholder="Enter store name" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input id="location" placeholder="Building, Floor, etc." />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="capacity">Capacity (units)</Label>
-                  <Input id="capacity" type="number" placeholder="Enter capacity" />
-                </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Store Registration"
+        description="Manage storage facilities and their capacities"
+      >
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Store
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Register New Store</DialogTitle>
+              <DialogDescription>
+                Add a new storage facility to the system.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="store-name">Store Name</Label>
+                <Input id="store-name" placeholder="Enter store name" />
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={() => setIsDialogOpen(false)}>Register Store</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </PageHeader>
+              <div className="grid gap-2">
+                <Label htmlFor="location">Location</Label>
+                <Input id="location" placeholder="Building, Floor, etc." />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="capacity">Capacity (units)</Label>
+                <Input id="capacity" type="number" placeholder="Enter capacity" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setIsDialogOpen(false)}>Register Store</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </PageHeader>
 
         {/* Search */}
         <Card>
@@ -202,7 +197,6 @@ export default function StoresPage() {
             );
           })}
         </div>
-      </div>
-    </Suspense>
+    </div>
   );
 }

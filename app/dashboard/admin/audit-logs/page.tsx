@@ -12,9 +12,6 @@ import { DataTable, type Column } from '@/components/dashboard/data-table';
 import { mockAuditLogs } from '@/lib/mock-data';
 import { mockUsers } from '@/store/useAppStore';
 import type { AuditLog } from '@/types';
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
-import Loading from './loading';
 
 const actionColors: Record<string, string> = {
   USER_LOGIN: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
@@ -127,7 +124,6 @@ const columns: Column<AuditLog>[] = [
 export default function AuditLogsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
-  const searchParams = useSearchParams();
 
   const filteredLogs = extendedLogs.filter((log) => {
     const matchesSearch =
@@ -140,17 +136,16 @@ export default function AuditLogsPage() {
   const uniqueActions = [...new Set(extendedLogs.map((log) => log.action))];
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="System Audit Logs"
-          description="Track all system activities and user actions"
-        >
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export Logs
-          </Button>
-        </PageHeader>
+    <div className="space-y-6">
+      <PageHeader
+        title="System Audit Logs"
+        description="Track all system activities and user actions"
+      >
+        <Button variant="outline">
+          <Download className="mr-2 h-4 w-4" />
+          Export Logs
+        </Button>
+      </PageHeader>
 
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-4">
@@ -237,7 +232,6 @@ export default function AuditLogsPage() {
             />
           </CardContent>
         </Card>
-      </div>
-    </Suspense>
+    </div>
   );
 }

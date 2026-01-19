@@ -6,14 +6,22 @@ import { PageHeader } from '@/components/dashboard/page-header';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { StatusBadge } from '@/components/dashboard/status-badge';
 import { Progress } from '@/components/ui/progress';
-import { mockStores, mockShelves, mockAssets, mockAssignmentRequests, mockTransferRequests, storeOccupancyData } from '@/lib/mock-data';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { AreaChartGradient } from '@/components/dashboard/area-chart-gradient';
+import { mockStores, mockShelves, mockAssets, mockAssignmentRequests, mockTransferRequests } from '@/lib/mock-data';
 
 export default function StoreManagerDashboard() {
   const pendingAssignments = mockAssignmentRequests.filter((r) => r.status === 'PENDING').length;
   const pendingTransfers = mockTransferRequests.filter((r) => r.status === 'PENDING').length;
   const totalAssets = mockAssets.length;
   const totalShelves = mockShelves.length;
+  const throughputTrend = [
+    { month: 'Jan', throughput: 118 },
+    { month: 'Feb', throughput: 124 },
+    { month: 'Mar', throughput: 131 },
+    { month: 'Apr', throughput: 127 },
+    { month: 'May', throughput: 140 },
+    { month: 'Jun', throughput: 146 },
+  ];
 
   return (
     <div className="space-y-6">
@@ -50,44 +58,15 @@ export default function StoreManagerDashboard() {
         />
       </div>
 
-      {/* Store Occupancy */}
+      {/* Store Throughput & Capacity */}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base font-medium">Store Occupancy</CardTitle>
-            <CardDescription>Current capacity utilization by store</CardDescription>
+            <CardTitle className="text-base font-medium">Store Throughput</CardTitle>
+            <CardDescription>Items processed across all stores (monthly)</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[260px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={storeOccupancyData} layout="vertical">
-                  <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 12 }} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    tick={{ fontSize: 11 }}
-                    width={120}
-                  />
-                  <Tooltip 
-                    formatter={(value: number) => [`${value}%`, 'Occupancy']}
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Bar dataKey="occupancy" radius={[0, 4, 4, 0]}>
-                    {storeOccupancyData.map((entry, index) => (
-                      <rect
-                        key={`bar-${index}`}
-                        fill={entry.occupancy > 90 ? 'hsl(var(--destructive))' : entry.occupancy > 70 ? 'hsl(var(--warning))' : 'hsl(var(--chart-1))'}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <AreaChartGradient data={throughputTrend} xKey="month" yKey="throughput" />
           </CardContent>
         </Card>
 

@@ -69,20 +69,24 @@ export function Sidebar() {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          'fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 ease-in-out',
-          sidebarCollapsed ? 'w-[68px]' : 'w-64'
+          'fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border/70 bg-sidebar/95 backdrop-blur supports-[backdrop-filter]:bg-sidebar/80 shadow-lg transition-all duration-300 ease-in-out',
+          sidebarCollapsed ? 'w-[76px]' : 'w-64'
         )}
       >
         {/* Logo */}
-        <div className="flex h-16 items-center border-b border-sidebar-border px-4">
+        <div className="flex h-16 items-center border-b border-sidebar-border/80 px-4">
           <Link href={`/dashboard/${user.role}`} className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary/10 border border-sidebar-primary/20">
-              <Shield className="h-5 w-5 text-sidebar-primary" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sidebar-primary/10 border border-sidebar-primary/20 shadow-sm">
+              <Shield className="h-5 w-5 text-sidebar-primary" aria-hidden />
             </div>
             {!sidebarCollapsed && (
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-sidebar-foreground">INSA</span>
-                <span className="text-[10px] text-sidebar-foreground/60">Asset Management</span>
+                <span className="text-sm font-semibold text-sidebar-foreground tracking-tight">
+                  INSA Admin
+                </span>
+                <span className="text-[11px] text-sidebar-foreground/60">
+                  System Management
+                </span>
               </div>
             )}
           </Link>
@@ -90,10 +94,10 @@ export function Sidebar() {
 
         {/* Role Badge */}
         {!sidebarCollapsed && (
-          <div className="px-4 py-3 border-b border-sidebar-border">
-            <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-sidebar-accent/50">
-              <div className="h-2 w-2 rounded-full bg-sidebar-primary animate-pulse" />
-              <span className="text-xs font-medium text-sidebar-foreground/80">
+          <div className="px-4 py-3 border-b border-sidebar-border/80">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sidebar-accent/60 border border-sidebar-border/60">
+              <div className="h-2 w-2 rounded-full bg-sidebar-primary shadow-[0_0_0_4px] shadow-sidebar-primary/15" />
+              <span className="text-xs font-medium text-sidebar-foreground/80 tracking-wide">
                 {getRoleDisplayName(user.role)}
               </span>
             </div>
@@ -102,7 +106,7 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
-          <ul className="space-y-1">
+          <ul className="space-y-1.5">
             {navItems.map((item) => {
               const Icon = iconMap[item.icon] || LayoutDashboard;
               const isActive = pathname === item.href;
@@ -111,16 +115,22 @@ export function Sidebar() {
                 <Link
                   href={item.href}
                   className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                    'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                      ? 'bg-gradient-to-r from-sidebar-primary/15 via-sidebar-primary/10 to-transparent text-sidebar-foreground shadow-sm ring-1 ring-inset ring-sidebar-primary/30'
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground hover:ring-1 hover:ring-sidebar-border/70'
                   )}
                 >
-                  <Icon className={cn('h-4 w-4 shrink-0', isActive && 'text-sidebar-primary')} />
+                  <Icon
+                    className={cn(
+                      'h-4 w-4 shrink-0 transition-colors',
+                      isActive ? 'text-sidebar-primary' : 'text-sidebar-foreground/60'
+                    )}
+                    aria-hidden
+                  />
                   {!sidebarCollapsed && <span>{item.title}</span>}
                   {!sidebarCollapsed && item.badge && (
-                    <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-sidebar-primary text-[10px] font-semibold text-sidebar-primary-foreground">
+                    <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-sidebar-primary text-[10px] font-semibold text-sidebar-primary-foreground shadow-sm">
                       {item.badge}
                     </span>
                   )}
@@ -155,7 +165,7 @@ export function Sidebar() {
           <Button
             variant="outline"
             size="icon"
-            className="h-6 w-6 rounded-full border-sidebar-border bg-sidebar shadow-md hover:bg-sidebar-accent"
+            className="h-7 w-7 rounded-full border-sidebar-border/80 bg-sidebar shadow-md hover:bg-sidebar-accent"
             onClick={toggleSidebar}
           >
             {sidebarCollapsed ? (

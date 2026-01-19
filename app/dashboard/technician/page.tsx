@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AreaChartGradient } from "@/components/dashboard/area-chart-gradient";
 import {
   Wrench,
   CheckCircle,
@@ -18,7 +19,7 @@ import {
 import Link from "next/link";
 
 export default function TechnicianDashboard() {
-  const { maintenanceRecords, assets, currentUser } = useAppStore();
+  const { maintenanceTasks: maintenanceRecords, assets, user: currentUser } = useAppStore();
 
   const myTasks = maintenanceRecords.filter(
     (m) => m.technicianId === currentUser?.id
@@ -27,6 +28,15 @@ export default function TechnicianDashboard() {
   const inProgressTasks = myTasks.filter((m) => m.status === "IN_PROGRESS");
   const completedTasks = myTasks.filter((m) => m.status === "COMPLETED");
   const emergencyTasks = myTasks.filter((m) => m.type === "EMERGENCY");
+
+  const productivityTrend = [
+    { month: "Jan", tickets: 18 },
+    { month: "Feb", tickets: 20 },
+    { month: "Mar", tickets: 24 },
+    { month: "Apr", tickets: 23 },
+    { month: "May", tickets: 26 },
+    { month: "Jun", tickets: 28 },
+  ];
 
   const getAssetName = (assetId: string) => {
     const asset = assets.find((a) => a.id === assetId);
@@ -49,31 +59,51 @@ export default function TechnicianDashboard() {
         <StatsCard
           title="Pending Tasks"
           value={pendingTasks.length}
-          icon={Clock}
+          icon={<Clock className="h-5 w-5" />}
           description="Awaiting action"
+          trend={{ value: -2.1, label: "vs last week" }}
         />
         <StatsCard
           title="In Progress"
           value={inProgressTasks.length}
-          icon={Wrench}
+          icon={<Wrench className="h-5 w-5" />}
           description="Currently working"
+          trend={{ value: 3.5, label: "cycle velocity" }}
         />
         <StatsCard
           title="Completed"
           value={completedTasks.length}
-          icon={CheckCircle}
-          trend={{ value: 8, isPositive: true }}
+          icon={<CheckCircle className="h-5 w-5" />}
+          trend={{ value: 8, label: "closed this week" }}
         />
         <StatsCard
           title="Emergency"
           value={emergencyTasks.length}
-          icon={AlertTriangle}
+          icon={<AlertTriangle className="h-5 w-5" />}
           description="High priority"
         />
       </div>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold">Productivity Trend</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Tickets closed per month
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" className="gap-2">
+            View details
+            <ArrowUpRight className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <AreaChartGradient data={productivityTrend} xKey="month" yKey="tickets" />
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-semibold">
               My Pending Tasks
@@ -99,11 +129,10 @@ export default function TechnicianDashboard() {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                          task.type === "EMERGENCY"
+                        className={`flex h-10 w-10 items-center justify-center rounded-lg ${task.type === "EMERGENCY"
                             ? "bg-red-500/10"
                             : "bg-amber-500/10"
-                        }`}
+                          }`}
                       >
                         {task.type === "EMERGENCY" ? (
                           <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -134,7 +163,7 @@ export default function TechnicianDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-semibold">
               In Progress
@@ -186,7 +215,7 @@ export default function TechnicianDashboard() {
         </Card>
       </div>
 
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
         </CardHeader>

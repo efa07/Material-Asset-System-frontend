@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AreaChartGradient } from "@/components/dashboard/area-chart-gradient";
 import {
   Package,
   Clock,
@@ -18,7 +19,7 @@ import {
 import Link from "next/link";
 
 export default function EmployeeDashboard() {
-  const { assignments, assets, currentUser, notifications } = useAppStore();
+  const { assignments, assets, user: currentUser, notifications } = useAppStore();
 
   const myAssignments = assignments.filter(
     (a) => a.userId === currentUser?.id && a.status === "ACTIVE"
@@ -29,6 +30,15 @@ export default function EmployeeDashboard() {
   const myNotifications = notifications.filter(
     (n) => n.userId === currentUser?.id && !n.read
   );
+
+  const engagementTrend = [
+    { month: "Jan", requests: 6 },
+    { month: "Feb", requests: 8 },
+    { month: "Mar", requests: 7 },
+    { month: "Apr", requests: 9 },
+    { month: "May", requests: 11 },
+    { month: "Jun", requests: 10 },
+  ];
 
   const getAssetDetails = (assetId: string) => {
     return assets.find((a) => a.id === assetId);
@@ -45,19 +55,21 @@ export default function EmployeeDashboard() {
         <StatsCard
           title="My Assets"
           value={myAssignments.length}
-          icon={Package}
+          icon={<Package className="h-5 w-5" />}
           description="Currently assigned"
+          trend={{ value: 4.5, label: "utilization" }}
         />
         <StatsCard
           title="Pending Requests"
           value={pendingRequests.length}
-          icon={Clock}
+          icon={<Clock className="h-5 w-5" />}
           description="Awaiting approval"
+          trend={{ value: -1.2, label: "vs last month" }}
         />
         <StatsCard
           title="Notifications"
           value={myNotifications.length}
-          icon={Bell}
+          icon={<Bell className="h-5 w-5" />}
           description="Unread"
         />
         <StatsCard
@@ -65,13 +77,30 @@ export default function EmployeeDashboard() {
           value={
             assignments.filter((a) => a.userId === currentUser?.id).length
           }
-          icon={CheckCircle}
+          icon={<CheckCircle className="h-5 w-5" />}
           description="All time"
+          trend={{ value: 2.1, label: "lifetime growth" }}
         />
       </div>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold">Engagement Trend</CardTitle>
+            <p className="text-sm text-muted-foreground">Requests raised over time</p>
+          </div>
+          <Button variant="ghost" size="sm" className="gap-2">
+            View history
+            <ArrowUpRight className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <AreaChartGradient data={engagementTrend} xKey="month" yKey="requests" />
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-semibold">
               My Assigned Assets
@@ -126,7 +155,7 @@ export default function EmployeeDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-semibold">
               Pending Requests
@@ -177,7 +206,7 @@ export default function EmployeeDashboard() {
         </Card>
       </div>
 
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
         </CardHeader>

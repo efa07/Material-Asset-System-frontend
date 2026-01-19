@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Timeline } from "@/components/dashboard/timeline";
@@ -30,22 +29,16 @@ import {
   Calendar,
   DollarSign,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Loading from "./loading";
+import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
 
 export default function TechnicianHistoryPage() {
-  const searchParams = useSearchParams();
-  const { maintenanceRecords, assets, currentUser } = useAppStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [monthFilter, setMonthFilter] = useState<string>("all");
 
-  const completedTasks = maintenanceRecords.filter(
-    (m) => m.technicianId === currentUser?.id && m.status === "COMPLETED"
-  );
+  const completedTasks = mockMaintenanceTasks.filter((m) => m.status === "COMPLETED");
 
   const filteredTasks = completedTasks.filter((task) => {
-    const asset = assets.find((a) => a.id === task.assetId);
+    const asset = mockAssets.find((a) => a.id === task.assetId);
     const matchesSearch =
       asset?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       task.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -61,10 +54,10 @@ export default function TechnicianHistoryPage() {
     );
   });
 
-  const totalCost = filteredTasks.reduce((sum, t) => sum + (t.cost || 0), 0);
+  const totalCost = 0;
 
   const getAssetName = (assetId: string) => {
-    const asset = assets.find((a) => a.id === assetId);
+    const asset = mockAssets.find((a) => a.id === assetId);
     return asset?.name || "Unknown Asset";
   };
 
@@ -72,18 +65,14 @@ export default function TechnicianHistoryPage() {
     id: task.id,
     title: getAssetName(task.assetId),
     description: task.description,
-    date: task.completedDate || task.scheduledDate,
-    status: task.status as "COMPLETED",
-    icon: CheckCircle,
+    timestamp: new Date(task.scheduledDate).toISOString(),
+    status: "success" as const,
+    icon: <CheckCircle className="h-3 w-3" />,
   }));
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="Work History"
-          description="View your completed maintenance tasks"
-        />
+    <div className="space-y-6">
+      <PageHeader title="Work History" description="View completed maintenance tasks (mock data)" />
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
@@ -107,7 +96,7 @@ export default function TechnicianHistoryPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    {filteredTasks.filter((t) => t.type === "EMERGENCY").length}
+                    0
                   </p>
                   <p className="text-sm text-muted-foreground">Emergency Repairs</p>
                 </div>
@@ -191,9 +180,7 @@ export default function TechnicianHistoryPage() {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="capitalize">
-                          {task.type.toLowerCase()}
-                        </TableCell>
+                        <TableCell className="capitalize">{task.type}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm">
                             <Calendar className="h-3 w-3 text-muted-foreground" />
@@ -203,7 +190,7 @@ export default function TechnicianHistoryPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {task.cost ? `$${task.cost.toLocaleString()}` : "-"}
+                          {"-"}
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={task.status} />
@@ -227,7 +214,6 @@ export default function TechnicianHistoryPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </Suspense>
+    </div>
   );
 }

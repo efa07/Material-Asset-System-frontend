@@ -1,6 +1,5 @@
 "use client";
 
-import { useAppStore } from "@/store/useAppStore";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,10 +22,11 @@ import {
   Calendar,
 } from "lucide-react";
 import { useState } from "react";
+import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
 
 export default function ReportsPage() {
-  const { assets, maintenanceRecords, disposalRecords, assignments } =
-    useAppStore();
+  const assets = mockAssets;
+  const maintenanceRecords = mockMaintenanceTasks;
   const [reportPeriod, setReportPeriod] = useState("month");
 
   const totalAssetValue = assets.reduce((sum, a) => sum + a.currentValue, 0);
@@ -42,7 +42,7 @@ export default function ReportsPage() {
 
   const assetsByCategory = assets.reduce(
     (acc, asset) => {
-      acc[asset.category] = (acc[asset.category] || 0) + 1;
+      acc[asset.categoryId] = (acc[asset.categoryId] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>
@@ -50,7 +50,7 @@ export default function ReportsPage() {
 
   const maintenanceCosts = maintenanceRecords
     .filter((m) => m.status === "COMPLETED")
-    .reduce((sum, m) => sum + (m.cost || 0), 0);
+    .reduce((sum) => sum + 0, 0);
 
   return (
     <div className="space-y-6">
@@ -195,9 +195,7 @@ export default function ReportsPage() {
                 return (
                   <div key={category} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="capitalize">
-                        {category.toLowerCase().replace("_", " ")}
-                      </span>
+                      <span>Category {category}</span>
                       <span className="font-medium">
                         {count} ({percentage}%)
                       </span>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,44 +23,31 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react";
-import type { AssetCategory } from "@/types";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
-import Loading from "./loading";
+import { useAppStore } from "@/store/useAppStore";
+import { mockAssets } from "@/lib/mock-data";
 
 export default function EmployeeRequestPage() {
-  const { assets, assignments, currentUser, addAssignment } = useAppStore();
-  const searchParams = useSearchParams();
+  const { user } = useAppStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [requestReason, setRequestReason] = useState("");
   const [requestSubmitted, setRequestSubmitted] = useState(false);
 
-  const availableAssets = assets.filter((a) => a.status === "AVAILABLE");
+  const availableAssets = mockAssets.filter((a) => a.status === "AVAILABLE");
 
   const filteredAssets = availableAssets.filter((asset) => {
     const matchesSearch =
       asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.serialNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      categoryFilter === "all" || asset.category === categoryFilter;
+      (asset.serialNumber || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || asset.categoryId === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
-  const myPendingRequests = assignments.filter(
-    (a) => a.userId === currentUser?.id && a.status === "PENDING"
-  );
+  const myPendingRequests: { id: string; assetId: string }[] = [];
 
   const handleSubmitRequest = () => {
-    if (!selectedAssetId || !currentUser) return;
-
-    addAssignment({
-      assetId: selectedAssetId,
-      userId: currentUser.id,
-      assignedDate: new Date().toISOString(),
-      status: "PENDING",
-    });
+    if (!selectedAssetId || !user) return;
 
     setRequestSubmitted(true);
     setSelectedAssetId(null);
@@ -71,12 +57,8 @@ export default function EmployeeRequestPage() {
   };
 
   return (
-    <Suspense fallback={<Loading />}>
-      <div className="space-y-6">
-        <PageHeader
-          title="Request Asset"
-          description="Browse available assets and submit a request"
-        />
+    <div className="space-y-6">
+      <PageHeader title="Request Asset" description="Browse available assets and submit a request (mock)" />
 
         {requestSubmitted && (
           <div className="rounded-lg border border-emerald-500/50 bg-emerald-500/10 p-4">
@@ -149,12 +131,12 @@ export default function EmployeeRequestPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="IT_EQUIPMENT">IT Equipment</SelectItem>
-                        <SelectItem value="FURNITURE">Furniture</SelectItem>
-                        <SelectItem value="VEHICLE">Vehicle</SelectItem>
-                        <SelectItem value="OFFICE_SUPPLIES">
-                          Office Supplies
-                        </SelectItem>
+                      {/* using categoryId keys from mock-data */}
+                      <SelectItem value="1">Electronics</SelectItem>
+                      <SelectItem value="2">Furniture</SelectItem>
+                      <SelectItem value="3">Vehicles</SelectItem>
+                      <SelectItem value="4">IT Equipment</SelectItem>
+                      <SelectItem value="5">Office Supplies</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -209,7 +191,7 @@ export default function EmployeeRequestPage() {
                                 type="condition"
                               />
                               <span className="text-xs text-muted-foreground capitalize">
-                                {asset.category.toLowerCase().replace("_", " ")}
+                                {asset.categoryId}
                               </span>
                             </div>
                           </div>
@@ -238,13 +220,13 @@ export default function EmployeeRequestPage() {
                         <div>
                           <p className="font-medium">
                             {
-                              assets.find((a) => a.id === selectedAssetId)
+                              mockAssets.find((a) => a.id === selectedAssetId)
                                 ?.name
                             }
                           </p>
                           <p className="text-sm text-muted-foreground">
                             {
-                              assets.find((a) => a.id === selectedAssetId)
+                              mockAssets.find((a) => a.id === selectedAssetId)
                                 ?.serialNumber
                             }
                           </p>
@@ -280,7 +262,6 @@ export default function EmployeeRequestPage() {
             </Card>
           </div>
         </div>
-      </div>
-    </Suspense>
+    </div>
   );
 }

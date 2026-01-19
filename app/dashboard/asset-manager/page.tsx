@@ -1,11 +1,11 @@
 "use client";
 
-import { useAppStore } from "@/store/useAppStore";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AreaChartGradient } from "@/components/dashboard/area-chart-gradient";
 import {
   Package,
   Wrench,
@@ -16,66 +16,95 @@ import {
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { useAppStore } from "@/store/useAppStore";
+import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
 
 export default function AssetManagerDashboard() {
-  const { assets, maintenanceRecords, currentUser } = useAppStore();
+  const { user } = useAppStore();
 
-  const totalAssets = assets.length;
-  const activeAssets = assets.filter((a) => a.status === "IN_USE").length;
-  const pendingMaintenance = maintenanceRecords.filter(
-    (m) => m.status === "PENDING"
-  ).length;
-  const inProgressMaintenance = maintenanceRecords.filter(
-    (m) => m.status === "IN_PROGRESS"
-  ).length;
+  const totalAssets = mockAssets.length;
+  const activeAssets = mockAssets.filter((a) => a.status === "IN_USE").length;
+  const pendingMaintenance = mockMaintenanceTasks.filter((m) => m.status === "SCHEDULED").length;
+  const inProgressMaintenance = mockMaintenanceTasks.filter((m) => m.status === "IN_PROGRESS").length;
 
-  const recentAssets = assets.slice(0, 5);
-  const recentMaintenance = maintenanceRecords.slice(0, 5);
+  const recentAssets = mockAssets.slice(0, 5);
+  const recentMaintenance = mockMaintenanceTasks.slice(0, 5);
 
-  const assetsByCategory = assets.reduce(
+  const assetsByCategory = mockAssets.reduce(
     (acc, asset) => {
-      acc[asset.category] = (acc[asset.category] || 0) + 1;
+      // use categoryId as a grouping key in this mock phase
+      acc[asset.categoryId] = (acc[asset.categoryId] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>
   );
 
+  const lifecycleTrend = [
+    { month: "Jan", onboarded: 24 },
+    { month: "Feb", onboarded: 28 },
+    { month: "Mar", onboarded: 32 },
+    { month: "Apr", onboarded: 30 },
+    { month: "May", onboarded: 36 },
+    { month: "Jun", onboarded: 40 },
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Asset Manager Dashboard"
-        description={`Welcome back, ${currentUser?.name || "Asset Manager"}`}
+        description={`Welcome back, ${user?.name || "Asset Manager"}`}
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Assets"
           value={totalAssets}
-          icon={Package}
-          trend={{ value: 12, isPositive: true }}
+          icon={<Package className="h-5 w-5" />}
+          trend={{ value: 12, label: "vs last quarter" }}
         />
         <StatsCard
           title="Active Assets"
           value={activeAssets}
-          icon={CheckCircle}
+          icon={<CheckCircle className="h-5 w-5" />}
           description="Currently in use"
+          trend={{ value: 6.2, label: "utilization lift" }}
         />
         <StatsCard
           title="Pending Maintenance"
           value={pendingMaintenance}
-          icon={Clock}
+          icon={<Clock className="h-5 w-5" />}
           description="Awaiting action"
+          trend={{ value: -2.4, label: "since last week" }}
         />
         <StatsCard
           title="In Progress"
           value={inProgressMaintenance}
-          icon={Wrench}
+          icon={<Wrench className="h-5 w-5" />}
           description="Being serviced"
+          trend={{ value: 3.1, label: "cycle velocity" }}
         />
       </div>
 
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold">Asset Velocity</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Onboarded assets over the last 6 months
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" className="gap-2">
+            Export
+            <ArrowUpRight className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <AreaChartGradient data={lifecycleTrend} xKey="month" yKey="onboarded" />
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-semibold">
               Recent Assets
@@ -112,7 +141,7 @@ export default function AssetManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-semibold">
               Maintenance Queue
@@ -136,9 +165,7 @@ export default function AssetManagerDashboard() {
                       <Wrench className="h-5 w-5 text-amber-500" />
                     </div>
                     <div>
-                      <p className="font-medium capitalize">
-                        {record.type.toLowerCase().replace("_", " ")}
-                      </p>
+                      <p className="font-medium capitalize">{record.type}</p>
                       <p className="text-sm text-muted-foreground">
                         {new Date(record.scheduledDate).toLocaleDateString()}
                       </p>
@@ -153,7 +180,7 @@ export default function AssetManagerDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader>
             <CardTitle className="text-lg font-semibold">
               Assets by Category
@@ -163,9 +190,7 @@ export default function AssetManagerDashboard() {
             <div className="space-y-3">
               {Object.entries(assetsByCategory).map(([category, count]) => (
                 <div key={category} className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground capitalize">
-                    {category.toLowerCase().replace("_", " ")}
-                  </span>
+                  <span className="text-sm text-muted-foreground">Category {category}</span>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-24 rounded-full bg-muted">
                       <div
@@ -183,7 +208,7 @@ export default function AssetManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
           </CardHeader>
@@ -217,7 +242,7 @@ export default function AssetManagerDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card>
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Asset Health</CardTitle>
           </CardHeader>
@@ -229,7 +254,7 @@ export default function AssetManagerDashboard() {
                   <span className="text-sm">Excellent</span>
                 </div>
                 <span className="font-medium">
-                  {assets.filter((a) => a.condition === "EXCELLENT").length}
+                  {mockAssets.filter((a) => a.condition === "EXCELLENT").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -238,7 +263,7 @@ export default function AssetManagerDashboard() {
                   <span className="text-sm">Good</span>
                 </div>
                 <span className="font-medium">
-                  {assets.filter((a) => a.condition === "GOOD").length}
+                  {mockAssets.filter((a) => a.condition === "GOOD").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -247,7 +272,7 @@ export default function AssetManagerDashboard() {
                   <span className="text-sm">Fair</span>
                 </div>
                 <span className="font-medium">
-                  {assets.filter((a) => a.condition === "FAIR").length}
+                  {mockAssets.filter((a) => a.condition === "FAIR").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -256,7 +281,7 @@ export default function AssetManagerDashboard() {
                   <span className="text-sm">Poor</span>
                 </div>
                 <span className="font-medium">
-                  {assets.filter((a) => a.condition === "POOR").length}
+                  {mockAssets.filter((a) => a.condition === "POOR").length}
                 </span>
               </div>
             </div>

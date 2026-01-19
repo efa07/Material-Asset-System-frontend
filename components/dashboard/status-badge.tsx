@@ -15,57 +15,57 @@ const statusConfig: Record<Status, { label: string; className: string }> = {
   // Asset Status
   AVAILABLE: {
     label: 'Available',
-    className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    className: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 border-emerald-500/25',
   },
   IN_USE: {
     label: 'In Use',
-    className: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    className: 'bg-primary/12 text-primary border-primary/30',
   },
   MAINTENANCE: {
     label: 'Maintenance',
-    className: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    className: 'bg-amber-500/12 text-amber-600 dark:text-amber-400 border-amber-500/25',
   },
   DISPOSED: {
     label: 'Disposed',
-    className: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+    className: 'bg-muted text-muted-foreground border-border/70',
   },
   TRANSFERRED: {
     label: 'Transferred',
-    className: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+    className: 'bg-violet-500/12 text-violet-600 dark:text-violet-300 border-violet-500/25',
   },
   RESERVED: {
     label: 'Reserved',
-    className: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+    className: 'bg-orange-500/12 text-orange-600 dark:text-orange-400 border-orange-500/25',
   },
   // Request Status
   PENDING: {
     label: 'Pending',
-    className: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    className: 'bg-amber-500/12 text-amber-600 dark:text-amber-400 border-amber-500/25',
   },
   APPROVED: {
     label: 'Approved',
-    className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+    className: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 border-emerald-500/25',
   },
   REJECTED: {
     label: 'Rejected',
-    className: 'bg-red-500/10 text-red-500 border-red-500/20',
+    className: 'bg-red-500/12 text-red-600 dark:text-red-400 border-red-500/25',
   },
   COMPLETED: {
     label: 'Completed',
-    className: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    className: 'bg-primary/12 text-primary border-primary/30',
   },
   CANCELLED: {
     label: 'Cancelled',
-    className: 'bg-gray-500/10 text-gray-500 border-gray-500/20',
+    className: 'bg-muted text-muted-foreground border-border/70',
   },
   // Maintenance Status
   SCHEDULED: {
     label: 'Scheduled',
-    className: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    className: 'bg-primary/12 text-primary border-primary/30',
   },
   IN_PROGRESS: {
     label: 'In Progress',
-    className: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+    className: 'bg-amber-500/12 text-amber-600 dark:text-amber-400 border-amber-500/25',
   },
 };
 
@@ -77,9 +77,8 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
 
   return (
     <Badge
-      variant="outline"
       className={cn(
-        'font-medium text-[10px] px-2 py-0.5 uppercase tracking-wide border',
+        'font-semibold text-[10px] px-2.5 py-1 uppercase tracking-wide border',
         config.className,
         className
       )}
