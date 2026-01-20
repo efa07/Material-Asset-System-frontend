@@ -79,28 +79,28 @@ export default function AdminDashboard() {
           value="14,203"
           icon={<Package className="h-6 w-6" />}
           trend={{ value: 5, label: 'from last month' }}
-          accentColor="hsl(217 91% 60%)"
+          accentColor="var(--chart-1)"
         />
         <StatsCard
           title="Active Users"
           value="89"
           icon={<Users className="h-6 w-6" />}
           trend={{ value: 0, label: 'stable' }}
-          accentColor="hsl(217 91% 60%)"
+          accentColor="var(--success)"
         />
         <StatsCard
           title="System Health"
           value="99.9%"
           icon={<Activity className="h-6 w-6" />}
           trend={{ value: 0.1, label: 'uptime' }}
-          accentColor="hsl(142 76% 36%)"
+          accentColor="var(--success)"
         />
         <StatsCard
           title="Security Alerts"
           value="3"
           icon={<AlertTriangle className="h-6 w-6" />}
           trend={{ value: 2, label: 'requires attention' }}
-          accentColor="hsl(0 62% 30%)"
+          accentColor="var(--warning)"
         />
       </div>
 
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
               data={assetsTrendData}
               xKey="month"
               yKey="assets"
-              stroke="hsl(217 91% 60%)"
+              stroke="var(--chart-1)"
               height={300}
             />
           </CardContent>

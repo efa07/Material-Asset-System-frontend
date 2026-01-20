@@ -43,7 +43,7 @@ export function StatsCard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden border-border/50 bg-card shadow-sm transition-all duration-200 hover:border-border hover:shadow-md',
+        'relative overflow-hidden border border-border/50 bg-card shadow-sm transition-all duration-200 hover:shadow-md',
         className
       )}
     >

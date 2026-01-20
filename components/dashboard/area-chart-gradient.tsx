@@ -24,7 +24,7 @@ export function AreaChartGradient<T extends Record<string, any>>({
   xKey,
   yKey,
   height = 260,
-  stroke = 'hsl(var(--chart-1))',
+  stroke = 'var(--chart-1)',
   hideGrid,
 }: AreaChartGradientProps<T>) {
   const gradientId = useId();
@@ -43,7 +43,7 @@ export function AreaChartGradient<T extends Record<string, any>>({
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
-              stroke="hsl(var(--border))"
+              stroke="var(--border)"
               opacity={0.6}
             />
           )}
@@ -51,22 +51,22 @@ export function AreaChartGradient<T extends Record<string, any>>({
             dataKey={xKey as string}
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
+            tick={{ fontSize: 12, fill: 'var(--chart-axis-label)' }}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 12, fill: 'hsl(var(--foreground))' }}
+            tick={{ fontSize: 12, fill: 'var(--chart-axis-label)' }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: 'hsl(var(--card))',
-              border: '1px solid hsl(var(--border))',
+              backgroundColor: 'var(--card)',
+              border: '1px solid var(--border)',
               borderRadius: '14px',
               boxShadow: '0 14px 45px -30px rgba(47,17,120,0.35)',
               padding: '10px 12px',
             }}
-            labelStyle={{ color: 'hsl(var(--foreground))', fontWeight: 600 }}
+            labelStyle={{ color: 'var(--foreground)', fontWeight: 600 }}
             formatter={(value: any) => [value as string, yKey as string]}
           />
           <Area

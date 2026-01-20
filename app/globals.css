@@ -4,105 +4,123 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Light theme */
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(244 24% 15%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(244 24% 15%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(244 24% 15%);
-  --primary: hsl(147 72% 46%);
-  --primary-foreground: hsl(146 86% 96%);
-  --secondary: hsl(258 34% 96%);
-  --secondary-foreground: hsl(252 24% 32%);
-  --muted: hsl(249 22% 94%);
-  --muted-foreground: hsl(247 15% 44%);
-  --accent: hsl(258 32% 92%);
-  --accent-foreground: hsl(252 28% 32%);
-  --destructive: hsl(0 72% 55%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(249 20% 88%);
-  --input: hsl(249 20% 88%);
-  --ring: hsl(147 72% 46%);
+  /* Light theme - Horizon UI */
+  --background: hsl(222, 59%, 98%); /* Light Blue/Grey Background */
+  --foreground: hsl(231, 46%, 31%); /* Dark Blue Text */
+  
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(231, 46%, 31%);
+  
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(231, 46%, 31%);
+  
+  --primary: hsl(251, 100%, 55%); /* Horizon Purple/Blue */
+  --primary-foreground: hsl(0, 0%, 100%);
+  
+  --secondary: hsl(210, 40%, 96%);
+  --secondary-foreground: hsl(251, 100%, 55%);
+  
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215, 16%, 47%);
+  
+  --accent: hsl(210, 40%, 96%);
+  --accent-foreground: hsl(251, 100%, 55%);
+  
+  --destructive: hsl(0, 72%, 55%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  
+  --border: hsl(215, 30%, 92%); /* Softer border */
+  --input: hsl(215, 30%, 92%);
+  --ring: hsl(251, 100%, 55%);
+  
   /* Charts */
-  --chart-1: hsl(147 72% 46%);
-  --chart-2: hsl(258 70% 55%);
-  --chart-3: hsl(198 70% 55%);
-  --chart-4: hsl(142 55% 52%);
-  --chart-5: hsl(32 86% 60%);
-  --radius: 1rem;
+  --chart-1: hsl(251, 100%, 55%); /* Primary Purple */
+  --chart-2: hsl(222, 59%, 98%); /* Background Blue */
+  --chart-3: hsl(231, 46%, 31%); /* Dark Text */
+  --chart-4: hsl(190, 100%, 50%); /* Cyan accent */
+  --chart-5: hsl(32, 90%, 60%);
+  
+  --chart-axis-label: hsl(231, 46%, 31%);
+  
+  --radius: 1.25rem; /* Smoother, larger radius */
+
   /* Sidebar */
-  --sidebar: hsl(252 45% 99%);
-  --sidebar-foreground: hsl(244 24% 15%);
-  --sidebar-primary: hsl(147 72% 46%);
-  --sidebar-primary-foreground: hsl(146 86% 96%);
-  --sidebar-accent: hsl(258 32% 92%);
-  --sidebar-accent-foreground: hsl(252 28% 32%);
-  --sidebar-border: hsl(249 20% 88%);
-  --sidebar-ring: hsl(147 72% 46%);
+  --sidebar: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(231, 46%, 31%);
+  --sidebar-primary: hsl(251, 100%, 55%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(210, 40%, 96%);
+  --sidebar-accent-foreground: hsl(251, 100%, 55%);
+  --sidebar-border: hsl(215, 30%, 92%);
+  --sidebar-ring: hsl(251, 100%, 55%);
+
   /* Custom tokens */
-  --success: hsl(147 72% 42%);
-  --success-foreground: hsl(146 86% 96%);
-  --warning: hsl(32 86% 60%);
-  --warning-foreground: hsl(32 86% 12%);
-  --neutral-elevated: 0 10px 40px rgba(32, 7, 65, 0.08);
+  --success: hsl(150, 100%, 40%);
+  --success-foreground: hsl(0, 0%, 100%);
+  
+  --warning: hsl(35, 100%, 55%);
+  --warning-foreground: hsl(0, 0%, 100%);
+  
+  --neutral-elevated: 0px 10px 40px rgba(112, 144, 176, 0.12); /* Horizon Soft Shadow */
 }
 
 .dark {
-  /* Dark theme - deep blue/navy premium */
-  --background: hsl(222 47% 11%); /* #0f172a - Slate 900ish but bluer */
-  --foreground: hsl(210 40% 98%);
+  /* Dark theme - Horizon Dark */
+  --background: hsl(228, 67%, 13%); /* Deep Navy */
+  --foreground: hsl(0, 0%, 100%); 
   
-  --card: hsl(217 33% 17%); /* #1e293b - Slate 800ish */
-  --card-foreground: hsl(210 40% 98%);
+  --card: hsl(227, 60%, 17%); /* Dark Blue Card */
+  --card-foreground: hsl(0, 0%, 100%);
   
-  --popover: hsl(222 47% 11%);
-  --popover-foreground: hsl(210 40% 98%);
+  --popover: hsl(227, 60%, 17%);
+  --popover-foreground: hsl(0, 0%, 100%);
   
-  --primary: hsl(217 91% 60%); /* Bright Blue for accents */
-  --primary-foreground: hsl(222 47% 11%);
+  --primary: hsl(252, 100%, 66%); /* Lighter Purple for Dark Mode */
+  --primary-foreground: hsl(0, 0%, 100%);
   
-  --secondary: hsl(217 33% 17%); 
-  --secondary-foreground: hsl(210 40% 98%);
+  --secondary: hsl(227, 50%, 25%);
+  --secondary-foreground: hsl(0, 0%, 100%);
   
-  --muted: hsl(217 33% 17%);
-  --muted-foreground: hsl(215 20% 65%);
+  --muted: hsl(227, 50%, 25%);
+  --muted-foreground: hsl(220, 20%, 70%);
   
-  --accent: hsl(217 33% 25%);
-  --accent-foreground: hsl(210 40% 98%);
+  --accent: hsl(227, 50%, 25%);
+  --accent-foreground: hsl(0, 0%, 100%);
   
-  --destructive: hsl(0 62% 30%);
-  --destructive-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0, 62%, 30%);
+  --destructive-foreground: hsl(0, 0%, 100%);
   
-  --border: hsl(217 33% 20%);
-  --input: hsl(217 33% 20%);
-  --ring: hsl(217 91% 60%);
+  --border: hsl(227, 50%, 25%);
+  --input: hsl(227, 50%, 25%);
+  --ring: hsl(252, 100%, 66%);
   
   /* Charts */
-  --chart-1: hsl(217 91% 60%); /* Blue */
-  --chart-2: hsl(173 58% 39%); /* Teal */
-  --chart-3: hsl(197 37% 24%); /* Dark Blue */
-  --chart-4: hsl(43 74% 66%); /* Yellow/Orange */
-  --chart-5: hsl(27 87% 67%); /* Orange */
+  --chart-1: hsl(252, 100%, 66%);
+  --chart-2: hsl(190, 80%, 50%);
+  --chart-3: hsl(230, 70%, 50%);
+  --chart-4: hsl(280, 70%, 50%);
+  --chart-5: hsl(340, 70%, 50%);
+  
+  --chart-axis-label: #ffffff;
   
   /* Sidebar */
-  --sidebar: hsl(222 47% 10%); /* Very dark blue */
-  --sidebar-foreground: hsl(210 40% 98%);
-  --sidebar-primary: hsl(217 91% 60%);
-  --sidebar-primary-foreground: hsl(210 40% 98%);
-  --sidebar-accent: hsl(217 33% 15%);
-  --sidebar-accent-foreground: hsl(210 40% 98%);
-  --sidebar-border: hsl(217 33% 15%);
-  --sidebar-ring: hsl(217 91% 60%);
-  
+  --sidebar: hsl(228, 67%, 10%); /* Very dark navy */
+  --sidebar-foreground: hsl(0, 0%, 100%);
+  --sidebar-primary: hsl(252, 100%, 66%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(227, 50%, 25%);
+  --sidebar-accent-foreground: hsl(0, 0%, 100%);
+  --sidebar-border: hsl(227, 50%, 25%);
+  --sidebar-ring: hsl(252, 100%, 66%);
+
   /* Custom tokens */
-  --success: hsl(142 76% 36%);
-  --success-foreground: hsl(0 0% 100%);
+  --success: hsl(150, 70%, 50%);
+  --success-foreground: hsl(0, 0%, 100%);
   
-  --warning: hsl(43 74% 66%);
-  --warning-foreground: hsl(0 0% 10%);
+  --warning: hsl(35, 90%, 60%);
+  --warning-foreground: hsl(0, 0%, 10%);
   
-  --neutral-elevated: 0 10px 30px -10px rgba(0,0,0,0.5);
+  --neutral-elevated: 0px 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -155,10 +173,12 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
   }
+
   h1,
   h2,
   h3,
@@ -166,15 +186,19 @@
     font-family: var(--font-heading);
     letter-spacing: -0.01em;
   }
+
   h1 {
     @apply text-3xl md:text-4xl font-semibold leading-tight;
   }
+
   h2 {
     @apply text-2xl md:text-3xl font-semibold leading-snug;
   }
+
   h3 {
     @apply text-xl md:text-2xl font-semibold leading-snug;
   }
+
   h4 {
     @apply text-lg font-medium leading-snug;
   }
@@ -186,13 +210,16 @@
     width: 8px;
     height: 8px;
   }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 999px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background: var(--muted-foreground);
   }
@@ -203,9 +230,11 @@
   .transition-theme {
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   }
+
   .elevated-card {
     box-shadow: var(--neutral-elevated);
   }
+
   .glow-success {
     box-shadow:
       0 0 0 1px hsl(147 72% 46% / 0.35),
