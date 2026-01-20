@@ -1,41 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { MockDbService } from '../common/mock-db.service';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 
 @Injectable()
 export class StoresService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private mockDb: MockDbService) { }
 
     async create(createStoreDto: CreateStoreDto) {
-        return this.prisma.store.create({
-            data: createStoreDto,
-        });
+        return this.mockDb.create('stores', createStoreDto);
     }
 
     async findAll() {
-        return this.prisma.store.findMany({
-            include: { shelves: true, assets: true },
-        });
+        return this.mockDb.findAll('stores');
     }
 
-    async findOne(id: string) {
-        return this.prisma.store.findUnique({
-            where: { id },
-            include: { shelves: true, assets: true },
-        });
+    async findOne(id: number) {
+        return this.mockDb.findOne('stores', id);
     }
 
-    async update(id: string, updateStoreDto: UpdateStoreDto) {
-        return this.prisma.store.update({
-            where: { id },
-            data: updateStoreDto,
-        });
+    async update(id: number, updateStoreDto: UpdateStoreDto) {
+        return this.mockDb.update('stores', id, updateStoreDto);
     }
 
-    async remove(id: string) {
-        return this.prisma.store.delete({
-            where: { id },
-        });
+    async remove(id: number) {
+        return this.mockDb.remove('stores', id);
     }
 }

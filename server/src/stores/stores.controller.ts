@@ -37,14 +37,14 @@ export class StoresController {
     @ApiOperation({ summary: 'Get a store by ID' })
     @ApiResponse({ status: 200, description: 'Returns a store' })
     findOne(@Param('id') id: string) {
-        return this.storesService.findOne(id);
+        return this.storesService.findOne(+id);
     }
 
     @Patch(':id')
     @ApiOperation({ summary: 'Update a store' })
     @ApiResponse({ status: 200, description: 'Store updated successfully' })
     update(@Param('id') id: string, @Body() updateStoreDto: UpdateStoreDto) {
-        return this.storesService.update(id, updateStoreDto);
+        return this.storesService.update(+id, updateStoreDto);
     }
 
     @Delete(':id')
@@ -52,6 +52,6 @@ export class StoresController {
     @ApiOperation({ summary: 'Delete a store' })
     @ApiResponse({ status: 204, description: 'Store deleted successfully' })
     remove(@Param('id') id: string) {
-        return this.storesService.remove(id);
+        return this.storesService.remove(+id);
     }
 }

@@ -10,8 +10,65 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAppStore, mockUsers } from '@/store/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { getRoleDashboardPath } from '@/lib/navigation';
+
+const mockUsers: Record<UserRole, User> = {
+  admin: {
+    id: '1',
+    email: 'admin@insa.gov',
+    name: 'Administrator',
+    role: 'admin',
+    department: 'IT Administration',
+    createdAt: '2024-01-01',
+    lastLogin: '2025-01-19',
+  },
+  'store-manager': {
+    id: '2',
+    email: 'store.manager@insa.gov',
+    name: 'Sarah Johnson',
+    role: 'store-manager',
+    department: 'Logistics',
+    createdAt: '2024-02-15',
+    lastLogin: '2025-01-19',
+  },
+  'asset-manager': {
+    id: '3',
+    email: 'asset.manager@insa.gov',
+    name: 'Michael Chen',
+    role: 'asset-manager',
+    department: 'Asset Management',
+    createdAt: '2024-03-10',
+    lastLogin: '2025-01-19',
+  },
+  technician: {
+    id: '4',
+    email: 'technician@insa.gov',
+    name: 'David Williams',
+    role: 'technician',
+    department: 'Maintenance',
+    createdAt: '2024-04-20',
+    lastLogin: '2025-01-19',
+  },
+  employee: {
+    id: '5',
+    email: 'employee@insa.gov',
+    name: 'Emily Brown',
+    role: 'employee',
+    department: 'Operations',
+    createdAt: '2024-05-05',
+    lastLogin: '2025-01-19',
+  },
+  auditor: {
+    id: '6',
+    email: 'auditor@insa.gov',
+    name: 'Robert Taylor',
+    role: 'auditor',
+    department: 'Internal Audit',
+    createdAt: '2024-06-12',
+    lastLogin: '2025-01-19',
+  },
+};
 import type { UserRole } from '@/types';
 
 export default function LoginPage() {
@@ -97,10 +154,10 @@ export default function LoginPage() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
+                    className="h-11 pr-10 bg-background/50"
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-11 pr-10 bg-background/50"
                   />
                   <button
                     type="button"

@@ -7,13 +7,23 @@ import { StatsCard } from '@/components/dashboard/stats-card';
 import { StatusBadge } from '@/components/dashboard/status-badge';
 import { Progress } from '@/components/ui/progress';
 import { AreaChartGradient } from '@/components/dashboard/area-chart-gradient';
-import { mockStores, mockShelves, mockAssets, mockAssignmentRequests, mockTransferRequests } from '@/lib/mock-data';
+import { useStores, useAssets, useAssignmentRequests, useTransferRequests } from '@/hooks/useQueries';
 
 export default function StoreManagerDashboard() {
-  const pendingAssignments = mockAssignmentRequests.filter((r) => r.status === 'PENDING').length;
-  const pendingTransfers = mockTransferRequests.filter((r) => r.status === 'PENDING').length;
-  const totalAssets = mockAssets.length;
-  const totalShelves = mockShelves.length;
+  const { data: stores, isLoading: storesLoading } = useStores();
+  const { data: assets, isLoading: assetsLoading } = useAssets();
+  const { data: assignmentRequests, isLoading: assignmentsLoading } = useAssignmentRequests();
+  const { data: transferRequests, isLoading: transfersLoading } = useTransferRequests();
+
+  if (storesLoading || assetsLoading || assignmentsLoading || transfersLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const pendingAssignments = (assignmentRequests || []).filter((r) => r.status === 'PENDING').length;
+  const pendingTransfers = (transferRequests || []).filter((r) => r.status === 'PENDING').length;
+  const totalAssets = assets?.length || 0;
+  const totalShelves = stores?.reduce((acc, store) => acc + (store.shelves?.length || 0), 0) || 0;
+
   const throughputTrend = [
     { month: 'Jan', throughput: 118 },
     { month: 'Feb', throughput: 124 },
@@ -76,7 +86,7 @@ export default function StoreManagerDashboard() {
             <CardDescription>Detailed breakdown by store</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {mockStores.map((store) => {
+            {(stores || []).map((store) => {
               const occupancy = Math.round((store.currentOccupancy / store.capacity) * 100);
               return (
                 <div key={store.id} className="space-y-2">
@@ -86,8 +96,8 @@ export default function StoreManagerDashboard() {
                       {store.currentOccupancy} / {store.capacity}
                     </span>
                   </div>
-                  <Progress 
-                    value={occupancy} 
+                  <Progress
+                    value={occupancy}
                     className="h-2"
                   />
                 </div>
@@ -115,12 +125,12 @@ export default function StoreManagerDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            {mockAssignmentRequests.filter((r) => r.status === 'PENDING').length > 0 ? (
+            {(assignmentRequests || []).filter((r) => r.status === 'PENDING').length > 0 ? (
               <div className="space-y-3">
-                {mockAssignmentRequests
+                {(assignmentRequests || [])
                   .filter((r) => r.status === 'PENDING')
                   .map((request) => {
-                    const asset = mockAssets.find((a) => a.id === request.assetId);
+                    const asset = (assets || []).find((a) => a.id === request.assetId);
                     return (
                       <div
                         key={request.id}
@@ -162,14 +172,14 @@ export default function StoreManagerDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            {mockTransferRequests.filter((r) => r.status === 'PENDING').length > 0 ? (
+            {(transferRequests || []).filter((r) => r.status === 'PENDING').length > 0 ? (
               <div className="space-y-3">
-                {mockTransferRequests
+                {(transferRequests || [])
                   .filter((r) => r.status === 'PENDING')
                   .map((request) => {
-                    const asset = mockAssets.find((a) => a.id === request.assetId);
-                    const fromStore = mockStores.find((s) => s.id === request.fromStoreId);
-                    const toStore = mockStores.find((s) => s.id === request.toStoreId);
+                    const asset = (assets || []).find((a) => a.id === request.assetId);
+                    const fromStore = (stores || []).find((s) => s.id === request.fromStoreId);
+                    const toStore = (stores || []).find((s) => s.id === request.toStoreId);
                     return (
                       <div
                         key={request.id}

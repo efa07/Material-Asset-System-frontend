@@ -7,7 +7,7 @@ import { DataTable, type Column } from '@/components/dashboard/data-table';
 import { StatusBadge } from '@/components/dashboard/status-badge';
 import { AreaChartGradient } from '@/components/dashboard/area-chart-gradient';
 import { Progress } from '@/components/ui/progress';
-import { mockDashboardStats, mockAuditLogs, assetsTrendData } from '@/lib/mock-data';
+import { useDashboardStats, useDashboardCharts, useAuditLogs } from '@/hooks/useQueries';
 import type { AuditLog } from '@/types';
 
 
@@ -70,20 +70,28 @@ const auditLogsColumns: Column<AuditLog>[] = [
 ];
 
 export default function AdminDashboard() {
+  const { data: stats, isLoading: statsLoading } = useDashboardStats();
+  const { data: charts, isLoading: chartsLoading } = useDashboardCharts();
+  const { data: auditLogs, isLoading: logsLoading } = useAuditLogs();
+
+  if (statsLoading || chartsLoading || logsLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="space-y-6">
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Assets"
-          value="14,203"
+          value={stats?.totalAssets.toLocaleString() || "0"}
           icon={<Package className="h-6 w-6" />}
           trend={{ value: 5, label: 'from last month' }}
           accentColor="var(--chart-1)"
         />
         <StatsCard
           title="Active Users"
-          value="89"
+          value={stats?.totalUsers.toString() || "0"}
           icon={<Users className="h-6 w-6" />}
           trend={{ value: 0, label: 'stable' }}
           accentColor="var(--success)"
@@ -124,7 +132,7 @@ export default function AdminDashboard() {
               <span className="text-sm font-medium text-emerald-500">+12% vs last week</span>
             </div>
             <AreaChartGradient
-              data={assetsTrendData}
+              data={charts?.assetsTrend || []}
               xKey="month"
               yKey="assets"
               stroke="var(--chart-1)"
@@ -192,7 +200,7 @@ export default function AdminDashboard() {
         <CardContent className="p-0">
           <DataTable
             columns={auditLogsColumns}
-            data={mockAuditLogs}
+            data={auditLogs || []}
             className="border-0 rounded-none"
           />
         </CardContent>

@@ -19,10 +19,16 @@ import { getRoleDisplayName } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 
+import { useNotifications } from '@/hooks/useQueries';
+
 export function Navbar() {
   const router = useRouter();
-  const { user, logout, notifications, unreadCount, markAllNotificationsRead } = useAppStore();
+  const { user, logout, theme: storeTheme } = useAppStore();
   const { theme, setTheme } = useTheme();
+
+  const { data: notificationsData } = useNotifications();
+  const notifications = notificationsData || [];
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   if (!user) return null;
 
@@ -95,7 +101,7 @@ export function Navbar() {
                     variant="ghost"
                     size="sm"
                     className="h-auto px-2 text-xs text-muted-foreground hover:text-foreground"
-                    onClick={markAllNotificationsRead}
+                    onClick={() => { }}
                   >
                     Mark all read
                   </Button>

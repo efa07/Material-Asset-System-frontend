@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { MockDbService } from '../common/mock-db.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
+  constructor(private mockDb: MockDbService) { }
+
   create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+    return this.mockDb.create('users', createUserDto);
   }
 
   findAll() {
-    return `This action returns all users`;
+    return this.mockDb.findAll('users');
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.mockDb.findOne('users', id);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+    return this.mockDb.update('users', id, updateUserDto);
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    return this.mockDb.remove('users', id);
   }
 }

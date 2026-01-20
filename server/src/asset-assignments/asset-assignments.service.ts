@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { MockDbService } from '../common/mock-db.service';
 
 @Injectable()
 export class AssetAssignmentsService {
-  constructor(private prisma: PrismaService) {}
-  
+  constructor(private mockDb: MockDbService) { }
+
   findAll() {
-    return this.prisma.assetAssignment.findMany();
+    return this.mockDb.findAll('assignments');
   }
 }

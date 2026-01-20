@@ -17,20 +17,26 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
-import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
+import { useAssets, useMaintenanceTasks } from "@/hooks/useQueries";
 
 export default function AssetManagerDashboard() {
   const { user } = useAppStore();
+  const { data: assets, isLoading: assetsLoading } = useAssets();
+  const { data: maintenanceTasks, isLoading: maintenanceLoading } = useMaintenanceTasks();
 
-  const totalAssets = mockAssets.length;
-  const activeAssets = mockAssets.filter((a) => a.status === "IN_USE").length;
-  const pendingMaintenance = mockMaintenanceTasks.filter((m) => m.status === "SCHEDULED").length;
-  const inProgressMaintenance = mockMaintenanceTasks.filter((m) => m.status === "IN_PROGRESS").length;
+  if (assetsLoading || maintenanceLoading) {
+    return <div>Loading...</div>;
+  }
 
-  const recentAssets = mockAssets.slice(0, 5);
-  const recentMaintenance = mockMaintenanceTasks.slice(0, 5);
+  const totalAssets = assets?.length || 0;
+  const activeAssets = (assets || []).filter((a) => a.status === "IN_USE").length;
+  const pendingMaintenance = (maintenanceTasks || []).filter((m) => m.status === "SCHEDULED").length;
+  const inProgressMaintenance = (maintenanceTasks || []).filter((m) => m.status === "IN_PROGRESS").length;
 
-  const assetsByCategory = mockAssets.reduce(
+  const recentAssets = (assets || []).slice(0, 5);
+  const recentMaintenance = (maintenanceTasks || []).slice(0, 5);
+
+  const assetsByCategory = (assets || []).reduce(
     (acc, asset) => {
       // use categoryId as a grouping key in this mock phase
       acc[asset.categoryId] = (acc[asset.categoryId] || 0) + 1;
@@ -254,7 +260,7 @@ export default function AssetManagerDashboard() {
                   <span className="text-sm">Excellent</span>
                 </div>
                 <span className="font-medium">
-                  {mockAssets.filter((a) => a.condition === "EXCELLENT").length}
+                  {(assets || []).filter((a: any) => a.condition === "EXCELLENT").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -263,7 +269,7 @@ export default function AssetManagerDashboard() {
                   <span className="text-sm">Good</span>
                 </div>
                 <span className="font-medium">
-                  {mockAssets.filter((a) => a.condition === "GOOD").length}
+                  {(assets || []).filter((a: any) => a.condition === "GOOD").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -272,7 +278,7 @@ export default function AssetManagerDashboard() {
                   <span className="text-sm">Fair</span>
                 </div>
                 <span className="font-medium">
-                  {mockAssets.filter((a) => a.condition === "FAIR").length}
+                  {(assets || []).filter((a: any) => a.condition === "FAIR").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -281,7 +287,7 @@ export default function AssetManagerDashboard() {
                   <span className="text-sm">Poor</span>
                 </div>
                 <span className="font-medium">
-                  {mockAssets.filter((a) => a.condition === "POOR").length}
+                  {(assets || []).filter((a: any) => a.condition === "POOR").length}
                 </span>
               </div>
             </div>
