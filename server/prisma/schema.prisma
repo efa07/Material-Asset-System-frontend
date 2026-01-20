@@ -1,0 +1,319 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------
+// Users & Roles
+// --------------------------------------
+
+enum RoleType {
+  ADMIN
+  STORE_MANAGER
+  ASSET_MANAGER
+  TECHNICIAN
+  EMPLOYEE
+  AUDITOR
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roleId String?
+  role   Role?   @relation(fields: [roleId], references: [id])
+
+  assignments       AssetAssignment[]
+  actions           WorkflowAction[]
+  requestedWorkflows Workflow[]        @relation("Requester")
+  auditLogs         AuditLog[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique // e.g., "Admin", "Store Manager"
+  description String?
+  permissions Json? // Flexible permission structure for future use
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+
+  @@map("roles")
+}
+
+// --------------------------------------
+// Stores & Locations
+// --------------------------------------
+
+model Store {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  location    String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  shelves Shelf[]
+  assets  Asset[]
+
+  @@map("stores")
+}
+
+model Shelf {
+  id          String   @id @default(uuid())
+  name        String // e.g., "A-1", "B-2"
+  description String?
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assets Asset[]
+
+  @@map("shelves")
+}
+
+// --------------------------------------
+// Assets
+// --------------------------------------
+
+enum AssetStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+  RETIRED
+  DISPOSED
+  LOST
+}
+
+model AssetCategory {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assets Asset[]
+
+  @@map("asset_categories")
+}
+
+model Asset {
+  id             String      @id @default(uuid())
+  name           String
+  description    String?
+  serialNumber   String?     @unique
+  barcode        String?     @unique
+  qrCode         String?     @unique
+  status         AssetStatus @default(AVAILABLE)
+  purchaseDate   DateTime?
+  purchasePrice  Decimal?
+  specifications Json?
+
+  categoryId String
+  category   AssetCategory @relation(fields: [categoryId], references: [id])
+
+  storeId String?
+  store   Store?  @relation(fields: [storeId], references: [id])
+
+  shelfId String?
+  shelf   Shelf?  @relation(fields: [shelfId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignments     AssetAssignment[]
+  transfers       AssetTransfer[]
+  maintenanceLogs MaintenanceRecord[]
+  performanceLogs PerformanceRecord[]
+  returns         AssetReturn[]
+  disposals       AssetDisposal[]
+
+  @@map("assets")
+}
+
+// --------------------------------------
+// Asset Lifecycle
+// --------------------------------------
+
+model AssetAssignment {
+  id         String    @id @default(uuid())
+  assetId    String
+  asset      Asset     @relation(fields: [assetId], references: [id])
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  assignedAt DateTime  @default(now())
+  dueDate    DateTime?
+  returnedAt DateTime?
+  status     String    @default("ACTIVE") // ACTIVE, RETURNED
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("asset_assignments")
+}
+
+model AssetTransfer {
+  id           String   @id @default(uuid())
+  assetId      String
+  asset        Asset    @relation(fields: [assetId], references: [id])
+  fromStoreId  String?
+  toStoreId    String
+  transferDate DateTime @default(now())
+  reason       String?
+  status       String   @default("COMPLETED") // PENDING, COMPLETED, CANCELLED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("asset_transfers")
+}
+
+model AssetReturn {
+  id         String   @id @default(uuid())
+  assetId    String
+  asset      Asset    @relation(fields: [assetId], references: [id])
+  returnDate DateTime @default(now())
+  condition  String? // GOOD, DAMAGED, etc.
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("asset_returns")
+}
+
+model AssetDisposal {
+  id           String   @id @default(uuid())
+  assetId      String
+  asset        Asset    @relation(fields: [assetId], references: [id])
+  disposalDate DateTime @default(now())
+  reason       String?
+  method       String? // SALE, SCRAP, DONATION
+  value        Decimal?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("asset_disposals")
+}
+
+// --------------------------------------
+// Maintenance & Performance
+// --------------------------------------
+
+model MaintenanceRecord {
+  id              String   @id @default(uuid())
+  assetId         String
+  asset           Asset    @relation(fields: [assetId], references: [id])
+  maintenanceDate DateTime @default(now())
+  type            String   // PREVENTIVE, CORRECTIVE
+  description     String?
+  cost            Decimal?
+  performedBy     String? // Could be external vendor or internal user
+  nextScheduled   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("maintenance_records")
+}
+
+model PerformanceRecord {
+  id         String   @id @default(uuid())
+  assetId    String
+  asset      Asset    @relation(fields: [assetId], references: [id])
+  date       DateTime @default(now())
+  metricName String
+  value      Float
+  unit       String?
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("performance_records")
+}
+
+// --------------------------------------
+// Workflows & Approvals (Generic)
+// --------------------------------------
+
+enum WorkflowStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model Workflow {
+  id          String         @id @default(uuid())
+  type        String // ASSET_REQUEST, TRANSFER_REQUEST, DISPOSAL_REQUEST
+  referenceId String? // ID of the asset/request
+  requesterId String
+  requester   User           @relation("Requester", fields: [requesterId], references: [id])
+  status      WorkflowStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  actions WorkflowAction[]
+
+  @@map("workflows")
+}
+
+model WorkflowAction {
+  id         String   @id @default(uuid())
+  workflowId String
+  workflow   Workflow @relation(fields: [workflowId], references: [id])
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  action     String // APPROVE, REJECT, COMMENT
+  comment    String?
+  timestamp  DateTime @default(now())
+
+  @@map("workflow_actions")
+}
+
+// --------------------------------------
+// Notifications & Audit
+// --------------------------------------
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String // Intentionally not a relation for now to decouple if needed vs strictly tied
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  type      String?  // INFO, WARNING, ALERT
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String // CREATE, UPDATE, DELETE, LOGIN, ETC.
+  entity    String // ASSET, USER, STORE
+  entityId  String?
+  details   Json? // Before/After values
+  ipAddress String?
+  timestamp DateTime @default(now())
+
+  @@map("audit_logs")
+}

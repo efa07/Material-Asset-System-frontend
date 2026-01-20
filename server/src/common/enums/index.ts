@@ -1,0 +1,24 @@
+export enum RoleType {
+    ADMIN = 'ADMIN',
+    STORE_MANAGER = 'STORE_MANAGER',
+    ASSET_MANAGER = 'ASSET_MANAGER',
+    TECHNICIAN = 'TECHNICIAN',
+    EMPLOYEE = 'EMPLOYEE',
+    AUDITOR = 'AUDITOR',
+}
+
+export enum AssetStatus {
+    AVAILABLE = 'AVAILABLE',
+    IN_USE = 'IN_USE',
+    MAINTENANCE = 'MAINTENANCE',
+    RETIRED = 'RETIRED',
+    DISPOSED = 'DISPOSED',
+    LOST = 'LOST',
+}
+
+export enum WorkflowStatus {
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
+    CANCELLED = 'CANCELLED',
+}
