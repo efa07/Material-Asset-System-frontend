@@ -18,6 +18,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { getRoleDisplayName } from '@/lib/navigation';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
+import { logoutAndClear } from '@/lib/keycloak';
 
 import { useNotifications } from '@/hooks/useQueries';
 
@@ -32,8 +33,10 @@ export function Navbar() {
 
   if (!user) return null;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    // perform full client-side cleanup and redirect to Keycloak
+    await logoutAndClear();
+    // keycloak.logout will redirect out; as a fallback, navigate to login route
     router.push('/login');
   };
 

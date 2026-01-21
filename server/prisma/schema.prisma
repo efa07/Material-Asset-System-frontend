@@ -42,9 +42,9 @@ model User {
 
 model Role {
   id          String   @id @default(uuid())
-  name        String   @unique // e.g., "Admin", "Store Manager"
+  name        String   @unique 
   description String?
-  permissions Json? // Flexible permission structure for future use
+  permissions Json? 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
