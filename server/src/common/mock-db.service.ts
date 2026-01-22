@@ -1,69 +1,87 @@
 import { Injectable } from '@nestjs/common';
-import * as mockData from './mock-db';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class MockDbService {
-    private data = {
-        categories: [...mockData.mockCategories],
-        stores: [...mockData.mockStores],
-        shelves: [...mockData.mockShelves],
-        assets: [...mockData.mockAssets],
-        users: [...mockData.mockUsers],
-        assignmentRequests: [...mockData.mockAssignmentRequests],
-        assignments: [...mockData.mockAssignments],
-        transferRequests: [...mockData.mockTransferRequests],
-        maintenanceTasks: [...mockData.mockMaintenanceTasks],
-        auditLogs: [...mockData.mockAuditLogs],
-        notifications: [...mockData.mockNotifications],
-        dashboardStats: { ...mockData.mockDashboardStats },
-        assetsByStatus: [...mockData.assetsByStatusData],
-        assetsTrend: [...mockData.assetsTrendData],
-        maintenanceByType: [...mockData.maintenanceByTypeData],
-    };
+    constructor(private readonly prisma: PrismaService) {}
 
-    findAll(collection: keyof typeof this.data) {
-        return this.data[collection];
+    // Map the simple collection names used by older code to Prisma model accessors
+    private modelFor(collection: string) {
+        const map: Record<string, string> = {
+            categories: 'assetCategory',
+            stores: 'store',
+            shelves: 'shelf',
+            assets: 'asset',
+            users: 'user',
+            assignmentRequests: 'workflow',
+            assignments: 'assetAssignment',
+            transferRequests: 'assetTransfer',
+            maintenanceTasks: 'maintenanceRecord',
+            auditLogs: 'auditLog',
+            notifications: 'notification',
+            // dashboardStats / chart data will be computed
+        };
+        return map[collection];
     }
 
-    findOne(collection: keyof typeof this.data, id: number) {
-        if (Array.isArray(this.data[collection])) {
-            return (this.data[collection] as any[]).find((item) => item.id.toString() === id.toString());
+    async findAll(collection: string) {
+        const model = this.modelFor(collection);
+        if (!model) {
+            // special cases
+            if (collection === 'dashboardStats') return this.getDashboardStats();
+            return [];
         }
-        return null;
+
+        // @ts-ignore dynamic access
+        return await (this.prisma as any)[model].findMany();
     }
 
-    create(collection: keyof typeof this.data, item: any) {
-        if (Array.isArray(this.data[collection])) {
-            const newItem = { ...item, id: Math.random().toString(36).substr(2, 9) };
-            (this.data[collection] as any[]).push(newItem);
-            return newItem;
-        }
-        return null;
+    async findOne(collection: string, id: string) {
+        const model = this.modelFor(collection);
+        if (!model) return null;
+
+        // @ts-ignore dynamic access
+        return await (this.prisma as any)[model].findUnique({ where: { id } });
     }
 
-    update(collection: keyof typeof this.data, id: number, item: any) {
-        if (Array.isArray(this.data[collection])) {
-            const index = (this.data[collection] as any[]).findIndex((i) => i.id.toString() === id.toString());
-            if (index !== -1) {
-                (this.data[collection] as any[])[index] = { ...(this.data[collection] as any[])[index], ...item };
-                return (this.data[collection] as any[])[index];
-            }
-        }
-        return null;
+    async create(collection: string, item: any) {
+        const model = this.modelFor(collection);
+        if (!model) return null;
+
+        // @ts-ignore dynamic access
+        return await (this.prisma as any)[model].create({ data: item });
     }
 
-    remove(collection: keyof typeof this.data, id: number) {
-        if (Array.isArray(this.data[collection])) {
-            const index = (this.data[collection] as any[]).findIndex((i) => i.id.toString() === id.toString());
-            if (index !== -1) {
-                const removed = (this.data[collection] as any[]).splice(index, 1);
-                return removed[0];
-            }
-        }
-        return null;
+    async update(collection: string, id: string, item: any) {
+        const model = this.modelFor(collection);
+        if (!model) return null;
+
+        // @ts-ignore dynamic access
+        return await (this.prisma as any)[model].update({ where: { id }, data: item });
     }
 
-    getDashboardStats() {
-        return this.data.dashboardStats;
+    async remove(collection: string, id: string) {
+        const model = this.modelFor(collection);
+        if (!model) return null;
+
+        // @ts-ignore dynamic access
+        return await (this.prisma as any)[model].delete({ where: { id } });
+    }
+
+    async getDashboardStats() {
+        // Basic aggregated stats for the dashboard
+        const totalAssets = await this.prisma.asset.count();
+        const assetsByStatus = await this.prisma.asset.groupBy({ by: ['status'], _count: { status: true } });
+        const pendingAssignments = await this.prisma.assetAssignment.count({ where: { status: 'ACTIVE' } });
+        const pendingTransfers = await this.prisma.assetTransfer.count({ where: { status: 'PENDING' } });
+        const maintenanceCount = await this.prisma.maintenanceRecord.count();
+
+        return {
+            totalAssets,
+            assetsByStatus,
+            pendingAssignments,
+            pendingTransfers,
+            maintenanceCount,
+        };
     }
 }

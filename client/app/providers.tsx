@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { SessionProvider } from 'next-auth/react';
+import { AuthSync } from '@/components/auth/auth-sync';
 
 import { ThemeProvider } from '@/components/theme-provider';
 
@@ -29,16 +31,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = React.useState(getQueryClient);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-      >
-        {children}
-      </ThemeProvider>
-    </QueryClientProvider>
+    <SessionProvider>
+      <AuthSync />
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </QueryClientProvider>
+    </SessionProvider>
   );
 }
 

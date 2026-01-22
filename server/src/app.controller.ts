@@ -20,11 +20,20 @@ export class AppController {
   }
 
   @Get('dashboard/charts')
-  getDashboardCharts() {
+  async getDashboardCharts() {
+    // compute basic chart data from DB via the MockDbService (Prisma-backed)
+    const stats: any = await this.mockDb.getDashboardStats();
+
+    const assetsByStatus = (stats.assetsByStatus || []).map((s: any) => ({ status: s.status, value: s._count?.status || 0 }));
+
+    // assetsTrend and maintenanceByType are not direct models; return simple placeholders
+    const assetsTrend = [];
+    const maintenanceByType = [];
+
     return {
-      assetsByStatus: this.mockDb.findAll('assetsByStatus'),
-      assetsTrend: this.mockDb.findAll('assetsTrend'),
-      maintenanceByType: this.mockDb.findAll('maintenanceByType'),
+      assetsByStatus,
+      assetsTrend,
+      maintenanceByType,
     };
   }
 }

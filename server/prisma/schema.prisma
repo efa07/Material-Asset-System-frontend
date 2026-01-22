@@ -188,7 +188,7 @@ model AssetReturn {
   assetId    String
   asset      Asset    @relation(fields: [assetId], references: [id])
   returnDate DateTime @default(now())
-  condition  String? // GOOD, DAMAGED, etc.
+  condition  String? // GOOD, DAMAGED, 
   notes      String?
 
   createdAt DateTime @default(now())
