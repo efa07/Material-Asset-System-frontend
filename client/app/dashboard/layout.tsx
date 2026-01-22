@@ -18,7 +18,6 @@ export default function DashboardLayout({
   const { user, isAuthenticated } = useAppStore();
 
   useEffect(() => {
-    // Redirect to login if not authenticated
     if (!isAuthenticated || !user) {
       router.push('/login');
       return;

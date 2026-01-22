@@ -200,8 +200,18 @@ export interface Assignment {
   id: string;
   assetId: string;
   userId: string;
+  asset?: Asset;
+  user?: User;
   status: 'ACTIVE' | 'PENDING' | 'COMPLETED' | 'RETURNED';
-  assignedDate: string;
+  assignedAt: string;
   dueDate?: string;
   notes?: string;
+}
+
+export interface CreateAssignmentRequest {
+  assetId: string;
+  userId: string;
+  notes?: string;
+  dueDate?: string;
+  status?: 'PENDING';
 }

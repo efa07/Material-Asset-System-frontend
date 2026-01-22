@@ -15,15 +15,15 @@ export class ShelvesService {
         return this.mockDb.findAll('shelves');
     }
 
-    findOne(id: number) {
+    findOne(id: string) {
         return this.mockDb.findOne('shelves', id);
     }
 
-    update(id: number, updateShelfDto: UpdateShelfDto) {
+    update(id: string, updateShelfDto: UpdateShelfDto) {
         return this.mockDb.update('shelves', id, updateShelfDto);
     }
 
-    remove(id: number) {
+    remove(id: string) {
         return this.mockDb.remove('shelves', id);
     }
 }

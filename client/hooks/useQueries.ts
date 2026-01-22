@@ -96,9 +96,11 @@ export const useDashboardCharts = () => {
     });
 };
 
-export const useAssignmentRequests = () => {
-    return useQuery<any[]>({
-        queryKey: ['assignment-requests'],
+import { Assignment } from '@/types';
+
+export const useAssignments = () => {
+    return useQuery<Assignment[]>({
+        queryKey: ['assignments'],
         queryFn: async () => {
             const { data } = await api.get('/asset-assignments');
             return data;

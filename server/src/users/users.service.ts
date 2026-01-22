@@ -15,15 +15,15 @@ export class UsersService {
     return this.mockDb.findAll('users');
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return this.mockDb.findOne('users', id);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: string, updateUserDto: UpdateUserDto) {
     return this.mockDb.update('users', id, updateUserDto);
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return this.mockDb.remove('users', id);
   }
 }

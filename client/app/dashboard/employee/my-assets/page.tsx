@@ -26,17 +26,19 @@ import {
 } from "lucide-react";
 import type { Asset } from "@/types";
 import { useAppStore } from "@/store/useAppStore";
-import { mockAssets } from "@/lib/mock-data";
+import { useAssignments } from "@/hooks/useQueries";
 
 export default function EmployeeMyAssetsPage() {
   const { user } = useAppStore();
+  const { data: assignments = [] } = useAssignments();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [issueDescription, setIssueDescription] = useState("");
 
-  // mock: show assets that are assignedTo current user (from lib/mock-data)
-  const myAssets = mockAssets.filter((a) => !!user && a.assignedTo === user.id);
+  const myAssets = assignments
+    .filter((a) => a.userId === user?.id && a.status === 'ACTIVE' && a.asset)
+    .map((a) => a.asset!);
 
   const filteredAssets = myAssets.filter((asset) => {
     return (

@@ -24,17 +24,24 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
-import { mockAssets } from "@/lib/mock-data";
+import { useAssets, useAssignments, useCategories } from "@/hooks/useQueries";
+import { useCreateAssignment } from "@/hooks/useMutations";
 
 export default function EmployeeRequestPage() {
   const { user } = useAppStore();
+  const { data: assets = [] } = useAssets();
+  const { data: assignments = [] } = useAssignments();
+  const { data: categories = [] } = useCategories();
+  const createAssignment = useCreateAssignment();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [requestReason, setRequestReason] = useState("");
   const [requestSubmitted, setRequestSubmitted] = useState(false);
 
-  const availableAssets = mockAssets.filter((a) => a.status === "AVAILABLE");
+  // Filter out assets that are NOT available
+  const availableAssets = assets.filter((a) => a.status === "AVAILABLE");
 
   const filteredAssets = availableAssets.filter((asset) => {
     const matchesSearch =
@@ -44,17 +51,30 @@ export default function EmployeeRequestPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const myPendingRequests: { id: string; assetId: string }[] = [];
+  // Get my pending requests
+  const myPendingRequests = assignments.filter((a) => 
+      a.userId === user?.id && a.status === 'PENDING'
+  );
 
   const handleSubmitRequest = () => {
     if (!selectedAssetId || !user) return;
+    
+    createAssignment.mutate({
+        assetId: selectedAssetId,
+        userId: user.id,
+        notes: requestReason,
+        status: 'PENDING'
+    }, {
+        onSuccess: () => {
+            setRequestSubmitted(true);
+            setSelectedAssetId(null);
+            setRequestReason("");
+            setTimeout(() => setRequestSubmitted(false), 3000);
+        }
+    });
 
-    setRequestSubmitted(true);
-    setSelectedAssetId(null);
-    setRequestReason("");
-
-    setTimeout(() => setRequestSubmitted(false), 3000);
   };
+
 
   return (
     <div className="space-y-6">
@@ -131,12 +151,11 @@ export default function EmployeeRequestPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Categories</SelectItem>
-                      {/* using categoryId keys from mock-data */}
-                      <SelectItem value="1">Electronics</SelectItem>
-                      <SelectItem value="2">Furniture</SelectItem>
-                      <SelectItem value="3">Vehicles</SelectItem>
-                      <SelectItem value="4">IT Equipment</SelectItem>
-                      <SelectItem value="5">Office Supplies</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -187,11 +206,11 @@ export default function EmployeeRequestPage() {
                             </p>
                             <div className="mt-2 flex items-center gap-2">
                               <StatusBadge
-                                status={asset.condition}
-                                type="condition"
+                                status={asset.status}
+                                
                               />
                               <span className="text-xs text-muted-foreground capitalize">
-                                {asset.categoryId}
+                                {categories.find(c => c.id === asset.categoryId)?.name || asset.categoryId}
                               </span>
                             </div>
                           </div>
@@ -220,13 +239,13 @@ export default function EmployeeRequestPage() {
                         <div>
                           <p className="font-medium">
                             {
-                              mockAssets.find((a) => a.id === selectedAssetId)
+                              assets.find((a) => a.id === selectedAssetId)
                                 ?.name
                             }
                           </p>
                           <p className="text-sm text-muted-foreground">
                             {
-                              mockAssets.find((a) => a.id === selectedAssetId)
+                              assets.find((a) => a.id === selectedAssetId)
                                 ?.serialNumber
                             }
                           </p>

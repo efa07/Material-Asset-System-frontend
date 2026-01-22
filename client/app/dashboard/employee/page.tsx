@@ -1,6 +1,7 @@
 "use client";
 
 import { useAppStore } from "@/store/useAppStore";
+import { useAssets, useAssignments, useNotifications } from "@/hooks/useQueries";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
@@ -19,7 +20,10 @@ import {
 import Link from "next/link";
 
 export default function EmployeeDashboard() {
-  const { assignments, assets, user: currentUser, notifications } = useAppStore();
+  const { user: currentUser } = useAppStore();
+  const { data: assets = [] } = useAssets();
+  const { data: assignments = [] } = useAssignments();
+  const { data: notifications = [] } = useNotifications();
 
   const myAssignments = assignments.filter(
     (a) => a.userId === currentUser?.id && a.status === "ACTIVE"

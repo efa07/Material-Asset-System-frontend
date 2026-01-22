@@ -7,7 +7,7 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly mockDb: MockDbService,
-  ) { }
+  ) {}
 
   @Get()
   getHello(): string {
@@ -27,8 +27,8 @@ export class AppController {
     const assetsByStatus = (stats.assetsByStatus || []).map((s: any) => ({ status: s.status, value: s._count?.status || 0 }));
 
     // assetsTrend and maintenanceByType are not direct models; return simple placeholders
-    const assetsTrend = [];
-    const maintenanceByType = [];
+    const assetsTrend: any[] = [];
+    const maintenanceByType: any[] = [];
 
     return {
       assetsByStatus,

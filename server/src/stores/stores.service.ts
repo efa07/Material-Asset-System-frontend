@@ -15,15 +15,15 @@ export class StoresService {
         return this.mockDb.findAll('stores');
     }
 
-    async findOne(id: number) {
+    async findOne(id: string) {
         return this.mockDb.findOne('stores', id);
     }
 
-    async update(id: number, updateStoreDto: UpdateStoreDto) {
+    async update(id: string, updateStoreDto: UpdateStoreDto) {
         return this.mockDb.update('stores', id, updateStoreDto);
     }
 
-    async remove(id: number) {
+    async remove(id: string) {
         return this.mockDb.remove('stores', id);
     }
 }
