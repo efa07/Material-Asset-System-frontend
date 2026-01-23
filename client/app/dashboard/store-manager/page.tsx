@@ -14,7 +14,7 @@ export default function StoreManagerDashboard() {
   const { data: assets, isLoading: assetsLoading } = useAssets();
   const { data: assignmentRequests, isLoading: assignmentsLoading } = useAssignmentRequests();
   const { data: transferRequests, isLoading: transfersLoading } = useTransferRequests();
-
+console.log(assets)
   if (storesLoading || assetsLoading || assignmentsLoading || transfersLoading) {
     return <div>Loading...</div>;
   }

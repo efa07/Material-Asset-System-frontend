@@ -6,7 +6,7 @@ import { PerformanceService } from './performance.service';
 @Controller('api/v1/performance')
 export class PerformanceController {
   constructor(private readonly service: PerformanceService) {}
-  
+
   @Get()
   findAll() {
     return this.service.findAll();

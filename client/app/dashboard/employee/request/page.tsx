@@ -78,7 +78,7 @@ export default function EmployeeRequestPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Request Asset" description="Browse available assets and submit a request (mock)" />
+      <PageHeader title="Request Asset" description="Browse available assets and submit a request" />
 
         {requestSubmitted && (
           <div className="rounded-lg border border-emerald-500/50 bg-emerald-500/10 p-4">

@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { MockDbService } from '../common/mock-db.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PerformanceService {
-  constructor(private mockDb: MockDbService) { }
+  constructor(private prisma: PrismaService) {}
 
   findAll() {
-    return []; // No mock data for performance yet
+    return this.prisma.performanceRecord.findMany({
+      include: { asset: true },
+    });
   }
 }

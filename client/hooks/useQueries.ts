@@ -1,13 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import type { Asset, User, Store, AssetCategory, Notification, AuditLog, MaintenanceTask, DashboardStats } from '@/types';
+import type { Asset, User, Store, AssetCategory, Notification, AuditLog, MaintenanceTask, DashboardStats, Shelf } from '@/types';
 
 export const useAssets = () => {
     return useQuery<Asset[]>({
         queryKey: ['assets'],
         queryFn: async () => {
             const { data } = await api.get('/assets');
-            return data;
+            return (data || []).map((asset: Asset) => ({
+                ...asset,
+                code: asset.code || asset.barcode || asset.serialNumber || '',
+                currentValue: asset.currentValue ?? asset.purchasePrice ?? 0,
+            }));
         },
     });
 };
@@ -22,11 +26,22 @@ export const useUsers = () => {
     });
 };
 
+//
 export const useStores = () => {
     return useQuery<Store[]>({
         queryKey: ['stores'],
         queryFn: async () => {
             const { data } = await api.get('/stores');
+            return data;
+        },
+    });
+};
+
+export const useShelves = () => {
+    return useQuery<Shelf[]>({
+        queryKey: ['shelves'],
+        queryFn: async () => {
+            const { data } = await api.get('/shelves');
             return data;
         },
     });
@@ -67,7 +82,10 @@ export const useMaintenanceTasks = () => {
         queryKey: ['maintenance-tasks'],
         queryFn: async () => {
             const { data } = await api.get('/maintenance');
-            return data;
+            return (data || []).map((record: MaintenanceTask) => ({
+                ...record,
+                scheduledDate: record.scheduledDate || record.maintenanceDate || undefined,
+            }));
         },
     });
 };
@@ -108,12 +126,32 @@ export const useAssignments = () => {
     });
 };
 
+export const useAssignmentRequests = () => {
+    return useQuery<Assignment[]>({
+        queryKey: ['assignments'],
+        queryFn: async () => {
+            const { data } = await api.get('/asset-assignments');
+            return data;
+        },
+    });
+};
+
 export const useTransferRequests = () => {
     return useQuery<any[]>({
         queryKey: ['transfer-requests'],
         queryFn: async () => {
             const { data } = await api.get('/asset-transfers');
             return data;
+        },
+    });
+};
+
+export const useDisposals = () => {
+    return useQuery<any[]>({
+        queryKey: ['disposals'],
+        queryFn: async () => {
+             const { data } = await api.get('/asset-disposals');
+             return data;
         },
     });
 };

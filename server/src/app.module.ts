@@ -19,7 +19,6 @@ import { PerformanceModule } from './performance/performance.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AuditModule } from './audit/audit.module';
-import { MockDbModule } from './common/mock-db.module';
 
 @Module({
   imports: [
@@ -27,7 +26,6 @@ import { MockDbModule } from './common/mock-db.module';
       isGlobal: true,
     }),
     PrismaModule,
-    MockDbModule,
     AuthModule,
     UsersModule,
     RolesModule,
@@ -48,4 +46,4 @@ import { MockDbModule } from './common/mock-db.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

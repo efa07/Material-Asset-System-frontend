@@ -3,7 +3,7 @@ import { ShelvesController } from './shelves.controller';
 import { ShelvesService } from './shelves.service';
 
 @Module({
-    controllers: [ShelvesController],
-    providers: [ShelvesService],
+  controllers: [ShelvesController],
+  providers: [ShelvesService],
 })
-export class ShelvesModule { }
+export class ShelvesModule {}

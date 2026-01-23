@@ -5,7 +5,7 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   create(createDto: CreateNotificationDto) {
     return this.prisma.notification.create({

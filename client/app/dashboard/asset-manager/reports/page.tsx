@@ -22,15 +22,15 @@ import {
   Calendar,
 } from "lucide-react";
 import { useState } from "react";
-import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
+import { useAssets, useMaintenanceTasks } from '@/hooks/useQueries';
 
 export default function ReportsPage() {
-  const assets = mockAssets;
-  const maintenanceRecords = mockMaintenanceTasks;
+  const { data: assets = [] } = useAssets();
+  const { data: maintenanceRecords = [] } = useMaintenanceTasks();
   const [reportPeriod, setReportPeriod] = useState("month");
 
-  const totalAssetValue = assets.reduce((sum, a) => sum + a.currentValue, 0);
-  const totalPurchaseValue = assets.reduce((sum, a) => sum + a.purchasePrice, 0);
+  const totalAssetValue = assets.reduce((sum, a) => sum + Number(a.purchasePrice || 0), 0);
+  const totalPurchaseValue = assets.reduce((sum, a) => sum + Number(a.purchasePrice || 0), 0);
   const depreciation = totalPurchaseValue - totalAssetValue;
 
   const assetsByStatus = {
@@ -42,7 +42,8 @@ export default function ReportsPage() {
 
   const assetsByCategory = assets.reduce(
     (acc, asset) => {
-      acc[asset.categoryId] = (acc[asset.categoryId] || 0) + 1;
+  const catName = asset.category?.name || asset.categoryId || 'Unknown';
+      acc[catName] = (acc[catName] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>
@@ -50,14 +51,14 @@ export default function ReportsPage() {
 
   const maintenanceCosts = maintenanceRecords
     .filter((m) => m.status === "COMPLETED")
-    .reduce((sum) => sum + 0, 0);
+    .reduce((sum, m) => sum + (m.cost || 0), 0);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Reports & Analytics"
         description="Generate and view asset management reports"
-        action={
+      >
           <div className="flex items-center gap-2">
             <Select value={reportPeriod} onValueChange={setReportPeriod}>
               <SelectTrigger className="w-40">
@@ -76,8 +77,7 @@ export default function ReportsPage() {
               Export
             </Button>
           </div>
-        }
-      />
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">

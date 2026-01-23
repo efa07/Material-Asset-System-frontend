@@ -35,16 +35,18 @@ import {
   Package,
   Calendar,
 } from "lucide-react";
-import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
+import { useMaintenanceTasks, useAssets } from '@/hooks/useQueries';
+import { useUpdateMaintenanceTask } from '@/hooks/useMutations';
+import { MaintenanceTask, Asset } from '@/types';
 
 export default function TechnicianTasksPage() {
-  const maintenanceRecords = mockMaintenanceTasks;
-  const assets = mockAssets;
+  const { data: maintenanceRecords = [] } = useMaintenanceTasks();
+  const { data: assets = [] } = useAssets();
+  const { mutate: updateTask, isPending } = useUpdateMaintenanceTask();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [selectedTask, setSelectedTask] = useState<
-    (typeof maintenanceRecords)[0] | null
-  >(null);
+  const [selectedTask, setSelectedTask] = useState<MaintenanceTask | null>(null);
   const [completionNotes, setCompletionNotes] = useState("");
   const [completionCost, setCompletionCost] = useState("");
 
@@ -54,12 +56,12 @@ export default function TechnicianTasksPage() {
     const asset = assets.find((a) => a.id === task.assetId);
     const matchesSearch =
       asset?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.description.toLowerCase().includes(searchQuery.toLowerCase());
+      (task.description || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = typeFilter === "all" || task.type === typeFilter;
     return matchesSearch && matchesType;
   });
 
-  const pendingTasks = filteredTasks.filter((t) => t.status === "PENDING");
+  const pendingTasks = filteredTasks.filter((t) => t.status === "SCHEDULED" || t.status === 'PENDING');
   const inProgressTasks = filteredTasks.filter((t) => t.status === "IN_PROGRESS");
   const completedTasks = filteredTasks.filter((t) => t.status === "COMPLETED");
 
@@ -68,21 +70,31 @@ export default function TechnicianTasksPage() {
   };
 
   const handleStartTask = (taskId: string) => {
-    // mock-only: no persistence
+      updateTask({ id: taskId, status: 'IN_PROGRESS' });
   };
 
   const handleCompleteTask = () => {
     if (!selectedTask) return;
-    setSelectedTask(null);
-    setCompletionNotes("");
-    setCompletionCost("");
+    
+    updateTask({
+        id: selectedTask.id,
+        status: 'COMPLETED',
+        description: completionNotes ? `${selectedTask.description || ''} \n[Completion]: ${completionNotes}` : selectedTask.description,
+        cost: completionCost ? parseFloat(completionCost) : undefined
+    }, {
+        onSuccess: () => {
+            setSelectedTask(null);
+            setCompletionNotes("");
+            setCompletionCost("");
+        }
+    });
   };
 
   const TaskCard = ({
     task,
     showActions = true,
   }: {
-    task: (typeof maintenanceRecords)[0];
+    task: MaintenanceTask;
     showActions?: boolean;
   }) => {
     const asset = getAssetDetails(task.assetId);

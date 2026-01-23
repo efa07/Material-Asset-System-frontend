@@ -5,34 +5,34 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 
 @Injectable()
 export class RolesService {
-    constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-    async create(createRoleDto: CreateRoleDto) {
-        return this.prisma.role.create({
-            data: createRoleDto,
-        });
-    }
+  async create(createRoleDto: CreateRoleDto) {
+    return this.prisma.role.create({
+      data: createRoleDto,
+    });
+  }
 
-    async findAll() {
-        return this.prisma.role.findMany();
-    }
+  async findAll() {
+    return this.prisma.role.findMany();
+  }
 
-    async findOne(id: string) {
-        return this.prisma.role.findUnique({
-            where: { id },
-        });
-    }
+  async findOne(id: string) {
+    return this.prisma.role.findUnique({
+      where: { id },
+    });
+  }
 
-    async update(id: string, updateRoleDto: UpdateRoleDto) {
-        return this.prisma.role.update({
-            where: { id },
-            data: updateRoleDto,
-        });
-    }
+  async update(id: string, updateRoleDto: UpdateRoleDto) {
+    return this.prisma.role.update({
+      where: { id },
+      data: updateRoleDto,
+    });
+  }
 
-    async remove(id: string) {
-        return this.prisma.role.delete({
-            where: { id },
-        });
-    }
+  async remove(id: string) {
+    return this.prisma.role.delete({
+      where: { id },
+    });
+  }
 }

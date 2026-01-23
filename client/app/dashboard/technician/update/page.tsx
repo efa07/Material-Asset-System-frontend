@@ -11,24 +11,50 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/dashboard/status-badge';
-import { mockAssets, mockMaintenanceTasks } from '@/lib/mock-data';
+import { useMaintenanceTasks, useAssets } from '@/hooks/useQueries';
+import { useUpdateMaintenanceTask } from '@/hooks/useMutations';
 
 export default function TechnicianUpdateStatusPage() {
-  const [taskId, setTaskId] = useState(mockMaintenanceTasks[0]?.id ?? '');
+  const { data: tasks = [] } = useMaintenanceTasks();
+  const { data: assets = [] } = useAssets();
+  const { mutate: updateTask, isPending } = useUpdateMaintenanceTask();
+
+  const [taskId, setTaskId] = useState('');
   const [status, setStatus] = useState<'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED'>('IN_PROGRESS');
   const [notes, setNotes] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const task = mockMaintenanceTasks.find((t) => t.id === taskId);
-  const asset = task ? mockAssets.find((a) => a.id === task.assetId) : undefined;
+  // If taskId is not set but tasks exist, select first (optional)
+  if (!taskId && tasks.length > 0) {
+      setTaskId(tasks[0].id);
+  }
+
+  const task = tasks.find((t) => t.id === taskId);
+  const asset = task ? assets.find((a) => a.id === task.assetId) : undefined;
+
+  const handleSave = () => {
+    if (!taskId) return;
+    
+    updateTask({
+        id: taskId,
+        status: status,
+        description: notes // Map notes to description
+    }, {
+        onSuccess: () => {
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2500);
+            setNotes('');
+        }
+    });
+  };
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Update Status" description="Update maintenance task status (mock workflow)" />
+      <PageHeader title="Update Status" description="Update maintenance task status" />
 
       {saved && (
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm">
-          <span className="font-medium text-emerald-500">Saved.</span> This will be persisted after backend integration.
+          <span className="font-medium text-emerald-500">Saved successfully.</span>
         </div>
       )}
 
@@ -45,9 +71,9 @@ export default function TechnicianUpdateStatusPage() {
                   <SelectValue placeholder="Select task" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockMaintenanceTasks.map((t) => (
+                  {tasks.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
-                      {t.type} • {mockAssets.find((a) => a.id === t.assetId)?.code ?? t.assetId}
+                      {t.type} • {assets.find((a) => a.id === t.assetId)?.barcode ?? assets.find((a) => a.id === t.assetId)?.name ?? t.assetId}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -72,13 +98,11 @@ export default function TechnicianUpdateStatusPage() {
             </div>
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => {
-                  setSaved(true);
-                  setTimeout(() => setSaved(false), 2500);
-                }}
+                onClick={handleSave}
+                disabled={isPending || !taskId}
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Save Update
+                {isPending ? 'Saving...' : 'Save Update'}
               </Button>
               <Button variant="outline" className="bg-transparent" onClick={() => setNotes('')}>
                 Clear

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,25 +41,18 @@ import {
   Edit,
   QrCode,
 } from "lucide-react";
-import type { Asset, AssetStatus } from "@/types";
+import type { Asset } from "@/types";
 import { useAssets, useCategories, useStores } from "@/hooks/useQueries";
+import { useCreateAsset } from "@/hooks/useMutations";
 
 export default function AssetManagerAssetsPage() {
   const { data: assetsData, isLoading: assetsLoading } = useAssets();
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
   const { data: storesData, isLoading: storesLoading } = useStores();
-
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [hasInitialized, setHasInitialized] = useState(false);
-
-  // Sync with initial data
-  if (!assetsLoading && assetsData && !hasInitialized) {
-    setAssets(assetsData);
-    setHasInitialized(true);
-  }
+  const { mutate: createAsset, isPending: isCreating } = useCreateAsset();
 
   const stores = storesData || [];
-  const mockCategories = categoriesData || [];
+  const categories = categoriesData || [];
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -70,7 +63,7 @@ export default function AssetManagerAssetsPage() {
   const [newAsset, setNewAsset] = useState({
     name: "",
     serialNumber: "",
-    categoryId: mockCategories[0]?.id ?? "1",
+  categoryId: categories[0]?.id ?? "",
     description: "",
     purchaseDate: "",
     purchasePrice: "",
@@ -81,45 +74,49 @@ export default function AssetManagerAssetsPage() {
     return <div>Loading...</div>;
   }
 
-  const filteredAssets = assets.filter((asset) => {
-    const matchesSearch =
-      asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      asset.serialNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || asset.status === statusFilter;
-    const matchesCategory =
-      categoryFilter === "all" || asset.category === categoryFilter;
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
+  const filteredAssets = useMemo(() => {
+    const list = assetsData || [];
+    return list.filter((asset) => {
+      const matchesSearch =
+        (asset.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (asset.serialNumber || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (asset.barcode || "").toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || asset.status === statusFilter;
+      const matchesCategory =
+        categoryFilter === "all" || asset.categoryId === categoryFilter;
+      return matchesSearch && matchesStatus && matchesCategory;
+    });
+  }, [assetsData, searchQuery, statusFilter, categoryFilter]);
 
   const handleAddAsset = () => {
-    const now = new Date().toISOString();
-    const created: Asset = {
-      id: crypto.randomUUID(),
-      name: newAsset.name,
-      code: `AST-${String(assets.length + 1).padStart(3, "0")}`,
-      categoryId: newAsset.categoryId,
-      storeId: newAsset.storeId || stores[0]?.id || "1",
-      status: "AVAILABLE",
-      purchaseDate: newAsset.purchaseDate || now,
-      purchasePrice: Number.parseFloat(newAsset.purchasePrice || "0"),
-      currentValue: Number.parseFloat(newAsset.purchasePrice || "0"),
-      description: newAsset.description || undefined,
-      serialNumber: newAsset.serialNumber || undefined,
-      createdAt: now,
-      updatedAt: now,
-    };
-    setAssets((prev) => [created, ...prev]);
-    setIsAddDialogOpen(false);
-    setNewAsset({
-      name: "",
-      serialNumber: "",
-      categoryId: mockCategories[0]?.id ?? "1",
-      description: "",
-      purchaseDate: "",
-      purchasePrice: "",
-      storeId: "",
-    });
+    createAsset(
+      {
+        name: newAsset.name,
+        serialNumber: newAsset.serialNumber || undefined,
+  categoryId: newAsset.categoryId || categories[0]?.id || "",
+        storeId: newAsset.storeId || undefined,
+        purchaseDate: newAsset.purchaseDate || undefined,
+        purchasePrice: newAsset.purchasePrice
+          ? Number.parseFloat(newAsset.purchasePrice)
+          : undefined,
+        description: newAsset.description || undefined,
+        status: "AVAILABLE",
+      },
+      {
+        onSuccess: () => {
+          setIsAddDialogOpen(false);
+          setNewAsset({
+            name: "",
+            serialNumber: "",
+            categoryId: categories[0]?.id ?? "",
+            description: "",
+            purchaseDate: "",
+            purchasePrice: "",
+            storeId: "",
+          });
+        },
+      }
+    );
   };
 
   return (
@@ -172,7 +169,7 @@ export default function AssetManagerAssetsPage() {
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {mockCategories.map((c) => (
+                        {categories.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.name}
                           </SelectItem>
@@ -235,7 +232,7 @@ export default function AssetManagerAssetsPage() {
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleAddAsset} disabled={!newAsset.name.trim()}>
+                <Button onClick={handleAddAsset} disabled={!newAsset.name.trim() || isCreating}>
                   Add Asset
                 </Button>
               </DialogFooter>
@@ -279,14 +276,11 @@ export default function AssetManagerAssetsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="IT_EQUIPMENT">IT Equipment</SelectItem>
-                  <SelectItem value="FURNITURE">Furniture</SelectItem>
-                  <SelectItem value="VEHICLE">Vehicle</SelectItem>
-                  <SelectItem value="MACHINERY">Machinery</SelectItem>
-                  <SelectItem value="OFFICE_SUPPLIES">Office Supplies</SelectItem>
-                  <SelectItem value="SECURITY_EQUIPMENT">
-                    Security Equipment
-                  </SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -301,7 +295,7 @@ export default function AssetManagerAssetsPage() {
                   <TableHead>Serial Number</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Condition</TableHead>
+                  <TableHead>Barcode</TableHead>
                   <TableHead>Value</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -323,17 +317,23 @@ export default function AssetManagerAssetsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-sm">
-                      {asset.serialNumber}
+                      {asset.serialNumber || "—"}
                     </TableCell>
                     <TableCell>
-                      {mockCategories.find((c) => c.id === asset.categoryId)?.name ?? '—'}
+                      {asset.category?.name ||
+                        categories.find((c) => c.id === asset.categoryId)?.name ||
+                        "—"}
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={asset.status} />
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">—</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {asset.barcode || asset.qrCode || "—"}
+                    </TableCell>
                     <TableCell>
-                      ${asset.currentValue.toLocaleString()}
+                      {asset.purchasePrice
+                        ? `$${Number(asset.purchasePrice).toLocaleString()}`
+                        : "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -390,31 +390,41 @@ export default function AssetManagerAssetsPage() {
                   <StatusBadge status={selectedAsset.status} />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Condition</p>
-                  <StatusBadge status={selectedAsset.condition} type="condition" />
+                  <p className="text-sm text-muted-foreground">Barcode</p>
+                  <p className="font-medium">
+                    {selectedAsset.barcode || selectedAsset.qrCode || "—"}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Category</p>
                   <p className="font-medium capitalize">
-                    {selectedAsset.category.toLowerCase().replace("_", " ")}
+                    {selectedAsset.category?.name ||
+                      categories.find((c) => c.id === selectedAsset.categoryId)?.name ||
+                      "—"}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Purchase Date</p>
                   <p className="font-medium">
-                    {new Date(selectedAsset.purchaseDate).toLocaleDateString()}
+                    {selectedAsset.purchaseDate
+                      ? new Date(selectedAsset.purchaseDate).toLocaleDateString()
+                      : "—"}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Purchase Price</p>
                   <p className="font-medium">
-                    ${selectedAsset.purchasePrice.toLocaleString()}
+                    {selectedAsset.purchasePrice
+                      ? `$${Number(selectedAsset.purchasePrice).toLocaleString()}`
+                      : "—"}
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Current Value</p>
+                  <p className="text-sm text-muted-foreground">Store</p>
                   <p className="font-medium">
-                    ${selectedAsset.currentValue.toLocaleString()}
+                    {selectedAsset.store?.name ||
+                      stores.find((s) => s.id === selectedAsset.storeId)?.name ||
+                      "—"}
                   </p>
                 </div>
               </div>

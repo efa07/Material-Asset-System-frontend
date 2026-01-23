@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -8,7 +16,7 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 @Controller('api/v1/notifications')
 export class NotificationsController {
   constructor(private readonly service: NotificationsService) {}
-  
+
   @Post()
   @ApiOperation({ summary: 'Create notification' })
   create(@Body() createDto: CreateNotificationDto) {

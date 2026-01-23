@@ -5,7 +5,7 @@ import { UpdateAssetAssignmentDto } from './dto/update-asset-assignment.dto';
 
 @Injectable()
 export class AssetAssignmentsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   create(createDto: CreateAssetAssignmentDto) {
     const { dueDate, ...rest } = createDto;
@@ -17,7 +17,7 @@ export class AssetAssignmentsService {
       include: {
         asset: true,
         user: true,
-      }
+      },
     });
   }
 
@@ -26,7 +26,7 @@ export class AssetAssignmentsService {
       include: {
         asset: true,
         user: true,
-      }
+      },
     });
   }
 
@@ -36,7 +36,7 @@ export class AssetAssignmentsService {
       include: {
         asset: true,
         user: true,
-      }
+      },
     });
   }
 
@@ -51,7 +51,7 @@ export class AssetAssignmentsService {
       include: {
         asset: true,
         user: true,
-      }
+      },
     });
   }
 

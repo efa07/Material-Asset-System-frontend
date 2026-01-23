@@ -1,29 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { MockDbService } from '../common/mock-db.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private mockDb: MockDbService) { }
+  constructor(private prisma: PrismaService) {}
 
   create(createUserDto: CreateUserDto) {
-    return this.mockDb.create('users', createUserDto);
+    return this.prisma.user.create({
+      data: createUserDto,
+    });
   }
 
   findAll() {
-    return this.mockDb.findAll('users');
+    return this.prisma.user.findMany({
+      include: {
+        role: true,
+      },
+    });
   }
 
   findOne(id: string) {
-    return this.mockDb.findOne('users', id);
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        role: true,
+      },
+    });
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
-    return this.mockDb.update('users', id, updateUserDto);
+    return this.prisma.user.update({
+      where: { id },
+      data: updateUserDto,
+    });
   }
 
   remove(id: string) {
-    return this.mockDb.remove('users', id);
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 }

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AssetAssignmentsService } from './asset-assignments.service';
 import { CreateAssetAssignmentDto } from './dto/create-asset-assignment.dto';
@@ -8,7 +16,7 @@ import { UpdateAssetAssignmentDto } from './dto/update-asset-assignment.dto';
 @Controller('api/v1/asset-assignments')
 export class AssetAssignmentsController {
   constructor(private readonly service: AssetAssignmentsService) {}
-  
+
   @Post()
   @ApiOperation({ summary: 'Create assignment' })
   create(@Body() createDto: CreateAssetAssignmentDto) {

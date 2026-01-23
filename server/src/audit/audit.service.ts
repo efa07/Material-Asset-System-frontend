@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { MockDbService } from '../common/mock-db.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuditService {
-  constructor(private mockDb: MockDbService) { }
+  constructor(private prisma: PrismaService) {}
 
   findAll() {
-    return this.mockDb.findAll('auditLogs');
+    return this.prisma.auditLog.findMany({
+      orderBy: { timestamp: 'desc' },
+      include: { user: true },
+    });
   }
 }

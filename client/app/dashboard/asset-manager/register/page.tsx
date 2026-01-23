@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { PackagePlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { PageHeader } from '@/components/dashboard/page-header';
 import { Button } from '@/components/ui/button';
@@ -10,11 +11,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { mockCategories, mockStores } from '@/lib/mock-data';
+import { useCategories, useStores } from '@/hooks/useQueries';
+import { useCreateAsset } from '@/hooks/useMutations';
 
 export default function AssetRegisterPage() {
-  const [categoryId, setCategoryId] = useState(mockCategories[0]?.id ?? '1');
-  const [storeId, setStoreId] = useState(mockStores[0]?.id ?? '1');
+  const router = useRouter();
+  const { data: categories = [] } = useCategories();
+  const { data: stores = [] } = useStores();
+  const { mutate: createAsset, isPending } = useCreateAsset();
+
+  const [categoryId, setCategoryId] = useState<string>('');
+  const [storeId, setStoreId] = useState<string>('');
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
@@ -23,32 +30,60 @@ export default function AssetRegisterPage() {
   const [description, setDescription] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
+  // Set default category/store when loaded if not set (optional, good UX)
+  useMemo(() => {
+    if (!categoryId && categories.length > 0) setCategoryId(categories[0].id);
+  }, [categories, categoryId]);
+
+  useMemo(() => {
+    if (!storeId && stores.length > 0) setStoreId(stores[0].id);
+  }, [stores, storeId]);
+
   const canSubmit = useMemo(() => {
     return name.trim().length > 2 && code.trim().length > 2 && categoryId && storeId;
   }, [name, code, categoryId, storeId]);
+
+  const handleSubmit = () => {
+    createAsset({
+        name,
+        barcode: code, // Map code to barcode
+        categoryId,
+        storeId,
+        serialNumber,
+        purchaseDate,
+        purchasePrice: purchasePrice ? parseFloat(purchasePrice) : undefined,
+        description,
+        status: 'AVAILABLE'
+    }, {
+        onSuccess: () => {
+             setSubmitted(true);
+             setTimeout(() => {
+                 setSubmitted(false);
+                 router.push('/dashboard/asset-manager/assets');
+             }, 1500);
+        }
+    });
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Register Asset"
-        description="Create an asset record (mock form — OIDC + backend-ready)"
+        description="Create an asset record"
       >
         <Button
-          onClick={() => {
-            setSubmitted(true);
-            setTimeout(() => setSubmitted(false), 2500);
-          }}
-          disabled={!canSubmit}
+          onClick={handleSubmit}
+          disabled={!canSubmit || isPending}
         >
           <PackagePlus className="mr-2 h-4 w-4" />
-          Register
+          {isPending ? 'Registering...' : 'Register'}
         </Button>
       </PageHeader>
 
       {submitted && (
         <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm">
-          <span className="font-medium text-emerald-500">Asset registered (mock).</span>{' '}
-          This will be persisted once the NestJS + Keycloak backend is connected.
+          <span className="font-medium text-emerald-500">Asset registered successfully.</span>{' '}
+          Redirecting...
         </div>
       )}
 
@@ -80,7 +115,7 @@ export default function AssetRegisterPage() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockCategories.map((c) => (
+                    {categories.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>
@@ -95,7 +130,7 @@ export default function AssetRegisterPage() {
                     <SelectValue placeholder="Select store" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockStores.map((s) => (
+                    {stores.map((s) => (
                       <SelectItem key={s.id} value={s.id}>
                         {s.name}
                       </SelectItem>
@@ -133,11 +168,11 @@ export default function AssetRegisterPage() {
             <div className="grid gap-2 rounded-lg border border-border/50 bg-background/50 p-3">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Category</span>
-                <span className="font-medium">{mockCategories.find((c) => c.id === categoryId)?.name ?? '—'}</span>
+                <span className="font-medium">{categories.find((c) => c.id === categoryId)?.name ?? '—'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Store</span>
-                <span className="font-medium">{mockStores.find((s) => s.id === storeId)?.name ?? '—'}</span>
+                <span className="font-medium">{stores.find((s) => s.id === storeId)?.name ?? '—'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Serial</span>

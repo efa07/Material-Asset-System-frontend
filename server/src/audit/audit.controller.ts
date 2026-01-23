@@ -6,7 +6,7 @@ import { AuditService } from './audit.service';
 @Controller('api/v1/audit')
 export class AuditController {
   constructor(private readonly service: AuditService) {}
-  
+
   @Get()
   findAll() {
     return this.service.findAll();

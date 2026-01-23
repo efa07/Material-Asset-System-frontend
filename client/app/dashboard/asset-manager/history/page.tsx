@@ -7,40 +7,45 @@ import { PageHeader } from '@/components/dashboard/page-header';
 import { Timeline } from '@/components/dashboard/timeline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { mockAssetHistory, mockAssets } from '@/lib/mock-data';
+import { useAuditLogs, useAssets } from '@/hooks/useQueries';
+import type { Asset, AuditLog } from '@/types';
 
 export default function AssetHistoryPage() {
+  const { data: auditLogs = [], isLoading } = useAuditLogs();
+  const { data: assets = [] } = useAssets();
   const [q, setQ] = useState('');
 
   const items = useMemo(() => {
     const s = q.trim().toLowerCase();
-    const filtered = !s
-      ? mockAssetHistory
-      : mockAssetHistory.filter((h) => {
-          const asset = mockAssets.find((a) => a.id === h.assetId);
-          return (
-            h.action.toLowerCase().includes(s) ||
-            h.details.toLowerCase().includes(s) ||
-            asset?.name.toLowerCase().includes(s) ||
-            asset?.code.toLowerCase().includes(s)
-          );
-        });
+    const filtered = (auditLogs || []).filter((log: AuditLog) => {
+      const asset = assets.find((a: Asset) => a.id === log.entityId);
+      const details = typeof log.details === 'string' ? log.details : JSON.stringify(log.details || {});
+      return (
+        log.entity.toLowerCase().includes('asset') &&
+        (!s ||
+          log.action.toLowerCase().includes(s) ||
+          details.toLowerCase().includes(s) ||
+          asset?.name.toLowerCase().includes(s))
+      );
+    });
 
-    return filtered
-      .slice(0, 25)
-      .map((h) => {
-        const asset = mockAssets.find((a) => a.id === h.assetId);
-        return {
-          id: h.id,
-          title: `${asset?.name ?? 'Unknown Asset'} • ${h.action.replace(/_/g, ' ')}`,
-          description: h.details,
-          timestamp: h.timestamp,
-          icon: <Package className="h-3 w-3" />,
-          status:
-            h.action.includes('REJECT') ? 'error' : h.action.includes('MAINTENANCE') ? 'warning' : 'info',
-        };
-      });
-  }, [q]);
+    return filtered.slice(0, 25).map((log: AuditLog) => {
+      const asset = assets.find((a: Asset) => a.id === log.entityId);
+      const details = typeof log.details === 'string' ? log.details : JSON.stringify(log.details || {});
+      return {
+        id: log.id,
+        title: `${asset?.name ?? 'Unknown Asset'} • ${log.action.replace(/_/g, ' ')}`,
+        description: details,
+        timestamp: log.timestamp,
+        icon: <Package className="h-3 w-3" />,
+        status: log.action.includes('DELETE') ? 'error' : log.action.includes('UPDATE') ? 'warning' : 'info',
+      };
+    });
+  }, [q, auditLogs, assets]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">

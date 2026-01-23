@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Search, Archive, MoreHorizontal, Package } from 'lucide-react';
+import { Plus, Search, Archive, MoreHorizontal, Package, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -26,21 +25,54 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { PageHeader } from '@/components/dashboard/page-header';
-import { mockShelves, mockStores } from '@/lib/mock-data';
+import { useShelves, useStores } from '@/hooks/useQueries';
+import { useCreateShelf } from '@/hooks/useMutations';
 
 export default function ShelvesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStore, setSelectedStore] = useState<string>('all');
+  const [newShelf, setNewShelf] = useState({
+    name: '',
+    description: '',
+    storeId: '',
+  });
 
-  const filteredShelves = mockShelves.filter((shelf) => {
+  const { data: shelves = [], isLoading: isLoadingShelves } = useShelves();
+  const { data: stores = [], isLoading: isLoadingStores } = useStores();
+  const createShelf = useCreateShelf();
+
+  const handleCreateShelf = () => {
+    if (!newShelf.name || !newShelf.storeId) return;
+    
+    createShelf.mutate({
+      name: newShelf.name,
+      description: newShelf.description,
+      storeId: newShelf.storeId,
+    }, {
+      onSuccess: () => {
+        setIsDialogOpen(false);
+        setNewShelf({ name: '', description: '', storeId: '' });
+      },
+    });
+  };
+
+  const filteredShelves = shelves.filter((shelf) => {
     const matchesSearch =
-      shelf.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      shelf.code.toLowerCase().includes(searchQuery.toLowerCase());
+      shelf.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStore = selectedStore === 'all' || shelf.storeId === selectedStore;
     return matchesSearch && matchesStore;
   });
+
+  if (isLoadingShelves || isLoadingStores) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -65,12 +97,15 @@ export default function ShelvesPage() {
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="store">Store</Label>
-                <Select>
+                <Select 
+                  value={newShelf.storeId} 
+                  onValueChange={(value) => setNewShelf({...newShelf, storeId: value})}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select store" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockStores.map((store) => (
+                    {stores.map((store) => (
                       <SelectItem key={store.id} value={store.id}>
                         {store.name}
                       </SelectItem>
@@ -80,22 +115,31 @@ export default function ShelvesPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="shelf-name">Shelf Name</Label>
-                <Input id="shelf-name" placeholder="e.g., Shelf A1" />
+                <Input 
+                  id="shelf-name" 
+                  placeholder="e.g., Shelf A1" 
+                  value={newShelf.name}
+                  onChange={(e) => setNewShelf({...newShelf, name: e.target.value})}
+                />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="shelf-code">Shelf Code</Label>
-                <Input id="shelf-code" placeholder="e.g., MWH-A1" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="capacity">Capacity (units)</Label>
-                <Input id="capacity" type="number" placeholder="Enter capacity" />
+                <Label htmlFor="description">Description</Label>
+                <Textarea 
+                  id="description" 
+                  placeholder="Optional description" 
+                  value={newShelf.description}
+                  onChange={(e) => setNewShelf({...newShelf, description: e.target.value})}
+                />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => setIsDialogOpen(false)}>Create Shelf</Button>
+              <Button onClick={handleCreateShelf} disabled={createShelf.isPending}>
+                {createShelf.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Create Shelf
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -108,7 +152,7 @@ export default function ShelvesPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search shelves by name or code..."
+                  placeholder="Search shelves by name..."
                   className="pl-9"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -120,7 +164,7 @@ export default function ShelvesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Stores</SelectItem>
-                  {mockStores.map((store) => (
+                  {stores.map((store) => (
                     <SelectItem key={store.id} value={store.id}>
                       {store.name}
                     </SelectItem>
@@ -132,7 +176,7 @@ export default function ShelvesPage() {
         </Card>
 
         {/* Shelves by Store */}
-        {mockStores.map((store) => {
+        {stores.map((store) => {
           const storeShelves = filteredShelves.filter((s) => s.storeId === store.id);
           if (selectedStore !== 'all' && selectedStore !== store.id) return null;
           if (storeShelves.length === 0 && searchQuery) return null;
@@ -152,32 +196,23 @@ export default function ShelvesPage() {
                 {storeShelves.length > 0 ? (
                   <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                     {storeShelves.map((shelf) => {
-                      const occupancy = Math.round((shelf.currentOccupancy / shelf.capacity) * 100);
-                      let statusColor = 'bg-emerald-500';
-                      if (occupancy > 90) statusColor = 'bg-red-500';
-                      else if (occupancy > 70) statusColor = 'bg-amber-500';
-
                       return (
                         <div
                           key={shelf.id}
                           className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/30 transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`h-10 w-10 rounded-lg ${statusColor}/20 flex items-center justify-center`}>
-                              <Archive className={`h-5 w-5 ${statusColor.replace('bg-', 'text-')}`} />
+                            <div className={`h-10 w-10 rounded-lg bg-emerald-500/20 flex items-center justify-center`}>
+                              <Archive className={`h-5 w-5 text-emerald-500`} />
                             </div>
                             <div>
                               <p className="font-medium text-sm">{shelf.name}</p>
-                              <p className="text-xs text-muted-foreground font-mono">{shelf.code}</p>
+                              {shelf.description && (
+                                <p className="text-xs text-muted-foreground truncate max-w-[150px]">{shelf.description}</p>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <div className="text-right">
-                              <p className="text-sm font-medium">{occupancy}%</p>
-                              <p className="text-xs text-muted-foreground">
-                                {shelf.currentOccupancy}/{shelf.capacity}
-                              </p>
-                            </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-8 w-8">

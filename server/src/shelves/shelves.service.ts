@@ -1,29 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { MockDbService } from '../common/mock-db.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateShelfDto } from './dto/create-shelf.dto';
 import { UpdateShelfDto } from './dto/update-shelf.dto';
 
 @Injectable()
 export class ShelvesService {
-    constructor(private mockDb: MockDbService) { }
+  constructor(private prisma: PrismaService) {}
 
-    create(createShelfDto: CreateShelfDto) {
-        return this.mockDb.create('shelves', createShelfDto);
-    }
+  create(createShelfDto: CreateShelfDto) {
+    return this.prisma.shelf.create({
+      data: createShelfDto,
+    });
+  }
 
-    findAll() {
-        return this.mockDb.findAll('shelves');
-    }
+  findAll() {
+    return this.prisma.shelf.findMany({
+      include: {
+        store: true,
+      },
+    });
+  }
 
-    findOne(id: string) {
-        return this.mockDb.findOne('shelves', id);
-    }
+  findOne(id: string) {
+    return this.prisma.shelf.findUnique({
+      where: { id },
+      include: {
+        store: true,
+      },
+    });
+  }
 
-    update(id: string, updateShelfDto: UpdateShelfDto) {
-        return this.mockDb.update('shelves', id, updateShelfDto);
-    }
+  update(id: string, updateShelfDto: UpdateShelfDto) {
+    return this.prisma.shelf.update({
+      where: { id },
+      data: updateShelfDto,
+    });
+  }
 
-    remove(id: string) {
-        return this.mockDb.remove('shelves', id);
-    }
+  remove(id: string) {
+    return this.prisma.shelf.delete({
+      where: { id },
+    });
+  }
 }

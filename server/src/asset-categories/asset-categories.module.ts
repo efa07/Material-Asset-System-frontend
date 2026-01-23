@@ -3,7 +3,7 @@ import { AssetCategoriesController } from './asset-categories.controller';
 import { AssetCategoriesService } from './asset-categories.service';
 
 @Module({
-    controllers: [AssetCategoriesController],
-    providers: [AssetCategoriesService],
+  controllers: [AssetCategoriesController],
+  providers: [AssetCategoriesService],
 })
-export class AssetCategoriesModule { }
+export class AssetCategoriesModule {}

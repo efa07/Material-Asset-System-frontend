@@ -40,11 +40,12 @@ import {
   Calendar,
 } from "lucide-react";
 import type { Asset } from "@/types";
-import { mockAssets, mockStores } from "@/lib/mock-data";
+import { useAssets, useStores } from "@/hooks/useQueries";
 
 export default function AuditorAssetsPage() {
-  const assets = mockAssets;
-  const stores = mockStores;
+  const { data: assets = [] } = useAssets();
+  const { data: stores = [] } = useStores();
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [storeFilter, setStoreFilter] = useState<string>("all");
@@ -219,7 +220,7 @@ export default function AuditorAssetsPage() {
                       </TableCell>
                       <TableCell>{getStoreName(asset.storeId)}</TableCell>
                       <TableCell className="capitalize">
-                        {asset.category.toLowerCase().replace("_", " ")}
+                        {asset.category?.name || 'Unknown'}
                       </TableCell>
                       <TableCell>
                         <StatusBadge status={asset.status} />

@@ -29,23 +29,25 @@ import {
   Calendar,
   DollarSign,
 } from "lucide-react";
-import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
+import { useMaintenanceTasks, useAssets } from '@/hooks/useQueries';
 
 export default function TechnicianHistoryPage() {
+  const { data: tasks = [] } = useMaintenanceTasks();
+  const { data: assets = [] } = useAssets();
   const [searchQuery, setSearchQuery] = useState("");
   const [monthFilter, setMonthFilter] = useState<string>("all");
 
-  const completedTasks = mockMaintenanceTasks.filter((m) => m.status === "COMPLETED");
+  const completedTasks = tasks.filter((m) => m.status === "COMPLETED");
 
   const filteredTasks = completedTasks.filter((task) => {
-    const asset = mockAssets.find((a) => a.id === task.assetId);
+    const asset = assets.find((a) => a.id === task.assetId);
     const matchesSearch =
       asset?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.description.toLowerCase().includes(searchQuery.toLowerCase());
+      (task.description || '').toLowerCase().includes(searchQuery.toLowerCase());
 
     if (monthFilter === "all") return matchesSearch;
 
-    const taskDate = new Date(task.completedDate || task.scheduledDate);
+    const taskDate = new Date(task.completedDate || task.scheduledDate || task.maintenanceDate || new Date());
     const filterDate = new Date(monthFilter);
     return (
       matchesSearch &&
@@ -57,22 +59,22 @@ export default function TechnicianHistoryPage() {
   const totalCost = 0;
 
   const getAssetName = (assetId: string) => {
-    const asset = mockAssets.find((a) => a.id === assetId);
+    const asset = assets.find((a) => a.id === assetId);
     return asset?.name || "Unknown Asset";
   };
 
   const timelineItems = filteredTasks.slice(0, 10).map((task) => ({
     id: task.id,
     title: getAssetName(task.assetId),
-    description: task.description,
-    timestamp: new Date(task.scheduledDate).toISOString(),
+    description: task.description || '',
+    timestamp: new Date(task.scheduledDate || task.maintenanceDate || new Date()).toISOString(),
     status: "success" as const,
     icon: <CheckCircle className="h-3 w-3" />,
   }));
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Work History" description="View completed maintenance tasks (mock data)" />
+      <PageHeader title="Work History" description="View completed maintenance tasks" />
 
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">

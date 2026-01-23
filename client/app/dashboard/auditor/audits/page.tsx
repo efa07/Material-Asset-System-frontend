@@ -45,10 +45,11 @@ import {
   Calendar,
   AlertTriangle,
 } from "lucide-react";
-import { mockStores } from "@/lib/mock-data";
+import { useStores } from '@/hooks/useQueries';
 
 export default function AuditorAuditsPage() {
-  const stores = mockStores;
+  const { data: stores = [] } = useStores();
+
   const auditRecords: Array<{
     id: string;
     storeId: string;
@@ -59,9 +60,9 @@ export default function AuditorAuditsPage() {
     discrepanciesFound?: number;
     findings?: string;
   }> = [
-    { id: "a1", storeId: stores[0]?.id ?? "1", type: "PERIODIC", auditDate: "2025-01-10", status: "COMPLETED", assetsAudited: 120, discrepanciesFound: 2, findings: "2 minor discrepancies resolved." },
-    { id: "a2", storeId: stores[1]?.id ?? "2", type: "COMPLIANCE", auditDate: "2025-01-18", status: "IN_PROGRESS", assetsAudited: 60, discrepanciesFound: 1, findings: "Ongoing." },
-    { id: "a3", storeId: stores[2]?.id ?? "3", type: "RANDOM", auditDate: "2025-02-05", status: "SCHEDULED" },
+    { id: "a1", storeId: "1", type: "PERIODIC", auditDate: "2025-01-10", status: "COMPLETED", assetsAudited: 120, discrepanciesFound: 2, findings: "2 minor discrepancies resolved." },
+    { id: "a2", storeId: "2", type: "COMPLIANCE", auditDate: "2025-01-18", status: "IN_PROGRESS", assetsAudited: 60, discrepanciesFound: 1, findings: "Ongoing." },
+    { id: "a3", storeId: "3", type: "RANDOM", auditDate: "2025-02-05", status: "SCHEDULED" },
   ];
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -120,8 +121,8 @@ export default function AuditorAuditsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Audit Management"
-        description="Schedule, conduct, and review audits (read-only mock)"
-        action={
+        description="Schedule, conduct, and review audits"
+      >
           <Dialog
             open={isNewAuditDialogOpen}
             onOpenChange={setIsNewAuditDialogOpen}
@@ -216,8 +217,7 @@ export default function AuditorAuditsPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        }
-      />
+      </PageHeader>
 
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="border-border/50 bg-card/50 backdrop-blur-sm">

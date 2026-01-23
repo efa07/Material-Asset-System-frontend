@@ -11,8 +11,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { mockCategories } from '@/lib/mock-data';
 import type { AssetCategory } from '@/types';
+import { useCategories } from '@/hooks/useQueries';
+import { useCreateAssetCategory } from '@/hooks/useMutations';
 
 const columns: Column<AssetCategory>[] = [
   {
@@ -46,7 +47,8 @@ const columns: Column<AssetCategory>[] = [
 ];
 
 export default function AssetCategoriesPage() {
-  const [categories, setCategories] = useState<AssetCategory[]>(mockCategories);
+  const { data: categories = [], isLoading } = useCategories();
+  const { mutate: createCategory, isPending } = useCreateAssetCategory();
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState({ name: '', description: '' });
@@ -54,8 +56,14 @@ export default function AssetCategoriesPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return categories;
-    return categories.filter((c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q));
+    return categories.filter((c) =>
+      c.name.toLowerCase().includes(q) || (c.description || '').toLowerCase().includes(q)
+    );
   }, [categories, search]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -102,15 +110,17 @@ export default function AssetCategoriesPage() {
               </Button>
               <Button
                 onClick={() => {
-                  const now = new Date().toISOString();
-                  setCategories((prev) => [
-                    { id: crypto.randomUUID(), name: draft.name.trim(), description: draft.description.trim(), createdAt: now },
-                    ...prev,
-                  ]);
-                  setDraft({ name: '', description: '' });
-                  setOpen(false);
+                  createCategory(
+                    { name: draft.name.trim(), description: draft.description.trim() || undefined },
+                    {
+                      onSuccess: () => {
+                        setDraft({ name: '', description: '' });
+                        setOpen(false);
+                      },
+                    }
+                  );
                 }}
-                disabled={!draft.name.trim()}
+                disabled={!draft.name.trim() || isPending}
               >
                 Create
               </Button>

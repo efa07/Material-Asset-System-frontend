@@ -17,11 +17,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
-import { useAssets, useMaintenanceTasks } from "@/hooks/useQueries";
+import { useAssets, useCategories, useMaintenanceTasks } from "@/hooks/useQueries";
 
 export default function AssetManagerDashboard() {
   const { user } = useAppStore();
   const { data: assets, isLoading: assetsLoading } = useAssets();
+  const { data: categories } = useCategories();
   const { data: maintenanceTasks, isLoading: maintenanceLoading } = useMaintenanceTasks();
 
   if (assetsLoading || maintenanceLoading) {
@@ -36,23 +37,35 @@ export default function AssetManagerDashboard() {
   const recentAssets = (assets || []).slice(0, 5);
   const recentMaintenance = (maintenanceTasks || []).slice(0, 5);
 
-  const assetsByCategory = (assets || []).reduce(
-    (acc, asset) => {
-      // use categoryId as a grouping key in this mock phase
-      acc[asset.categoryId] = (acc[asset.categoryId] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const assetsByCategory = (assets || []).reduce((acc, asset) => {
+    const name = asset.category?.name ||
+      categories?.find((c) => c.id === asset.categoryId)?.name ||
+      "Uncategorized";
+    acc[name] = (acc[name] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
-  const lifecycleTrend = [
-    { month: "Jan", onboarded: 24 },
-    { month: "Feb", onboarded: 28 },
-    { month: "Mar", onboarded: 32 },
-    { month: "Apr", onboarded: 30 },
-    { month: "May", onboarded: 36 },
-    { month: "Jun", onboarded: 40 },
-  ];
+  const lifecycleTrend = (() => {
+    const now = new Date();
+    const months = Array.from({ length: 6 }, (_, index) => {
+      const date = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
+      return {
+        key: `${date.getFullYear()}-${date.getMonth() + 1}`,
+        month: date.toLocaleString("default", { month: "short" }),
+        onboarded: 0,
+      };
+    });
+
+    (assets || []).forEach((asset) => {
+      if (!asset.createdAt) return;
+      const created = new Date(asset.createdAt);
+      const key = `${created.getFullYear()}-${created.getMonth() + 1}`;
+      const bucket = months.find((m) => m.key === key);
+      if (bucket) bucket.onboarded += 1;
+    });
+
+    return months.map(({ key, ...rest }) => rest);
+  })();
 
   return (
     <div className="space-y-6">
@@ -173,7 +186,9 @@ export default function AssetManagerDashboard() {
                     <div>
                       <p className="font-medium capitalize">{record.type}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(record.scheduledDate).toLocaleDateString()}
+                        {record.maintenanceDate
+                          ? new Date(record.maintenanceDate).toLocaleDateString()
+                          : "Unscheduled"}
                       </p>
                     </div>
                   </div>
@@ -196,13 +211,13 @@ export default function AssetManagerDashboard() {
             <div className="space-y-3">
               {Object.entries(assetsByCategory).map(([category, count]) => (
                 <div key={category} className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Category {category}</span>
+                  <span className="text-sm text-muted-foreground">{category}</span>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-24 rounded-full bg-muted">
                       <div
                         className="h-2 rounded-full bg-primary"
                         style={{
-                          width: `${(count / totalAssets) * 100}%`,
+                          width: `${totalAssets ? (count / totalAssets) * 100 : 0}%`,
                         }}
                       />
                     </div>
@@ -257,37 +272,37 @@ export default function AssetManagerDashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                  <span className="text-sm">Excellent</span>
+                  <span className="text-sm">Available</span>
                 </div>
                 <span className="font-medium">
-                  {(assets || []).filter((a: any) => a.condition === "EXCELLENT").length}
+                  {(assets || []).filter((a) => a.status === "AVAILABLE").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-blue-500" />
-                  <span className="text-sm">Good</span>
+                  <span className="text-sm">In Use</span>
                 </div>
                 <span className="font-medium">
-                  {(assets || []).filter((a: any) => a.condition === "GOOD").length}
+                  {(assets || []).filter((a) => a.status === "IN_USE").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-amber-500" />
-                  <span className="text-sm">Fair</span>
+                  <span className="text-sm">Maintenance</span>
                 </div>
                 <span className="font-medium">
-                  {(assets || []).filter((a: any) => a.condition === "FAIR").length}
+                  {(assets || []).filter((a) => a.status === "MAINTENANCE").length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-red-500" />
-                  <span className="text-sm">Poor</span>
+                  <span className="text-sm">Disposed</span>
                 </div>
                 <span className="font-medium">
-                  {(assets || []).filter((a: any) => a.condition === "POOR").length}
+                  {(assets || []).filter((a) => a.status === "DISPOSED").length}
                 </span>
               </div>
             </div>

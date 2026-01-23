@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { mockAssets } from "@/lib/mock-data";
+import { useAssets, useDisposals } from '@/hooks/useQueries';
 
 type DisposalRecord = {
   id: string;
@@ -24,35 +24,32 @@ type DisposalRecord = {
   estimatedValue?: number;
 };
 
-const seed: DisposalRecord[] = [
-  {
-    id: "d1",
-    assetId: "7",
-    method: "RECYCLING",
-    reason: "End-of-life replacement",
-    status: "COMPLETED",
-    createdAt: "2025-01-05T10:00:00Z",
-    estimatedValue: 0,
-  },
-  {
-    id: "d2",
-    assetId: "4",
-    method: "TRANSFER",
-    reason: "Move to external facility after maintenance",
-    status: "PENDING",
-    createdAt: "2025-01-16T09:20:00Z",
-    estimatedValue: 2800,
-  },
-];
+import { useCreateDisposal } from '@/hooks/useMutations';
 
 export default function DisposalsPage() {
-  const [records, setRecords] = useState<DisposalRecord[]>(seed);
+  const { data: assets = [] } = useAssets();
+  const { mutate: createDisposal } = useCreateDisposal();
+  const { data: dbDisposals = [] } = useDisposals();
+  
+  // Transform DB records to UI format
+  const records = useMemo(() => {
+      return dbDisposals.map((d: any) => ({
+          id: d.id,
+          assetId: d.assetId,
+          method: d.method as any,
+          reason: d.reason || '',
+          status: 'COMPLETED', // DB doesn't track status yet, assuming completed
+          createdAt: d.disposalDate || d.createdAt,
+          estimatedValue: Number(d.value) || 0
+      }));
+  }, [dbDisposals]);
+
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const [draft, setDraft] = useState({
-    assetId: mockAssets[0]?.id ?? "1",
+    assetId: "",
     method: "SALE" as DisposalRecord["method"],
     reason: "",
   });
@@ -60,22 +57,22 @@ export default function DisposalsPage() {
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return records.filter((r) => {
-      const asset = mockAssets.find((a) => a.id === r.assetId);
+      const asset = assets.find((a) => a.id === r.assetId);
       const matchesSearch = !q || asset?.name.toLowerCase().includes(q) || r.reason.toLowerCase().includes(q);
       const matchesStatus = statusFilter === "all" || r.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [records, searchQuery, statusFilter]);
+  }, [records, searchQuery, statusFilter, assets]);
 
   const pending = records.filter((r) => r.status === "PENDING").length;
   const approved = records.filter((r) => r.status === "APPROVED").length;
   const completed = records.filter((r) => r.status === "COMPLETED").length;
 
-  const getAssetName = (assetId: string) => mockAssets.find((a) => a.id === assetId)?.name ?? "Unknown Asset";
+  const getAssetName = (assetId: string) => assets.find((a) => a.id === assetId)?.name ?? "Unknown Asset";
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Asset Disposal" description="Manage disposal requests and approvals (mock)">
+      <PageHeader title="Asset Disposal" description="Manage disposal requests and approvals">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -96,9 +93,9 @@ export default function DisposalsPage() {
                     <SelectValue placeholder="Select asset" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockAssets.map((a) => (
+                    {assets.map((a) => (
                       <SelectItem key={a.id} value={a.id}>
-                        {a.name} ({a.code})
+                        {a.name} ({a.barcode || a.serialNumber || '—'})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -130,21 +127,19 @@ export default function DisposalsPage() {
               </Button>
               <Button
                 onClick={() => {
-                  const asset = mockAssets.find((a) => a.id === draft.assetId);
-                  setRecords((prev) => [
-                    {
-                      id: crypto.randomUUID(),
-                      assetId: draft.assetId,
-                      method: draft.method,
-                      reason: draft.reason,
-                      status: "PENDING",
-                      createdAt: new Date().toISOString(),
-                      estimatedValue: asset ? Math.round(asset.currentValue * 0.1) : undefined,
-                    },
-                    ...prev,
-                  ]);
-                  setDraft((d) => ({ ...d, reason: "" }));
-                  setOpen(false);
+                    const asset = assets.find((a) => a.id === draft.assetId);
+                    createDisposal({
+                        assetId: draft.assetId,
+                        method: draft.method,
+                        reason: draft.reason,
+                        disposalDate: new Date().toISOString(),
+            value: asset?.purchasePrice ? Math.round(Number(asset.purchasePrice) * 0.1) : undefined,
+                    }, {
+                        onSuccess: () => {
+                            setDraft((d) => ({ ...d, reason: "" }));
+                            setOpen(false);
+                        }
+                    });
                 }}
                 disabled={!draft.reason.trim()}
               >

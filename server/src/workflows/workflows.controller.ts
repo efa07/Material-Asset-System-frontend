@@ -6,7 +6,7 @@ import { WorkflowsService } from './workflows.service';
 @Controller('api/v1/workflows')
 export class WorkflowsController {
   constructor(private readonly service: WorkflowsService) {}
-  
+
   @Get()
   findAll() {
     return this.service.findAll();

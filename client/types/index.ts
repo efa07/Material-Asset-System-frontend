@@ -24,9 +24,9 @@ export type AssetStatus =
   | 'AVAILABLE'
   | 'IN_USE'
   | 'MAINTENANCE'
+  | 'RETIRED'
   | 'DISPOSED'
-  | 'TRANSFERRED'
-  | 'RESERVED';
+  | 'LOST';
 
 // Request Status
 export type RequestStatus =
@@ -41,27 +41,27 @@ export type MaintenanceStatus =
   | 'SCHEDULED'
   | 'IN_PROGRESS'
   | 'COMPLETED'
-  | 'CANCELLED'
-  | 'PENDING'; // Added PENDING
+  | 'CANCELLED';
 
 // Asset Category
 export interface AssetCategory {
   id: string;
   name: string;
-  description: string;
-  parentId?: string;
+  description?: string | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 // Store
 export interface Store {
   id: string;
   name: string;
-  location: string;
-  managerId: string;
-  capacity: number;
-  currentOccupancy: number;
+  location?: string | null;
+  description?: string | null;
+  isActive?: boolean;
+  shelves?: Shelf[];
   createdAt: string;
+  updatedAt?: string;
 }
 
 // Shelf
@@ -69,26 +69,33 @@ export interface Shelf {
   id: string;
   storeId: string;
   name: string;
-  code: string;
-  capacity: number;
-  currentOccupancy: number;
+  description?: string | null;
+  store?: Store;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Asset
 export interface Asset {
   id: string;
   name: string;
-  code: string;
   categoryId: string;
-  storeId: string;
+  category?: AssetCategory;
+  storeId?: string | null;
+  store?: Store;
   shelfId?: string;
+  shelf?: Shelf;
   status: AssetStatus;
-  purchaseDate: string;
-  purchasePrice: number;
-  currentValue: number;
-  assignedTo?: string;
+  barcode?: string | null;
+  qrCode?: string | null;
+  serialNumber?: string | null;
+  purchaseDate?: string | null;
+  purchasePrice?: number | null;
+  specifications?: Record<string, unknown> | null;
   description?: string;
-  serialNumber?: string;
+  code?: string;
+  currentValue?: number;
+  condition?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -123,32 +130,35 @@ export interface TransferRequest {
 export interface MaintenanceTask {
   id: string;
   assetId: string;
-  technicianId: string;
-  type: 'preventive' | 'corrective' | 'inspection' | 'EMERGENCY';
+  asset?: Asset;
+  type: string;
   status: MaintenanceStatus;
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
-  scheduledDate: string;
-  completedDate?: string;
-  startDate?: string; // Added startDate
-  notes?: string;
+  description?: string | null;
+  performedBy?: string | null;
+  maintenanceDate?: string | null;
+  nextScheduled?: string | null;
+  cost?: number | null;
   createdAt: string;
+  updatedAt?: string;
+  technicianId?: string;
+  priority?: 'low' | 'medium' | 'high' | 'critical';
+  scheduledDate?: string;
+  completedDate?: string;
+  startDate?: string;
+  notes?: string;
 }
 
 // Audit Log
 // Audit Log
 export interface AuditLog {
   id: string;
-  userId: string;
-  userName?: string;
-  userRole?: string;
+  userId?: string | null;
+  user?: User;
   action: string;
-  entityType: string;
-  entityId: string;
-  target?: string;
-  details: string;
-  status?: 'Success' | 'Warning' | 'Error';
-  ipAddress?: string;
+  entity: string;
+  entityId?: string | null;
+  details?: Record<string, unknown> | string | null;
+  ipAddress?: string | null;
   timestamp: string;
 }
 
@@ -158,8 +168,8 @@ export interface Notification {
   userId: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
+  type?: string | null;
+  isRead?: boolean;
   createdAt: string;
 }
 
@@ -214,4 +224,88 @@ export interface CreateAssignmentRequest {
   notes?: string;
   dueDate?: string;
   status?: 'PENDING';
+}
+
+export interface CreateAssetRequest {
+  name: string;
+  description?: string;
+  serialNumber?: string;
+  barcode?: string;
+  qrCode?: string;
+  status?: AssetStatus;
+  purchaseDate?: string;
+  purchasePrice?: number;
+  specifications?: any;
+  categoryId: string;
+  storeId?: string;
+  shelfId?: string;
+}
+
+export interface UpdateAssetRequest extends Partial<CreateAssetRequest> {
+  id: string;
+}
+
+export interface CreateAssetCategoryRequest {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateAssetCategoryRequest extends Partial<CreateAssetCategoryRequest> {
+  id: string;
+}
+
+export interface CreateAssetDisposalRequest {
+  assetId: string;
+  disposalDate?: string;
+  reason?: string;
+  method?: string;
+  value?: number;
+}
+
+export interface UpdateAssetDisposalRequest extends Partial<CreateAssetDisposalRequest> {
+  id: string;
+}
+
+export interface CreateAssetReturnRequest {
+  assetId: string;
+  returnDate?: string;
+  condition?: string;
+  notes?: string;
+}
+
+export interface UpdateAssetReturnRequest extends Partial<CreateAssetReturnRequest> {
+  id: string;
+}
+
+export interface CreateAssetTransferRequest {
+  assetId: string;
+  fromStoreId?: string;
+  toStoreId: string;
+  transferDate?: string;
+  reason?: string;
+  status?: string;
+}
+
+export interface UpdateAssetTransferRequest extends Partial<CreateAssetTransferRequest> {
+  id: string;
+}
+
+export interface CreateShelfRequest {
+  name: string;
+  description?: string;
+  storeId: string;
+}
+
+export interface UpdateShelfRequest extends Partial<CreateShelfRequest> {
+  id: string;
+}
+
+export interface UpdateMaintenanceRequest {
+  id: string;
+  status?: MaintenanceStatus;
+  notes?: string; // mapped to description? Or I should add notes to schema?
+                   // The form uses "notes". Schema has "description".
+                   // I should stick to description.
+  performedBy?: string;
+  // ... other fields
 }

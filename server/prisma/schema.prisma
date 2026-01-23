@@ -216,15 +216,23 @@ model AssetDisposal {
 // Maintenance & Performance
 // --------------------------------------
 
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
 model MaintenanceRecord {
   id              String   @id @default(uuid())
   assetId         String
   asset           Asset    @relation(fields: [assetId], references: [id])
-  maintenanceDate DateTime @default(now())
+  maintenanceDate DateTime @default(now()) // Scheduled or performed date
   type            String   // PREVENTIVE, CORRECTIVE
   description     String?
   cost            Decimal?
   performedBy     String? // Could be external vendor or internal user
+  status          MaintenanceStatus @default(SCHEDULED)
   nextScheduled   DateTime?
 
   createdAt DateTime @default(now())

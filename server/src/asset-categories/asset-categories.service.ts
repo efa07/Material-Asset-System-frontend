@@ -1,29 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { MockDbService } from '../common/mock-db.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateAssetCategoryDto } from './dto/create-asset-category.dto';
 import { UpdateAssetCategoryDto } from './dto/update-asset-category.dto';
 
 @Injectable()
 export class AssetCategoriesService {
-  constructor(private mockDb: MockDbService) {}
+  constructor(private prisma: PrismaService) {}
 
   create(createDto: CreateAssetCategoryDto) {
-    return this.mockDb.create('categories', createDto);
+    return this.prisma.assetCategory.create({
+      data: createDto,
+    });
   }
 
   findAll() {
-    return this.mockDb.findAll('categories');
+    return this.prisma.assetCategory.findMany({});
   }
 
   findOne(id: string) {
-    return this.mockDb.findOne('categories', id);
+    return this.prisma.assetCategory.findUnique({
+      where: { id },
+    });
   }
 
   update(id: string, updateDto: UpdateAssetCategoryDto) {
-    return this.mockDb.update('categories', id, updateDto);
+    return this.prisma.assetCategory.update({
+      where: { id },
+      data: updateDto,
+    });
   }
 
   remove(id: string) {
-    return this.mockDb.remove('categories', id);
+    return this.prisma.assetCategory.delete({
+      where: { id },
+    });
   }
 }

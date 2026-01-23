@@ -12,43 +12,47 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { mockAssets, mockMaintenanceTasks } from "@/lib/mock-data";
+import { useAssets, useMaintenanceTasks } from '@/hooks/useQueries';
+import { useCreateMaintenanceTask } from '@/hooks/useMutations';
 
 export default function MaintenancePage() {
-  const [records, setRecords] = useState(mockMaintenanceTasks);
+  const { data: records = [] } = useMaintenanceTasks();
+  const { data: assets = [] } = useAssets();
+  const { mutate: createMaintenanceTask } = useCreateMaintenanceTask();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
 
   const [draft, setDraft] = useState({
-    assetId: mockAssets[0]?.id ?? "1",
-    type: "preventive" as "preventive" | "corrective" | "inspection",
-    scheduledDate: new Date().toISOString().slice(0, 10),
+    assetId: "",
+    type: "PREVENTIVE" as "PREVENTIVE" | "CORRECTIVE" | "INSPECTION",
+    maintenanceDate: new Date().toISOString().slice(0, 10),
     description: "",
   });
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return records.filter((r) => {
-      const asset = mockAssets.find((a) => a.id === r.assetId);
+      const asset = assets.find((a) => a.id === r.assetId);
       const matchesSearch =
         !q ||
         asset?.name.toLowerCase().includes(q) ||
-        r.description.toLowerCase().includes(q);
+        (r.description || '').toLowerCase().includes(q);
       const matchesStatus = statusFilter === "all" || r.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [records, searchQuery, statusFilter]);
+  }, [records, searchQuery, statusFilter, assets]);
 
   const scheduledCount = records.filter((r) => r.status === "SCHEDULED").length;
   const inProgressCount = records.filter((r) => r.status === "IN_PROGRESS").length;
   const completedCount = records.filter((r) => r.status === "COMPLETED").length;
 
-  const getAssetName = (assetId: string) => mockAssets.find((a) => a.id === assetId)?.name ?? "Unknown Asset";
+  const getAssetName = (assetId: string) => assets.find((a) => a.id === assetId)?.name ?? "Unknown Asset";
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Maintenance Management" description="Schedule and track asset maintenance (mock)">
+      <PageHeader title="Maintenance Management" description="Schedule and track asset maintenance">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -69,9 +73,9 @@ export default function MaintenancePage() {
                     <SelectValue placeholder="Select asset" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockAssets.map((a) => (
+                    {assets.map((a) => (
                       <SelectItem key={a.id} value={a.id}>
-                        {a.name} ({a.code})
+                        {a.name} ({a.serialNumber})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -85,15 +89,15 @@ export default function MaintenancePage() {
                       <SelectValue placeholder="Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="preventive">Preventive</SelectItem>
-                      <SelectItem value="corrective">Corrective</SelectItem>
-                      <SelectItem value="inspection">Inspection</SelectItem>
+                      <SelectItem value="PREVENTIVE">Preventive</SelectItem>
+                      <SelectItem value="CORRECTIVE">Corrective</SelectItem>
+                      <SelectItem value="INSPECTION">Inspection</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label>Scheduled date</Label>
-                  <Input type="date" value={draft.scheduledDate} onChange={(e) => setDraft((d) => ({ ...d, scheduledDate: e.target.value }))} />
+                  <Label>Maintenance date</Label>
+                  <Input type="date" value={draft.maintenanceDate} onChange={(e) => setDraft((d) => ({ ...d, maintenanceDate: e.target.value }))} />
                 </div>
               </div>
               <div className="grid gap-2">
@@ -107,24 +111,23 @@ export default function MaintenancePage() {
               </Button>
               <Button
                 onClick={() => {
-                  setRecords((prev) => [
+                  createMaintenanceTask(
                     {
-                      id: crypto.randomUUID(),
                       assetId: draft.assetId,
-                      technicianId: "4",
                       type: draft.type,
                       status: "SCHEDULED",
-                      priority: "medium",
                       description: draft.description,
-                      scheduledDate: draft.scheduledDate,
-                      createdAt: new Date().toISOString(),
+                      maintenanceDate: new Date(draft.maintenanceDate).toISOString(),
                     },
-                    ...prev,
-                  ]);
-                  setDraft((d) => ({ ...d, description: "" }));
-                  setOpen(false);
+                    {
+                      onSuccess: () => {
+                        setDraft((d) => ({ ...d, description: "" }));
+                        setOpen(false);
+                      },
+                    }
+                  );
                 }}
-                disabled={!draft.description.trim()}
+                disabled={!draft.description.trim() || !draft.assetId}
               >
                 Create
               </Button>
@@ -208,7 +211,9 @@ export default function MaintenancePage() {
                 <div className="space-y-1">
                   <p className="font-medium">{getAssetName(r.assetId)}</p>
                   <p className="text-sm text-muted-foreground">{r.description}</p>
-                  <p className="text-xs text-muted-foreground">{r.type} • {new Date(r.scheduledDate).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {r.type} • {r.maintenanceDate ? new Date(r.maintenanceDate).toLocaleDateString() : '—'}
+                  </p>
                 </div>
                 <StatusBadge status={r.status} />
               </div>

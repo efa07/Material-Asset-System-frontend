@@ -8,8 +8,8 @@ import { DataTable, type Column } from '@/components/dashboard/data-table';
 import { StatusBadge } from '@/components/dashboard/status-badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { mockAssets } from '@/lib/mock-data';
 import type { Asset } from '@/types';
+import { useAssets } from '@/hooks/useQueries';
 
 const columns: Column<Asset>[] = [
   {
@@ -22,7 +22,9 @@ const columns: Column<Asset>[] = [
         </div>
         <div>
           <p className="font-medium">{a.name}</p>
-          <p className="text-xs text-muted-foreground">{a.code}</p>
+          <p className="text-xs text-muted-foreground">
+            {a.barcode || a.serialNumber || "—"}
+          </p>
         </div>
       </div>
     ),
@@ -36,7 +38,11 @@ const columns: Column<Asset>[] = [
   {
     key: 'store',
     header: 'Store',
-    cell: (a) => <span className="text-sm text-muted-foreground">{a.storeId}</span>,
+    cell: (a) => (
+      <span className="text-sm text-muted-foreground">
+        {a.store?.name || a.storeId || '—'}
+      </span>
+    ),
   },
   {
     key: 'updated',
@@ -47,17 +53,25 @@ const columns: Column<Asset>[] = [
 ];
 
 export default function AssetTrackingPage() {
+  const { data: assets = [], isLoading } = useAssets();
   const [q, setQ] = useState('');
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    if (!s) return mockAssets;
-    return mockAssets.filter((a) => a.name.toLowerCase().includes(s) || a.code.toLowerCase().includes(s));
-  }, [q]);
+    if (!s) return assets;
+    return assets.filter((a: Asset) =>
+      a.name.toLowerCase().includes(s) ||
+      (a.barcode || a.serialNumber || '').toLowerCase().includes(s)
+    );
+  }, [q, assets]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Status Tracking" description="Operational view of current asset states (mock dataset)" />
+      <PageHeader title="Status Tracking" description="Operational view of current asset states" />
 
       <Card>
         <CardContent className="p-4">
