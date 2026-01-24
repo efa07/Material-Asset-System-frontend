@@ -8,14 +8,41 @@ import { Prisma } from '@prisma/client';
 export class AssetDisposalsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createDto: CreateAssetDisposalDto) {
+  async create(createDto: CreateAssetDisposalDto) {
     const { disposalDate, value, ...rest } = createDto;
-    return this.prisma.assetDisposal.create({
-      data: {
-        ...rest,
-        disposalDate: disposalDate ? new Date(disposalDate) : undefined,
-        value: value ? new Prisma.Decimal(value) : undefined,
-      },
+
+    return this.prisma.$transaction(async (tx) => {
+      const disposal = await tx.assetDisposal.create({
+        data: {
+          ...rest,
+          disposalDate: disposalDate ? new Date(disposalDate) : undefined,
+          value: value ? new Prisma.Decimal(value) : undefined,
+        },
+      });
+
+      await tx.asset.update({
+        where: { id: rest.assetId },
+        data: {
+          status: 'DISPOSED',
+          storeId: null,
+          shelfId: null,
+          assignedToUserId: null,
+        },
+      });
+
+      // Close any active assignments
+      await tx.assetAssignment.updateMany({
+        where: {
+          assetId: rest.assetId,
+          status: 'ACTIVE',
+        },
+        data: {
+          status: 'RETURNED',
+          returnedAt: new Date(),
+        },
+      });
+
+      return disposal;
     });
   }
 

@@ -7,13 +7,46 @@ import { UpdateAssetTransferDto } from './dto/update-asset-transfer.dto';
 export class AssetTransfersService {
   constructor(private prisma: PrismaService) {}
 
-  create(createDto: CreateAssetTransferDto) {
+  async create(createDto: CreateAssetTransferDto) {
     const { transferDate, ...rest } = createDto;
-    return this.prisma.assetTransfer.create({
-      data: {
-        ...rest,
-        transferDate: transferDate ? new Date(transferDate) : undefined,
-      },
+
+    return this.prisma.$transaction(async (tx) => {
+      const transfer = await tx.assetTransfer.create({
+        data: {
+          ...rest,
+          transferDate: transferDate ? new Date(transferDate) : undefined,
+        },
+      });
+
+      // Only update the asset location if the transfer is COMPLETED
+      // If status is undefined, Prisma uses default "COMPLETED", so we treat undefined as COMPLETED too or check the result
+      const isCompleted = !rest.status || rest.status === 'COMPLETED';
+
+      if (createDto.toStoreId && isCompleted) {
+        await tx.asset.update({
+          where: { id: rest.assetId },
+          data: {
+            storeId: createDto.toStoreId,
+            shelfId: null, // Reset shelf as it's in a new store
+            status: 'AVAILABLE', 
+            assignedToUserId: null,
+          },
+        });
+
+        // Close any active assignments if moving to a store
+        await tx.assetAssignment.updateMany({
+          where: {
+            assetId: rest.assetId,
+            status: 'ACTIVE',
+          },
+          data: {
+            status: 'RETURNED',
+            returnedAt: new Date(),
+          },
+        });
+      }
+
+      return transfer;
     });
   }
 

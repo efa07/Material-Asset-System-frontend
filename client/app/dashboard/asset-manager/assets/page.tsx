@@ -152,7 +152,7 @@ export default function AssetManagerAssetsPage() {
         userId: assignmentData.userId,
         dueDate: assignmentData.dueDate || undefined,
         notes: assignmentData.notes || undefined,
-        status: "PENDING",
+        status: "ACTIVE",
       },
       {
         onSuccess: () => {
