@@ -70,4 +70,9 @@ export class CreateAssetDto {
   @IsUUID()
   @IsOptional()
   shelfId?: string;
+
+  @ApiProperty({ required: false })
+  @IsUUID()
+  @IsOptional()
+  assignedToUserId?: string;
 }

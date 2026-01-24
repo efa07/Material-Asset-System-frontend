@@ -29,6 +29,9 @@ import {
   RotateCcw,
   GitBranch,
   ScrollText,
+  Wrench,
+  Trash2,
+  FileBarChart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -55,6 +58,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   RotateCcw,
   GitBranch,
   ScrollText,
+  Wrench,
+  Trash2,
+  FileBarChart,
 };
 
 export function Sidebar() {

@@ -27,6 +27,7 @@ export class AssetsService {
         category: true,
         store: true,
         shelf: true,
+        assignedToUser: true,
       },
     });
   }
@@ -38,6 +39,7 @@ export class AssetsService {
         category: true,
         store: true,
         shelf: true,
+        assignedToUser: true,
       },
     });
   }

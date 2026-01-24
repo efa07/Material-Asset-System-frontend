@@ -18,30 +18,58 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { StatusBadge } from '@/components/dashboard/status-badge';
-import { mockAssignmentRequests, mockAssets } from '@/lib/mock-data';
-import { mockUsers } from '@/store/useAppStore';
-import type { AssignmentRequest } from '@/types';
+import { useAssignmentRequests, useAssets, useUsers } from '@/hooks/useQueries';
+import { useUpdateAssignment } from '@/hooks/useMutations';
+import type { Assignment, User as UserType, Asset } from '@/types';
 
 export default function AssignmentsPage() {
-  const [selectedRequest, setSelectedRequest] = useState<AssignmentRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<Assignment | null>(null);
   const [dialogType, setDialogType] = useState<'approve' | 'reject' | null>(null);
+  const [notes, setNotes] = useState('');
 
-  const pendingRequests = mockAssignmentRequests.filter((r) => r.status === 'PENDING');
-  const processedRequests = mockAssignmentRequests.filter((r) => r.status !== 'PENDING');
+  const { data: assignmentRequests = [], isLoading: requestsLoading } = useAssignmentRequests();
+  const { data: assets = [], isLoading: assetsLoading } = useAssets();
+  const { data: users = [], isLoading: usersLoading } = useUsers();
+  
+  const updateAssignment = useUpdateAssignment();
 
-  const handleAction = (request: AssignmentRequest, type: 'approve' | 'reject') => {
+  const pendingRequests = assignmentRequests.filter((r) => r.status === 'PENDING');
+  const processedRequests = assignmentRequests.filter((r) => r.status !== 'PENDING');
+
+  const handleAction = (request: Assignment, type: 'approve' | 'reject') => {
     setSelectedRequest(request);
     setDialogType(type);
+    setNotes('');
   };
 
   const closeDialog = () => {
     setSelectedRequest(null);
     setDialogType(null);
+    setNotes('');
   };
 
-  const renderRequestCard = (request: AssignmentRequest, showActions: boolean = false) => {
-    const asset = mockAssets.find((a) => a.id === request.assetId);
-    const requester = Object.values(mockUsers).find((u) => u.id === request.requesterId);
+  const confirmAction = () => {
+    if (!selectedRequest || !dialogType) return;
+
+    const status = dialogType === 'approve' ? 'APPROVED' : 'REJECTED';
+    
+    updateAssignment.mutate({
+      id: selectedRequest.id,
+      status,
+      // Pass notes if API supports it, assuming 'notes' or 'comments' field
+      notes: notes
+    }, {
+      onSuccess: () => {
+        closeDialog();
+      }
+    });
+  };
+
+  const renderRequestCard = (request: Assignment, showActions: boolean = false) => {
+    // Some API responses might include 'asset' and 'user' relation objects directly.
+    // If not, we look them up.
+    const asset = (request as any).asset || assets.find((a) => a.id === request.assetId);
+    const requester = (request as any).user || users.find((u) => u.id === (request as any).userId || u.id === (request as any).requesterId);
 
     return (
       <Card key={request.id} className="transition-all hover:shadow-md">
@@ -52,11 +80,11 @@ export default function AssignmentsPage() {
                 <User className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="font-medium text-sm">{requester?.name || 'Unknown User'}</p>
-                <p className="text-xs text-muted-foreground">{requester?.department}</p>
+                <p className="font-medium text-sm">{requester?.name || requester?.firstName || 'Unknown User'}</p>
+                <p className="text-xs text-muted-foreground">{requester?.department || requester?.email}</p>
               </div>
             </div>
-            <StatusBadge status={request.status} />
+            <StatusBadge status={request.status as any} />
           </div>
 
           <div className="space-y-2 mb-4">
@@ -66,18 +94,25 @@ export default function AssignmentsPage() {
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Code:</span>
-              <span className="font-mono text-xs">{asset?.code}</span>
+              <span className="font-mono text-xs">{asset?.code || asset?.barcode}</span>
             </div>
             <div className="text-sm">
               <span className="text-muted-foreground">Reason:</span>
-              <p className="text-foreground mt-1">{request.reason}</p>
+              <p className="text-foreground mt-1">{(request as any).reason || '-'}</p>
             </div>
+             {/* If processed, show notes/comments if available */}
+             {!showActions && (request as any).notes && (
+                <div className="text-sm mt-2 pt-2 border-t border-dashed">
+                  <span className="text-muted-foreground">Notes:</span>
+                  <p className="text-foreground mt-1 italic">{(request as any).notes}</p>
+                </div>
+             )}
           </div>
 
           <div className="flex items-center justify-between pt-3 border-t">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
-              {new Date(request.requestedAt).toLocaleDateString()}
+              {(request as any).createdAt || (request as any).assignedDate ? new Date((request as any).createdAt || (request as any).assignedDate).toLocaleDateString() : 'N/A'}
             </div>
             {showActions && (
               <div className="flex gap-2">
@@ -100,111 +135,81 @@ export default function AssignmentsPage() {
                 </Button>
               </div>
             )}
-            {!showActions && request.processedAt && (
-              <span className="text-xs text-muted-foreground">
-                Processed: {new Date(request.processedAt).toLocaleDateString()}
-              </span>
-            )}
           </div>
         </CardContent>
       </Card>
     );
   };
 
+  if (requestsLoading || assetsLoading || usersLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Assignment Approvals"
-        description="Review and process asset assignment requests"
+        title="Asset Requests"
+        description="Manage asset assignment and return requests"
       />
 
-      <Tabs defaultValue="pending" className="space-y-6">
+      <Tabs defaultValue="pending" className="w-full">
         <TabsList>
-          <TabsTrigger value="pending" className="relative">
-            Pending
-            {pendingRequests.length > 0 && (
-              <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                {pendingRequests.length}
-              </Badge>
-            )}
+          <TabsTrigger value="pending">
+            Pending <Badge variant="secondary" className="ml-2">{pendingRequests.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="processed">Processed</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="pending" className="space-y-4">
-          {pendingRequests.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {pendingRequests.map((request) => renderRequestCard(request, true))}
-            </div>
+        
+        <TabsContent value="pending" className="mt-4">
+          {pendingRequests.length === 0 ? (
+             <div className="text-center py-10 text-muted-foreground">No pending requests</div>
           ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Check className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                <p className="text-lg font-medium">All caught up!</p>
-                <p className="text-sm text-muted-foreground">
-                  No pending assignment requests to review
-                </p>
-              </CardContent>
-            </Card>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {pendingRequests.map((req) => renderRequestCard(req, true))}
+            </div>
           )}
         </TabsContent>
-
-        <TabsContent value="processed" className="space-y-4">
-          {processedRequests.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {processedRequests.map((request) => renderRequestCard(request, false))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-sm text-muted-foreground">No processed requests yet</p>
-              </CardContent>
-            </Card>
-          )}
+        
+        <TabsContent value="history" className="mt-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+             {processedRequests.map((req) => renderRequestCard(req, false))}
+          </div>
         </TabsContent>
       </Tabs>
 
-      {/* Approval/Rejection Dialog */}
-      <Dialog open={!!dialogType} onOpenChange={closeDialog}>
+      <Dialog open={!!selectedRequest} onOpenChange={() => closeDialog()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {dialogType === 'approve' ? 'Approve Request' : 'Reject Request'}
             </DialogTitle>
             <DialogDescription>
-              {dialogType === 'approve'
-                ? 'Are you sure you want to approve this assignment request?'
+              {dialogType === 'approve' 
+                ? 'Are you sure you want to approve this asset request?' 
                 : 'Please provide a reason for rejecting this request.'}
             </DialogDescription>
           </DialogHeader>
-          {selectedRequest && (
-            <div className="py-4">
-              <div className="p-3 rounded-lg bg-muted space-y-1">
-                <p className="text-sm font-medium">
-                  {mockAssets.find((a) => a.id === selectedRequest.assetId)?.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Requested by:{' '}
-                  {Object.values(mockUsers).find((u) => u.id === selectedRequest.requesterId)?.name}
-                </p>
-              </div>
-              {dialogType === 'reject' && (
-                <div className="mt-4 space-y-2">
-                  <Label>Rejection Reason</Label>
-                  <Textarea placeholder="Enter the reason for rejection..." />
-                </div>
-              )}
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder={dialogType === 'approve' ? "Optional notes..." : "Reason for rejection..."}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
             </div>
-          )}
+          </div>
+
           <DialogFooter>
-            <Button variant="outline" onClick={closeDialog}>
-              Cancel
-            </Button>
-            <Button
-              variant={dialogType === 'reject' ? 'destructive' : 'default'}
-              onClick={closeDialog}
+            <Button variant="outline" onClick={closeDialog}>Cancel</Button>
+            <Button 
+              variant={dialogType === 'reject' ? "destructive" : "default"}
+              onClick={confirmAction}
+              disabled={updateAssignment.isPending}
             >
-              {dialogType === 'approve' ? 'Approve' : 'Reject'}
+              {updateAssignment.isPending ? "Processing..." : (dialogType === 'approve' ? 'Approve' : 'Reject')}
             </Button>
           </DialogFooter>
         </DialogContent>

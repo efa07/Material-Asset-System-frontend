@@ -7,15 +7,16 @@ import { StatsCard } from '@/components/dashboard/stats-card';
 import { StatusBadge } from '@/components/dashboard/status-badge';
 import { Progress } from '@/components/ui/progress';
 import { AreaChartGradient } from '@/components/dashboard/area-chart-gradient';
-import { useStores, useAssets, useAssignmentRequests, useTransferRequests } from '@/hooks/useQueries';
+import { useStores, useAssets, useAssignmentRequests, useTransferRequests, useDashboardCharts } from '@/hooks/useQueries';
 
 export default function StoreManagerDashboard() {
   const { data: stores, isLoading: storesLoading } = useStores();
   const { data: assets, isLoading: assetsLoading } = useAssets();
   const { data: assignmentRequests, isLoading: assignmentsLoading } = useAssignmentRequests();
   const { data: transferRequests, isLoading: transfersLoading } = useTransferRequests();
-console.log(assets)
-  if (storesLoading || assetsLoading || assignmentsLoading || transfersLoading) {
+  const { data: charts, isLoading: chartsLoading } = useDashboardCharts();
+
+  if (storesLoading || assetsLoading || assignmentsLoading || transfersLoading || chartsLoading) {
     return <div>Loading...</div>;
   }
 
@@ -24,14 +25,7 @@ console.log(assets)
   const totalAssets = assets?.length || 0;
   const totalShelves = stores?.reduce((acc, store) => acc + (store.shelves?.length || 0), 0) || 0;
 
-  const throughputTrend = [
-    { month: 'Jan', throughput: 118 },
-    { month: 'Feb', throughput: 124 },
-    { month: 'Mar', throughput: 131 },
-    { month: 'Apr', throughput: 127 },
-    { month: 'May', throughput: 140 },
-    { month: 'Jun', throughput: 146 },
-  ];
+  const throughputTrend = charts?.assetsTrend || [];
 
   return (
     <div className="space-y-6">
@@ -82,22 +76,23 @@ console.log(assets)
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base font-medium">Store Capacity Details</CardTitle>
-            <CardDescription>Detailed breakdown by store</CardDescription>
+            <CardTitle className="text-base font-medium">Store Asset Distribution</CardTitle>
+            <CardDescription>Number of assets per store</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {(stores || []).map((store) => {
-              const occupancy = Math.round((store.currentOccupancy / store.capacity) * 100);
+               const assetsInStore = assets?.filter(a => a.storeId === store.id).length || 0;
+               const percentage = totalAssets > 0 ? Math.round((assetsInStore / totalAssets) * 100) : 0;
               return (
                 <div key={store.id} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium">{store.name}</span>
                     <span className="text-muted-foreground">
-                      {store.currentOccupancy} / {store.capacity}
+                      {assetsInStore} Assets
                     </span>
                   </div>
                   <Progress
-                    value={occupancy}
+                    value={percentage}
                     className="h-2"
                   />
                 </div>

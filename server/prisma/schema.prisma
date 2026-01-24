@@ -37,6 +37,10 @@ model User {
   requestedWorkflows Workflow[]        @relation("Requester")
   auditLogs         AuditLog[]
 
+  currentAssets     Asset[]           @relation("CurrentAssetHolder")
+  transfersFrom     AssetTransfer[]   @relation("TransferFromUser")
+  transfersTo       AssetTransfer[]   @relation("TransferToUser")
+
   @@map("users")
 }
 
@@ -132,6 +136,9 @@ model Asset {
   shelfId String?
   shelf   Shelf?  @relation(fields: [shelfId], references: [id])
 
+  assignedToUserId String?
+  assignedToUser   User?   @relation("CurrentAssetHolder", fields: [assignedToUserId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -172,7 +179,13 @@ model AssetTransfer {
   assetId      String
   asset        Asset    @relation(fields: [assetId], references: [id])
   fromStoreId  String?
-  toStoreId    String
+  toStoreId    String?
+  
+  fromUserId   String?
+  fromUser     User?   @relation("TransferFromUser", fields: [fromUserId], references: [id])
+  toUserId     String?
+  toUser       User?   @relation("TransferToUser", fields: [toUserId], references: [id])
+
   transferDate DateTime @default(now())
   reason       String?
   status       String   @default("COMPLETED") // PENDING, COMPLETED, CANCELLED

@@ -12,7 +12,10 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   role: UserRole;
+  isActive?: boolean;
   avatar?: string;
   department?: string;
   createdAt: string;
@@ -96,6 +99,10 @@ export interface Asset {
   code?: string;
   currentValue?: number;
   condition?: string;
+
+  assignedToUserId?: string | null;
+  assignedToUser?: User;
+
   createdAt: string;
   updatedAt: string;
 }

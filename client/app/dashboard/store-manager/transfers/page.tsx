@@ -18,32 +18,61 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { StatusBadge } from '@/components/dashboard/status-badge';
-import { mockTransferRequests, mockAssets, mockStores } from '@/lib/mock-data';
-import { mockUsers } from '@/store/useAppStore';
+import { useTransferRequests, useAssets, useStores, useUsers } from '@/hooks/useQueries';
+import { useUpdateTransfer } from '@/hooks/useMutations';
 import type { TransferRequest } from '@/types';
 
 export default function TransfersPage() {
   const [selectedRequest, setSelectedRequest] = useState<TransferRequest | null>(null);
   const [dialogType, setDialogType] = useState<'approve' | 'reject' | null>(null);
+  const [notes, setNotes] = useState('');
 
-  const pendingRequests = mockTransferRequests.filter((r) => r.status === 'PENDING');
-  const processedRequests = mockTransferRequests.filter((r) => r.status !== 'PENDING');
+  const { data: transferRequests = [], isLoading: requestsLoading } = useTransferRequests();
+  const { data: assets = [], isLoading: assetsLoading } = useAssets();
+  const { data: stores = [], isLoading: storesLoading } = useStores();
+  const { data: users = [], isLoading: usersLoading } = useUsers();
+
+  const updateTransfer = useUpdateTransfer();
+
+  const pendingRequests = transferRequests.filter((r) => r.status === 'PENDING');
+  const processedRequests = transferRequests.filter((r) => r.status !== 'PENDING');
 
   const handleAction = (request: TransferRequest, type: 'approve' | 'reject') => {
     setSelectedRequest(request);
     setDialogType(type);
+    setNotes('');
   };
 
   const closeDialog = () => {
     setSelectedRequest(null);
     setDialogType(null);
+    setNotes('');
+  };
+
+  const confirmAction = () => {
+    if (!selectedRequest || !dialogType) return;
+
+    const status = dialogType === 'approve' ? 'APPROVED' : 'REJECTED';
+    
+    updateTransfer.mutate({
+      id: selectedRequest.id,
+      status,
+      // Pass notes if supported
+      notes: notes
+    } as any, {
+      onSuccess: () => {
+        closeDialog();
+      }
+    });
   };
 
   const renderRequestCard = (request: TransferRequest, showActions: boolean = false) => {
-    const asset = mockAssets.find((a) => a.id === request.assetId);
-    const requester = Object.values(mockUsers).find((u) => u.id === request.requesterId);
-    const fromStore = mockStores.find((s) => s.id === request.fromStoreId);
-    const toStore = mockStores.find((s) => s.id === request.toStoreId);
+    // Lookup related data
+    // Assuming request has assetId, fromStoreId, toStoreId, requesterId
+    const asset = assets.find((a) => a.id === request.assetId);
+    const requester = users.find((u) => u.id === (request.requesterId || (request as any).userId));
+    const fromStore = stores.find((s) => s.id === request.fromStoreId);
+    const toStore = stores.find((s) => s.id === request.toStoreId);
 
     return (
       <Card key={request.id} className="transition-all hover:shadow-md">
@@ -51,9 +80,9 @@ export default function TransfersPage() {
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="font-medium">{asset?.name || 'Unknown Asset'}</p>
-              <p className="text-xs text-muted-foreground font-mono">{asset?.code}</p>
+              <p className="text-xs text-muted-foreground font-mono">{asset?.code || asset?.barcode}</p>
             </div>
-            <StatusBadge status={request.status} />
+            <StatusBadge status={request.status as any} />
           </div>
 
           {/* Transfer Flow */}
@@ -64,14 +93,14 @@ export default function TransfersPage() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">From</p>
-                <p className="text-sm font-medium">{fromStore?.name}</p>
+                <p className="text-sm font-medium">{fromStore?.name || 'Unknown'}</p>
               </div>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
             <div className="flex items-center gap-2">
               <div>
                 <p className="text-xs text-muted-foreground">To</p>
-                <p className="text-sm font-medium">{toStore?.name}</p>
+                <p className="text-sm font-medium">{toStore?.name || 'Unknown'}</p>
               </div>
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                 <Building2 className="h-4 w-4 text-primary" />
@@ -86,14 +115,14 @@ export default function TransfersPage() {
             </div>
             <div className="text-sm">
               <span className="text-muted-foreground">Reason:</span>
-              <p className="text-foreground mt-1">{request.reason}</p>
+              <p className="text-foreground mt-1">{(request as any).reason || (request as any).notes || '-'}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between pt-3 border-t">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
-              {new Date(request.requestedAt).toLocaleDateString()}
+              {(request as any).requestedAt ? new Date((request as any).requestedAt).toLocaleDateString() : 'N/A'}
             </div>
             {showActions && (
               <div className="flex gap-2">
@@ -116,111 +145,81 @@ export default function TransfersPage() {
                 </Button>
               </div>
             )}
-            {!showActions && request.processedAt && (
-              <span className="text-xs text-muted-foreground">
-                Processed: {new Date(request.processedAt).toLocaleDateString()}
-              </span>
-            )}
           </div>
         </CardContent>
       </Card>
     );
   };
 
+  if (requestsLoading || assetsLoading || storesLoading || usersLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Transfer Approvals"
-        description="Review and process asset transfer requests between stores"
+        title="Transfer Requests"
+        description="Manage inter-store asset transfer requests"
       />
 
-      <Tabs defaultValue="pending" className="space-y-6">
+      <Tabs defaultValue="pending" className="w-full">
         <TabsList>
-          <TabsTrigger value="pending" className="relative">
-            Pending
-            {pendingRequests.length > 0 && (
-              <Badge className="ml-2 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                {pendingRequests.length}
-              </Badge>
-            )}
+          <TabsTrigger value="pending">
+            Pending <Badge variant="secondary" className="ml-2">{pendingRequests.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="processed">Processed</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="pending" className="space-y-4">
-          {pendingRequests.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {pendingRequests.map((request) => renderRequestCard(request, true))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Check className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                <p className="text-lg font-medium">All caught up!</p>
-                <p className="text-sm text-muted-foreground">
-                  No pending transfer requests to review
-                </p>
-              </CardContent>
-            </Card>
-          )}
+        
+        <TabsContent value="pending" className="mt-4">
+             {pendingRequests.length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground">No pending requests</div>
+             ) : (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {pendingRequests.map((req) => renderRequestCard(req, true))}
+                </div>
+             )}
         </TabsContent>
-
-        <TabsContent value="processed" className="space-y-4">
-          {processedRequests.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {processedRequests.map((request) => renderRequestCard(request, false))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <p className="text-sm text-muted-foreground">No processed requests yet</p>
-              </CardContent>
-            </Card>
-          )}
+        
+        <TabsContent value="history" className="mt-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+             {processedRequests.map((req) => renderRequestCard(req, false))}
+          </div>
         </TabsContent>
       </Tabs>
 
-      {/* Approval/Rejection Dialog */}
-      <Dialog open={!!dialogType} onOpenChange={closeDialog}>
+      <Dialog open={!!selectedRequest} onOpenChange={() => closeDialog()}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
               {dialogType === 'approve' ? 'Approve Transfer' : 'Reject Transfer'}
             </DialogTitle>
             <DialogDescription>
-              {dialogType === 'approve'
-                ? 'Are you sure you want to approve this transfer request?'
+              {dialogType === 'approve' 
+                ? 'Are you sure you want to approve this transfer request?' 
                 : 'Please provide a reason for rejecting this request.'}
             </DialogDescription>
           </DialogHeader>
-          {selectedRequest && (
-            <div className="py-4">
-              <div className="p-3 rounded-lg bg-muted space-y-2">
-                <p className="text-sm font-medium">
-                  {mockAssets.find((a) => a.id === selectedRequest.assetId)?.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {mockStores.find((s) => s.id === selectedRequest.fromStoreId)?.name} →{' '}
-                  {mockStores.find((s) => s.id === selectedRequest.toStoreId)?.name}
-                </p>
-              </div>
-              {dialogType === 'reject' && (
-                <div className="mt-4 space-y-2">
-                  <Label>Rejection Reason</Label>
-                  <Textarea placeholder="Enter the reason for rejection..." />
-                </div>
-              )}
+
+           <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder={dialogType === 'approve' ? "Optional notes..." : "Reason for rejection..."}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
             </div>
-          )}
+          </div>
+
           <DialogFooter>
-            <Button variant="outline" onClick={closeDialog}>
-              Cancel
-            </Button>
-            <Button
-              variant={dialogType === 'reject' ? 'destructive' : 'default'}
-              onClick={closeDialog}
+            <Button variant="outline" onClick={closeDialog}>Cancel</Button>
+            <Button 
+              variant={dialogType === 'reject' ? "destructive" : "default"}
+              onClick={confirmAction}
+              disabled={updateTransfer.isPending}
             >
-              {dialogType === 'approve' ? 'Approve' : 'Reject'}
+              {updateTransfer.isPending ? "Processing..." : (dialogType === 'approve' ? 'Approve' : 'Reject')}
             </Button>
           </DialogFooter>
         </DialogContent>

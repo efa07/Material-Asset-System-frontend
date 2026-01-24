@@ -94,6 +94,12 @@ export const navigationConfig: NavItem[] = [
     roles: ['asset-manager'],
   },
   {
+    title: 'All Assets',
+    href: '/dashboard/asset-manager/assets',
+    icon: 'Package',
+    roles: ['asset-manager'],
+  },
+  {
     title: 'Categories',
     href: '/dashboard/asset-manager/categories',
     icon: 'FolderTree',
@@ -106,9 +112,33 @@ export const navigationConfig: NavItem[] = [
     roles: ['asset-manager'],
   },
   {
+    title: 'Asset Assignments',
+    href: '/dashboard/asset-manager/assignments',
+    icon: 'Users',
+    roles: ['asset-manager'],
+  },
+  {
+    title: 'Maintenance',
+    href: '/dashboard/asset-manager/maintenance',
+    icon: 'Wrench',
+    roles: ['asset-manager'],
+  },
+  {
     title: 'Status Tracking',
     href: '/dashboard/asset-manager/tracking',
     icon: 'Activity',
+    roles: ['asset-manager'],
+  },
+  {
+    title: 'Disposals',
+    href: '/dashboard/asset-manager/disposals',
+    icon: 'Trash2',
+    roles: ['asset-manager'],
+  },
+  {
+    title: 'Reports',
+    href: '/dashboard/asset-manager/reports',
+    icon: 'FileBarChart',
     roles: ['asset-manager'],
   },
   {

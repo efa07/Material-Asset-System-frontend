@@ -8,201 +8,129 @@ Your job as an AI agent is to **extend, refactor, or debug** this system **witho
 
 ## 1. Project Overview (Big Picture)
 
-This system manages **material assets**, **users**, **roles**, **auditing**, and **secure access control**.
+The system manages **material assets**, **users**, **roles**, **auditing**, and **secure access control**, designed for an enterprise environment.
 
 ### Tech Stack
 
-### Frontend (`client/`)
-
+#### Frontend (`client/`)
 * **Framework**: Next.js 14+ (App Router)
 * **Language**: TypeScript (strict mode)
 * **Styling**: Tailwind CSS + shadcn/ui
 * **State Management**: Zustand (`store/useAppStore.ts`)
-* **Data Fetching**: TanStack React Query
+* **Data Fetching**: TanStack React Query via custom hooks
 * **HTTP Client**: Axios (`lib/api.ts`)
 
-### Backend (`server/`)
-
-* **Framework**: NestJS
-* **Language**: TypeScript
-* **ORM**: Prisma
+#### Backend (`server/`)
+* **Framework**: NestJS (Standard Architecture)
+* **Language**: TypeScript (strict, ES2023)
+* **ORM**: Prisma (`prisma/schema.prisma`)
 * **Database**: PostgreSQL
-* **Architecture**: Modular, domain‑driven (Controller → Service → Prisma)
+* **API Documentation**: OpenAPI/Swagger (Spec at `.github/api-spec.json`)
 
 ---
 
-## 2. High‑Level Architecture Rules (DO NOT VIOLATE)
+## 2. API & Data Schema (Crucial)
+
+**The single source of truth for the API contract is `.github/api-spec.json`**.
+* **ALWAYS** read `.github/api-spec.json` when implementing frontend API calls or understanding backend capabilities.
+* **NEVER** guess endpoints or payload structures.
+* If you modify the backend `*.controller.ts` or DTOs, you imply a change to this contract.
+
+**Database Schema**:
+* The `server/prisma/schema.prisma` file defines the database structure.
+* When adding features, check this file first to understand relationships.
+
+---
+
+## 3. High‑Level Architecture Rules (DO NOT VIOLATE)
 
 ### Frontend Rules
-
-* ❌ **NO `useEffect` for data fetching**
-* ✅ **ONLY** use TanStack Query (`useQuery`, `useMutation`)
-* ❌ Do not call APIs directly in components
-* ✅ API calls go through `lib/api.ts`
-* ✅ Query hooks live in `hooks/` (global or feature‑specific)
-* ❌ No global state in React Context
-* ✅ Global state lives in **Zustand** only
+* ❌ **NO `useEffect` for data fetching**. Use `useQuery` or `useMutation`.
+* ✅ **ONLY** use custom hooks in `client/hooks/`. Create new ones if needed.
+* ✅ API calls strictly go through `lib/api.ts` which uses the Axios instance.
+* ❌ No global state in React Context. Use **Zustand** (`store/useAppStore.ts`) for app-wide state (auth, theme, notifications).
+* ✅ Use `persist` middleware in Zustand only for user preferences (theme, sidebar), not sensitive data.
+* ✅ Types in `client/types/` must mirror backend DTOs.
 
 ### Backend Rules
-
-* ❌ No business logic in controllers
-* ✅ Controllers = request/response only
-* ✅ Services contain all logic
-* ✅ Prisma access only via `PrismaService`
-* ❌ No raw SQL unless explicitly approved
-* ✅ DTOs are mandatory for **every** request body
+* ❌ No business logic in controllers. Controllers are for DTO validation and routing only.
+* ✅ Logic lives in `*.service.ts`.
+* ✅ Database access is **exclusively** via `PrismaService`.
+* ❌ No raw SQL. Use Prisma's methods.
+* ✅ **DTOs are mandatory** for all inputs. Validation decorators (`class-validator`) are required.
+* ✅ All modules are imported in `app.module.ts`.
 
 ---
 
-## 3. Folder Responsibilities (You Must Respect This)
+## 4. Folder Responsibilities
 
 ### Frontend (`client/`)
+* `app/`: Next.js App Router pages. `(auth)` group for public auth pages. `dashboard/` for protected routes.
+* `components/ui/`: shadcn/ui primitives. **Do not modify** unless theming.
+* `components/<feature>/`: Feature-specific UI logic.
+* `hooks/`: **All** data fetching logic (`useQueries.ts`, `useMutations.ts`).
+* `store/`: Zustand stores. `headers` and `auth` logic often interact here.
+* `lib/`: Utilities. `api.ts` (Axios setup), `auth.ts` (Helpers).
 
-```
-client/
-├── app/                # Next.js routes & layouts (App Router)
-├── components/
-│   ├── ui/             # shadcn/ui reusable primitives
-│   └── <feature>/      # Feature‑specific components
-├── hooks/              # React Query hooks ONLY
-├── lib/api.ts          # Axios instance (baseURL, interceptors)
-├── store/useAppStore.ts# Zustand global store
-├── types/              # Frontend domain types
-```
-
-### Backend (`server/`)
-
-```
-server/
-├── src/
-│   ├── assets/
-│   ├── users/
-│   ├── audit/
-│   ├── auth/
-│   ├── prisma/
-│   └── common/
-├── prisma/schema.prisma
-```
-
-Each backend feature module contains:
-
-* `*.controller.ts`
-* `*.service.ts`
-* `*.module.ts`
-* `dto/`
+### Backend (`server/src/`)
+* Each feature (e.g., `assets`, `users`) has its own module folder.
+* `dto/`: Request/Response data transfer objects.
+* `common/`: Shared guards, filters, interceptors.
+* `prisma/`: Database connection service.
 
 ---
 
-## 4. Authentication & Authorization (Critical)
+## 5. Development Workflow
 
-* Authentication is **centralized** (Keycloak / external IdP assumed)
-* Backend **never trusts frontend roles blindly**
-* Role‑Based Access Control (RBAC) is enforced **server‑side**
-* Frontend uses roles **only for UI visibility**, not security
+### Builds & Execution
+* **Frontend**: `cd client && npm run dev` (Port 3000)
+* **Backend**: `cd server && npm run start:dev` (Port 3000/API). *Note: Ensure ports don't conflict, default Nest port is 3000, Next is 3000. Check `server/src/main.ts` or env vars.*
 
-If you add endpoints:
+### Database
+* **Migration**: `cd server && npx prisma migrate dev`
+* **Studio**: `cd server && npx prisma studio` (to view data)
 
-* Add guards
-* Add role checks
-* Document expected roles
-
----
-
-## 5. Data Flow (How Things Actually Work)
-
-### Frontend
-
-1. UI Component
-2. Calls a **custom hook** (React Query)
-3. Hook calls Axios (`lib/api.ts`)
-4. Axios hits NestJS REST endpoint
-
-### Backend
-
-1. Controller validates DTO
-2. Service executes logic
-3. Prisma reads/writes PostgreSQL
-4. Response returned to frontend
-
-No shortcuts. Ever.
+### Type Synchronization
+If you change `schema.prisma` or Backend DTOs:
+1. Run migration.
+2. Update backend `*.entity.ts` or DTOs.
+3. Update `.github/api-spec.json` (if automated) or manually ensure consistency.
+4. **Update Frontend Types** in `client/types/` to match. The frontend **will break** if types drift.
 
 ---
 
-## 6. Prisma & Database Rules
+## 6. Authentication & Authorization
 
-* Prisma schema is the **single source of truth**
-* Use `prisma migrate dev` for schema changes
-* Keep relations explicit
-* Avoid nullable fields unless required
-* Use enums where applicable
-
-If you change Prisma schema:
-
-* Update backend DTOs
-* Update frontend types
+* **Mechanism**: JWT-based.
+* **Backend**: Guards in `common/guards`. Role checks using `@Roles()` decorator.
+* **Frontend**: `store/auth.store.ts` (or `useAppStore.ts`) holds user state.
+* **RBAC**: Server-side enforcement is primary. Client-side hiding is for UX only.
 
 ---
 
-## 7. Type Safety (Non‑Negotiable)
+## 7. Implementation Guidelines
 
-* TypeScript `strict: true`
-* ❌ No `any`
-* ❌ No implicit `unknown`
-* ✅ Explicit interfaces for:
+1. **When implementing a new feature**:
+   * **Read** `schema.prisma` to model data.
+   * **Read** `.github/api-spec.json` to stick to naming conventions (RESTful).
+   * **Create** Backend: Module -> Controller -> Service -> DTOs.
+   * **Create** Frontend: Type definition -> specialized React Query hook -> UI Component.
 
-  * API responses
-  * DTOs
-  * Zustand state
+2. **When Refactoring**:
+   * Check for breaking changes in the API contract.
+   * Ensure `useAppStore` logic remains consistent.
+   * Keep components pure where possible.
 
-Frontend types live in:
-
-```
-client/types/index.ts
-```
-
-These **must stay in sync** with backend DTOs.
-
----
-
-## 8. Coding Style Expectations
-
-* Prefer **clarity over cleverness**
-* Small, focused functions
-* Descriptive naming
-* Early returns > nested logic
-* Comments only when logic is non‑obvious
-
-This is a long‑term codebase. Act like future you will maintain it.
+3. **Common Pitfalls**:
+   * Importing server code in client (strict separation required).
+   * forgetting `export class` in DTOs.
+   * Not handling loading/error states in React Query hooks.
 
 ---
 
-## 9. Common Mistakes to Avoid
+## 8. When You Are Unsure
 
-🚫 Fetching data in components
-🚫 Mixing UI and business logic
-🚫 Skipping DTO validation
-🚫 Writing fat controllers
-🚫 Ignoring RBAC
-🚫 Breaking existing API contracts
+* Check existing patterns in `server/src/users/` (Standard Backend Module) or `client/hooks/` (Standard Frontend Data Fetching).
+* Ask/Check for the latest API spec if the frontend call fails.
+* **Do not invent new architectural patterns.** Consistency is key.
 
----
-
-## 10. When You Are Unsure
-
-If you are not 100% confident:
-
-* Stop
-* Ask for clarification
-* Do NOT guess
-
-Incorrect assumptions cost more than asking questions.
-
----
-
-## Final Note
-
-You are assisting a **serious engineering project**.
-
-Act like a senior engineer, not an autocomplete bot.
-
-Clean code. Predictable patterns. Zero drama.

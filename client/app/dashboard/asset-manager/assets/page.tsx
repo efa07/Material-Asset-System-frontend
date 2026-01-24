@@ -40,25 +40,53 @@ import {
   Eye,
   Edit,
   QrCode,
+  MoreHorizontal,
+  UserCheck,
+  ArrowRightLeft,
+  Trash2,
 } from "lucide-react";
 import type { Asset } from "@/types";
-import { useAssets, useCategories, useStores } from "@/hooks/useQueries";
-import { useCreateAsset } from "@/hooks/useMutations";
+import { useAssets, useCategories, useStores, useUsers } from "@/hooks/useQueries";
+import { useCreateAsset, useCreateAssignment, useCreateTransfer, useCreateDisposal } from "@/hooks/useMutations";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function AssetManagerAssetsPage() {
   const { data: assetsData, isLoading: assetsLoading } = useAssets();
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
   const { data: storesData, isLoading: storesLoading } = useStores();
+  const { data: usersData } = useUsers();
   const { mutate: createAsset, isPending: isCreating } = useCreateAsset();
+  const { mutate: assignAsset, isPending: isAssigning } = useCreateAssignment();
+  const { mutate: transferAsset, isPending: isTransferring } = useCreateTransfer();
+  const { mutate: disposeAsset, isPending: isDisposing } = useCreateDisposal();
 
   const stores = storesData || [];
   const categories = categoriesData || [];
+  const users = usersData || [];
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  
+  // Action states
+  const [actionAsset, setActionAsset] = useState<Asset | null>(null);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [transferDialogOpen, setTransferDialogOpen] = useState(false);
+  const [disposeDialogOpen, setDisposeDialogOpen] = useState(false);
+
+  // Form states
+  const [assignmentData, setAssignmentData] = useState({ userId: "", dueDate: "", notes: "" });
+  const [transferData, setTransferData] = useState({ toStoreId: "", reason: "" });
+  const [disposalData, setDisposalData] = useState({ reason: "", method: "", value: "" });
 
   const [newAsset, setNewAsset] = useState({
     name: "",
@@ -70,9 +98,6 @@ export default function AssetManagerAssetsPage() {
     storeId: "",
   });
 
-  if (assetsLoading || categoriesLoading || storesLoading) {
-    return <div>Loading...</div>;
-  }
 
   const filteredAssets = useMemo(() => {
     const list = assetsData || [];
@@ -93,7 +118,7 @@ export default function AssetManagerAssetsPage() {
       {
         name: newAsset.name,
         serialNumber: newAsset.serialNumber || undefined,
-  categoryId: newAsset.categoryId || categories[0]?.id || "",
+        categoryId: newAsset.categoryId || categories[0]?.id || "",
         storeId: newAsset.storeId || undefined,
         purchaseDate: newAsset.purchaseDate || undefined,
         purchasePrice: newAsset.purchasePrice
@@ -119,12 +144,75 @@ export default function AssetManagerAssetsPage() {
     );
   };
 
+  const handleAssign = () => {
+    if (!actionAsset) return;
+    assignAsset(
+      {
+        assetId: actionAsset.id,
+        userId: assignmentData.userId,
+        dueDate: assignmentData.dueDate || undefined,
+        notes: assignmentData.notes || undefined,
+        status: "PENDING",
+      },
+      {
+        onSuccess: () => {
+          setAssignDialogOpen(false);
+          setAssignmentData({ userId: "", dueDate: "", notes: "" });
+          setActionAsset(null);
+        },
+      }
+    );
+  };
+
+  const handleTransfer = () => {
+    if (!actionAsset) return;
+    transferAsset(
+      {
+        assetId: actionAsset.id,
+        fromStoreId: actionAsset.storeId || undefined,
+        toStoreId: transferData.toStoreId,
+        reason: transferData.reason || undefined,
+        status: "COMPLETED",
+      },
+      {
+        onSuccess: () => {
+          setTransferDialogOpen(false);
+          setTransferData({ toStoreId: "", reason: "" });
+          setActionAsset(null);
+        },
+      }
+    );
+  };
+
+  const handleDispose = () => {
+    if (!actionAsset) return;
+    disposeAsset(
+      {
+        assetId: actionAsset.id,
+        reason: disposalData.reason || undefined,
+        method: disposalData.method || undefined,
+        value: disposalData.value ? Number(disposalData.value) : undefined,
+      },
+      {
+        onSuccess: () => {
+          setDisposeDialogOpen(false);
+          setDisposalData({ reason: "", method: "", value: "" });
+          setActionAsset(null);
+        },
+      }
+    );
+  };
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Asset Management"
-        description="View and manage all assets in the system"
-        action={
+      {(assetsLoading || categoriesLoading || storesLoading) ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          <PageHeader
+            title="Asset Management"
+            description="View and manage all assets in the system"
+          >
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -238,8 +326,7 @@ export default function AssetManagerAssetsPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-        }
-      />
+      </PageHeader>
 
       <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
         <CardHeader>
@@ -336,21 +423,51 @@ export default function AssetManagerAssetsPage() {
                         : "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setSelectedAsset(asset)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <QrCode className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => setSelectedAsset(asset)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setActionAsset(asset);
+                              setAssignDialogOpen(true);
+                            }}
+                          >
+                            <UserCheck className="mr-2 h-4 w-4" />
+                            Assign User
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setActionAsset(asset);
+                              setTransferDialogOpen(true);
+                            }}
+                          >
+                            <ArrowRightLeft className="mr-2 h-4 w-4" />
+                            Transfer
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setActionAsset(asset);
+                              setDisposeDialogOpen(true);
+                            }}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Dispose
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -443,7 +560,193 @@ export default function AssetManagerAssetsPage() {
             <Button>Edit Asset</Button>
           </DialogFooter>
         </DialogContent>
+    </Dialog>
+
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Asset</DialogTitle>
+            <DialogDescription>
+              Assign {actionAsset?.name} to a user.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="assign-user">User</Label>
+              <Select
+                value={assignmentData.userId}
+                onValueChange={(value) =>
+                  setAssignmentData({ ...assignmentData, userId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select user" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name} ({user.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="assign-date">Due Date (Optional)</Label>
+              <Input
+                id="assign-date"
+                type="date"
+                value={assignmentData.dueDate}
+                onChange={(e) =>
+                  setAssignmentData({ ...assignmentData, dueDate: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="assign-notes">Notes</Label>
+              <Textarea
+                id="assign-notes"
+                value={assignmentData.notes}
+                onChange={(e) =>
+                  setAssignmentData({ ...assignmentData, notes: e.target.value })
+                }
+                placeholder="Add assignment notes..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAssign} disabled={isAssigning || !assignmentData.userId}>
+              Assign
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
+
+      <Dialog open={transferDialogOpen} onOpenChange={setTransferDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transfer Asset</DialogTitle>
+            <DialogDescription>
+              Transfer {actionAsset?.name} to another store.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="transfer-store">Destination Store</Label>
+              <Select
+                value={transferData.toStoreId}
+                onValueChange={(value) =>
+                  setTransferData({ ...transferData, toStoreId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select store" />
+                </SelectTrigger>
+                <SelectContent>
+                  {stores
+                    .filter((s) => s.id !== actionAsset?.storeId)
+                    .map((store) => (
+                      <SelectItem key={store.id} value={store.id}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="transfer-reason">Reason</Label>
+              <Textarea
+                id="transfer-reason"
+                value={transferData.reason}
+                onChange={(e) =>
+                  setTransferData({ ...transferData, reason: e.target.value })
+                }
+                placeholder="Reason for transfer..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTransferDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleTransfer} disabled={isTransferring || !transferData.toStoreId}>
+              Transfer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={disposeDialogOpen} onOpenChange={setDisposeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dispose Asset</DialogTitle>
+            <DialogDescription>
+              Mark {actionAsset?.name} as disposed. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="dispose-method">Disposal Method</Label>
+              <Select
+                value={disposalData.method}
+                onValueChange={(value) =>
+                  setDisposalData({ ...disposalData, method: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SOLD">Sold</SelectItem>
+                  <SelectItem value="RECYCLED">Recycled</SelectItem>
+                  <SelectItem value="DESTROYED">Destroyed</SelectItem>
+                  <SelectItem value="DONATED">Donated</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dispose-value">Value / Price (Optional)</Label>
+              <Input
+                id="dispose-value"
+                type="number"
+                placeholder="0.00"
+                value={disposalData.value}
+                onChange={(e) =>
+                  setDisposalData({ ...disposalData, value: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dispose-reason">Reason</Label>
+              <Textarea
+                id="dispose-reason"
+                value={disposalData.reason}
+                onChange={(e) =>
+                  setDisposalData({ ...disposalData, reason: e.target.value })
+                }
+                placeholder="Why is this asset being disposed?"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDisposeDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDispose}
+              disabled={isDisposing || !disposalData.method}
+            >
+              Dispose Asset
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+        </>
+      )}
     </div>
   );
 }

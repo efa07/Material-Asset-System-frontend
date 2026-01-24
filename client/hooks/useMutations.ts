@@ -268,3 +268,56 @@ export const useDeleteTransfer = () => {
         },
     });
 };
+
+export const useCreateStore = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: any) => {
+            const response = await api.post('/stores', data);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['stores'] });
+        },
+    });
+};
+
+export const useUpdateStore = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, ...data }: { id: string } & any) => {
+            const response = await api.patch(`/stores/${id}`, data);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['stores'] });
+        },
+    });
+};
+
+export const useDeleteStore = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.delete(`/stores/${id}`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['stores'] });
+        },
+    });
+};
+
+export const useUpdateAssignment = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, ...data }: { id: string } & any) => {
+            const response = await api.patch(`/asset-assignments/${id}`, data);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['assignments'] });
+            queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+    });
+};

@@ -1,0 +1,2164 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/dashboard/stats": {
+      "get": {
+        "operationId": "AppController_getDashboardStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/dashboard/charts": {
+      "get": {
+        "operationId": "AppController_getDashboardCharts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/users": {
+      "post": {
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/v1/roles": {
+      "post": {
+        "operationId": "RolesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role created successfully"
+          }
+        },
+        "summary": "Create a new role",
+        "tags": [
+          "roles"
+        ]
+      },
+      "get": {
+        "operationId": "RolesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all roles"
+          }
+        },
+        "summary": "Get all roles",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/v1/roles/{id}": {
+      "get": {
+        "operationId": "RolesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a role"
+          }
+        },
+        "summary": "Get a role by ID",
+        "tags": [
+          "roles"
+        ]
+      },
+      "patch": {
+        "operationId": "RolesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role updated successfully"
+          }
+        },
+        "summary": "Update a role",
+        "tags": [
+          "roles"
+        ]
+      },
+      "delete": {
+        "operationId": "RolesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Role deleted successfully"
+          }
+        },
+        "summary": "Delete a role",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/v1/stores": {
+      "post": {
+        "operationId": "StoresController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStoreDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Store created successfully"
+          }
+        },
+        "summary": "Create a new store",
+        "tags": [
+          "stores"
+        ]
+      },
+      "get": {
+        "operationId": "StoresController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns all stores"
+          }
+        },
+        "summary": "Get all stores",
+        "tags": [
+          "stores"
+        ]
+      }
+    },
+    "/api/v1/stores/{id}": {
+      "get": {
+        "operationId": "StoresController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a store"
+          }
+        },
+        "summary": "Get a store by ID",
+        "tags": [
+          "stores"
+        ]
+      },
+      "patch": {
+        "operationId": "StoresController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStoreDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Store updated successfully"
+          }
+        },
+        "summary": "Update a store",
+        "tags": [
+          "stores"
+        ]
+      },
+      "delete": {
+        "operationId": "StoresController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Store deleted successfully"
+          }
+        },
+        "summary": "Delete a store",
+        "tags": [
+          "stores"
+        ]
+      }
+    },
+    "/api/v1/shelves": {
+      "post": {
+        "operationId": "ShelvesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShelfDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create shelf",
+        "tags": [
+          "shelves"
+        ]
+      },
+      "get": {
+        "operationId": "ShelvesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all shelves",
+        "tags": [
+          "shelves"
+        ]
+      }
+    },
+    "/api/v1/shelves/{id}": {
+      "get": {
+        "operationId": "ShelvesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get shelf by ID",
+        "tags": [
+          "shelves"
+        ]
+      },
+      "patch": {
+        "operationId": "ShelvesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateShelfDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update shelf",
+        "tags": [
+          "shelves"
+        ]
+      },
+      "delete": {
+        "operationId": "ShelvesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete shelf",
+        "tags": [
+          "shelves"
+        ]
+      }
+    },
+    "/api/v1/assets": {
+      "post": {
+        "operationId": "AssetsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create asset",
+        "tags": [
+          "assets"
+        ]
+      },
+      "get": {
+        "operationId": "AssetsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all assets",
+        "tags": [
+          "assets"
+        ]
+      }
+    },
+    "/api/v1/assets/{id}": {
+      "get": {
+        "operationId": "AssetsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get asset by ID",
+        "tags": [
+          "assets"
+        ]
+      },
+      "patch": {
+        "operationId": "AssetsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update asset",
+        "tags": [
+          "assets"
+        ]
+      },
+      "delete": {
+        "operationId": "AssetsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete asset",
+        "tags": [
+          "assets"
+        ]
+      }
+    },
+    "/api/v1/asset-categories": {
+      "post": {
+        "operationId": "AssetCategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssetCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create asset category",
+        "tags": [
+          "asset-categories"
+        ]
+      },
+      "get": {
+        "operationId": "AssetCategoriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all asset categories",
+        "tags": [
+          "asset-categories"
+        ]
+      }
+    },
+    "/api/v1/asset-categories/{id}": {
+      "get": {
+        "operationId": "AssetCategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get asset category by ID",
+        "tags": [
+          "asset-categories"
+        ]
+      },
+      "patch": {
+        "operationId": "AssetCategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssetCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update asset category",
+        "tags": [
+          "asset-categories"
+        ]
+      },
+      "delete": {
+        "operationId": "AssetCategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete asset category",
+        "tags": [
+          "asset-categories"
+        ]
+      }
+    },
+    "/api/v1/asset-assignments": {
+      "post": {
+        "operationId": "AssetAssignmentsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssetAssignmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create assignment",
+        "tags": [
+          "asset-assignments"
+        ]
+      },
+      "get": {
+        "operationId": "AssetAssignmentsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all assignments",
+        "tags": [
+          "asset-assignments"
+        ]
+      }
+    },
+    "/api/v1/asset-assignments/{id}": {
+      "get": {
+        "operationId": "AssetAssignmentsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get assignment by ID",
+        "tags": [
+          "asset-assignments"
+        ]
+      },
+      "patch": {
+        "operationId": "AssetAssignmentsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssetAssignmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update assignment",
+        "tags": [
+          "asset-assignments"
+        ]
+      },
+      "delete": {
+        "operationId": "AssetAssignmentsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete assignment",
+        "tags": [
+          "asset-assignments"
+        ]
+      }
+    },
+    "/api/v1/asset-transfers": {
+      "post": {
+        "operationId": "AssetTransfersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssetTransferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create asset transfer",
+        "tags": [
+          "asset-transfers"
+        ]
+      },
+      "get": {
+        "operationId": "AssetTransfersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all asset transfers",
+        "tags": [
+          "asset-transfers"
+        ]
+      }
+    },
+    "/api/v1/asset-transfers/{id}": {
+      "get": {
+        "operationId": "AssetTransfersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get asset transfer by ID",
+        "tags": [
+          "asset-transfers"
+        ]
+      },
+      "patch": {
+        "operationId": "AssetTransfersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssetTransferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update asset transfer",
+        "tags": [
+          "asset-transfers"
+        ]
+      },
+      "delete": {
+        "operationId": "AssetTransfersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete asset transfer",
+        "tags": [
+          "asset-transfers"
+        ]
+      }
+    },
+    "/api/v1/asset-returns": {
+      "post": {
+        "operationId": "AssetReturnsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssetReturnDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create asset return",
+        "tags": [
+          "asset-returns"
+        ]
+      },
+      "get": {
+        "operationId": "AssetReturnsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all asset returns",
+        "tags": [
+          "asset-returns"
+        ]
+      }
+    },
+    "/api/v1/asset-returns/{id}": {
+      "get": {
+        "operationId": "AssetReturnsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get asset return by ID",
+        "tags": [
+          "asset-returns"
+        ]
+      },
+      "patch": {
+        "operationId": "AssetReturnsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssetReturnDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update asset return",
+        "tags": [
+          "asset-returns"
+        ]
+      },
+      "delete": {
+        "operationId": "AssetReturnsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete asset return",
+        "tags": [
+          "asset-returns"
+        ]
+      }
+    },
+    "/api/v1/asset-disposals": {
+      "post": {
+        "operationId": "AssetDisposalsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssetDisposalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create disposal record",
+        "tags": [
+          "asset-disposals"
+        ]
+      },
+      "get": {
+        "operationId": "AssetDisposalsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all disposal records",
+        "tags": [
+          "asset-disposals"
+        ]
+      }
+    },
+    "/api/v1/asset-disposals/{id}": {
+      "get": {
+        "operationId": "AssetDisposalsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get disposal record by ID",
+        "tags": [
+          "asset-disposals"
+        ]
+      },
+      "patch": {
+        "operationId": "AssetDisposalsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssetDisposalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update disposal record",
+        "tags": [
+          "asset-disposals"
+        ]
+      },
+      "delete": {
+        "operationId": "AssetDisposalsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete disposal record",
+        "tags": [
+          "asset-disposals"
+        ]
+      }
+    },
+    "/api/v1/maintenance": {
+      "post": {
+        "operationId": "MaintenanceController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMaintenanceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create maintenance record",
+        "tags": [
+          "maintenance"
+        ]
+      },
+      "get": {
+        "operationId": "MaintenanceController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all maintenance records",
+        "tags": [
+          "maintenance"
+        ]
+      }
+    },
+    "/api/v1/maintenance/{id}": {
+      "get": {
+        "operationId": "MaintenanceController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get maintenance record by ID",
+        "tags": [
+          "maintenance"
+        ]
+      },
+      "patch": {
+        "operationId": "MaintenanceController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMaintenanceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update maintenance record",
+        "tags": [
+          "maintenance"
+        ]
+      },
+      "delete": {
+        "operationId": "MaintenanceController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete maintenance record",
+        "tags": [
+          "maintenance"
+        ]
+      }
+    },
+    "/api/v1/performance": {
+      "get": {
+        "operationId": "PerformanceController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "performance"
+        ]
+      }
+    },
+    "/api/v1/workflows": {
+      "get": {
+        "operationId": "WorkflowsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "workflows"
+        ]
+      }
+    },
+    "/api/v1/notifications": {
+      "post": {
+        "operationId": "NotificationsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Create notification",
+        "tags": [
+          "notifications"
+        ]
+      },
+      "get": {
+        "operationId": "NotificationsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get all notifications",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/{id}": {
+      "get": {
+        "operationId": "NotificationsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get notification by ID",
+        "tags": [
+          "notifications"
+        ]
+      },
+      "patch": {
+        "operationId": "NotificationsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update notification",
+        "tags": [
+          "notifications"
+        ]
+      },
+      "delete": {
+        "operationId": "NotificationsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete notification",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/audit": {
+      "get": {
+        "operationId": "AuditController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "audit"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Material & Asset Management System API",
+    "description": "Enterprise-grade asset management backend",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "users",
+      "description": "User management"
+    },
+    {
+      "name": "roles",
+      "description": "Role management"
+    },
+    {
+      "name": "stores",
+      "description": "Store management"
+    },
+    {
+      "name": "shelves",
+      "description": "Shelf management"
+    },
+    {
+      "name": "assets",
+      "description": "Asset management"
+    },
+    {
+      "name": "asset-categories",
+      "description": "Asset category management"
+    },
+    {
+      "name": "asset-assignments",
+      "description": "Asset assignment operations"
+    },
+    {
+      "name": "asset-transfers",
+      "description": "Asset transfer operations"
+    },
+    {
+      "name": "asset-returns",
+      "description": "Asset return operations"
+    },
+    {
+      "name": "asset-disposals",
+      "description": "Asset disposal operations"
+    },
+    {
+      "name": "maintenance",
+      "description": "Maintenance records"
+    },
+    {
+      "name": "performance",
+      "description": "Performance records"
+    },
+    {
+      "name": "workflows",
+      "description": "Workflow management"
+    },
+    {
+      "name": "notifications",
+      "description": "Notifications"
+    },
+    {
+      "name": "audit",
+      "description": "Audit logs"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "roleId": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "roleId": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "CreateRoleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Store Manager",
+            "description": "Role name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Manages store operations"
+          },
+          "permissions": {
+            "type": "object",
+            "description": "Permissions JSON object"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateRoleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Store Manager",
+            "description": "Role name"
+          },
+          "description": {
+            "type": "string",
+            "example": "Manages store operations"
+          },
+          "permissions": {
+            "type": "object",
+            "description": "Permissions JSON object"
+          }
+        }
+      },
+      "CreateStoreDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Main Warehouse",
+            "description": "Store name"
+          },
+          "location": {
+            "type": "string",
+            "example": "Building A, Floor 1"
+          },
+          "description": {
+            "type": "string",
+            "example": "Primary storage facility"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateStoreDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Main Warehouse",
+            "description": "Store name"
+          },
+          "location": {
+            "type": "string",
+            "example": "Building A, Floor 1"
+          },
+          "description": {
+            "type": "string",
+            "example": "Primary storage facility"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true,
+            "default": true
+          }
+        }
+      },
+      "CreateShelfDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "A-1"
+          },
+          "description": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "storeId"
+        ]
+      },
+      "UpdateShelfDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "A-1"
+          },
+          "description": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateAssetDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Dell Laptop"
+          },
+          "description": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "barcode": {
+            "type": "string"
+          },
+          "qrCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "IN_USE",
+              "MAINTENANCE",
+              "RETIRED",
+              "DISPOSED",
+              "LOST"
+            ],
+            "default": "AVAILABLE"
+          },
+          "purchaseDate": {
+            "type": "string"
+          },
+          "purchasePrice": {
+            "type": "number"
+          },
+          "specifications": {
+            "type": "object"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string"
+          },
+          "shelfId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status",
+          "categoryId"
+        ]
+      },
+      "UpdateAssetDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Dell Laptop"
+          },
+          "description": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "barcode": {
+            "type": "string"
+          },
+          "qrCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "IN_USE",
+              "MAINTENANCE",
+              "RETIRED",
+              "DISPOSED",
+              "LOST"
+            ],
+            "default": "AVAILABLE"
+          },
+          "purchaseDate": {
+            "type": "string"
+          },
+          "purchasePrice": {
+            "type": "number"
+          },
+          "specifications": {
+            "type": "object"
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "storeId": {
+            "type": "string"
+          },
+          "shelfId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateAssetCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateAssetCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Electronics"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateAssetAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "PENDING",
+              "COMPLETED",
+              "RETURNED"
+            ],
+            "default": "PENDING"
+          }
+        },
+        "required": [
+          "assetId",
+          "userId",
+          "status"
+        ]
+      },
+      "UpdateAssetAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "PENDING",
+              "COMPLETED",
+              "RETURNED"
+            ],
+            "default": "PENDING"
+          }
+        }
+      },
+      "CreateAssetTransferDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "fromStoreId": {
+            "type": "string"
+          },
+          "toStoreId": {
+            "type": "string"
+          },
+          "transferDate": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "assetId",
+          "toStoreId"
+        ]
+      },
+      "UpdateAssetTransferDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "fromStoreId": {
+            "type": "string"
+          },
+          "toStoreId": {
+            "type": "string"
+          },
+          "transferDate": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateAssetReturnDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "returnDate": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "assetId"
+        ]
+      },
+      "UpdateAssetReturnDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "returnDate": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateAssetDisposalDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "disposalDate": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "assetId"
+        ]
+      },
+      "UpdateAssetDisposalDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "disposalDate": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        }
+      },
+      "CreateMaintenanceDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "performedBy": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "maintenanceDate": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELLED"
+            ],
+            "default": "SCHEDULED"
+          }
+        },
+        "required": [
+          "assetId",
+          "type",
+          "status"
+        ]
+      },
+      "UpdateMaintenanceDto": {
+        "type": "object",
+        "properties": {
+          "assetId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "performedBy": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "number"
+          },
+          "maintenanceDate": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELLED"
+            ],
+            "default": "SCHEDULED"
+          }
+        }
+      },
+      "CreateNotificationDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "isRead": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "userId",
+          "title",
+          "message",
+          "isRead"
+        ]
+      },
+      "UpdateNotificationDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "isRead": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    }
+  }
+}

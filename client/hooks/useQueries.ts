@@ -21,7 +21,13 @@ export const useUsers = () => {
         queryKey: ['users'],
         queryFn: async () => {
             const { data } = await api.get('/users');
-            return data;
+            // Transform API data to match User interface
+            return (data || []).map((u: any) => ({
+                ...u,
+                name: u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : (u.name || u.email),
+                // Flatten role object to string and normalize format (STORE_MANAGER -> store-manager)
+                role: (u.role?.name || 'employee').toLowerCase().replace(/_/g, '-'), 
+            }));
         },
     });
 };
