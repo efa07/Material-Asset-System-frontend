@@ -10,7 +10,8 @@ export class AssetAssignmentsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createDto: CreateAssetAssignmentDto) {
-    const { dueDate, ...rest } = createDto;
+    const { dueDate, status, ...rest } = createDto;
+    const initialStatus = status || 'PENDING';
 
     try {
       return await this.prisma.$transaction(async (tx) => {
@@ -31,7 +32,7 @@ export class AssetAssignmentsService {
         const assignment = await tx.assetAssignment.create({
           data: {
             ...rest,
-            status: 'PENDING',
+            status: initialStatus,
             dueDate: dueDate ? new Date(dueDate) : undefined,
           },
           include: {
@@ -39,6 +40,29 @@ export class AssetAssignmentsService {
             user: true,
           },
         });
+
+        if (assignment.status === 'ACTIVE') {
+          // Close any other active assignments for the same asset
+          await tx.assetAssignment.updateMany({
+            where: {
+              assetId: assignment.assetId,
+              status: 'ACTIVE',
+              id: { not: assignment.id },
+            },
+            data: {
+              status: 'RETURNED',
+              returnedAt: new Date(),
+            },
+          });
+
+          await tx.asset.update({
+            where: { id: assignment.assetId },
+            data: {
+              assignedToUserId: assignment.userId,
+              status: 'IN_USE',
+            },
+          });
+        }
 
         return assignment;
       });

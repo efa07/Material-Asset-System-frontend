@@ -230,7 +230,7 @@ export interface CreateAssignmentRequest {
   userId: string;
   notes?: string;
   dueDate?: string;
-  status?: 'PENDING';
+  status?: 'ACTIVE' | 'PENDING';
 }
 
 export interface CreateAssetRequest {

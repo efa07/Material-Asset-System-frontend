@@ -12,9 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAssets, useDisposals } from '@/hooks/useQueries';
+import { useAssets, useDisposals, useCategories, useStores } from '@/hooks/useQueries';
 import { useAuthStore } from '@/store/auth.store';
-import { Check, X } from "lucide-react";
+import { Check, X, ChevronsUpDown } from "lucide-react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type DisposalRecord = {
   id: string;
@@ -32,6 +35,8 @@ export default function DisposalsPage() {
   const { roles } = useAuthStore();
   const isAdmin = roles.includes('admin') || roles.includes('ADMIN');
   const { data: assets = [] } = useAssets();
+  const { data: categories = [] } = useCategories();
+  const { data: stores = [] } = useStores();
   const { mutate: createDisposal } = useCreateDisposal();
   const { mutate: approveDisposal } = useApproveDisposal();
   const { mutate: rejectDisposal } = useRejectDisposal();
@@ -51,14 +56,27 @@ export default function DisposalsPage() {
   }, [dbDisposals]);
 
   const [open, setOpen] = useState(false);
+  const [comboboxOpen, setComboboxOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [storeFilter, setStoreFilter] = useState<string>("all");
 
   const [draft, setDraft] = useState({
     assetId: "",
     method: "SALE" as DisposalRecord["method"],
     reason: "",
   });
+
+  const availableAssets = useMemo(() => {
+    return assets.filter(a => {
+      const isNotDisposed = a.status !== "DISPOSED";
+      const matchesCategory = categoryFilter === "all" || a.categoryId === categoryFilter;
+      const matchesStore = storeFilter === "all" || a.storeId === storeFilter;
+      return isNotDisposed && matchesCategory && matchesStore;
+    });
+  }, [assets, categoryFilter, storeFilter]);
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -92,20 +110,81 @@ export default function DisposalsPage() {
               <DialogDescription>Submit a disposal request for review.</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label className="mb-2 block">Category Filter</Label>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <Label className="mb-2 block">Store Filter</Label>
+                   <Select value={storeFilter} onValueChange={setStoreFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="All Stores" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Stores</SelectItem>
+                      {stores.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="grid gap-2">
-                <Label>Asset</Label>
-                <Select value={draft.assetId} onValueChange={(v) => setDraft((d) => ({ ...d, assetId: v }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select asset" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {assets.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.name} ({a.barcode || a.serialNumber || '—'})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                 <Label>Asset</Label>
+                 <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={comboboxOpen}
+                      className="w-full justify-between"
+                    >
+                      {draft.assetId
+                        ? assets.find((asset) => asset.id === draft.assetId)?.name
+                        : "Select asset..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[450px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search asset by name or code..." />
+                      <CommandList>
+                        <CommandEmpty>No asset found.</CommandEmpty>
+                        <CommandGroup>
+                          {availableAssets.slice(0, 50).map((asset) => (
+                            <CommandItem
+                              key={asset.id}
+                              value={asset.name + " " + (asset.barcode || "") + " " + (asset.serialNumber || "")}
+                              onSelect={() => {
+                                setDraft((d) => ({ ...d, assetId: asset.id }));
+                                setComboboxOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  draft.assetId === asset.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {asset.name} ({asset.barcode || asset.serialNumber || '—'})
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="grid gap-2">
                 <Label>Method</Label>

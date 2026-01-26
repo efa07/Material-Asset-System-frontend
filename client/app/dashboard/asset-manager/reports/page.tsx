@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useAssets, useMaintenanceTasks } from '@/hooks/useQueries';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function ReportsPage() {
   const { data: assets = [] } = useAssets();
@@ -30,8 +32,8 @@ export default function ReportsPage() {
   const [reportPeriod, setReportPeriod] = useState("month");
 
   const totalAssetValue = assets.reduce((sum, a) => sum + Number(a.purchasePrice || 0), 0);
-  const totalPurchaseValue = assets.reduce((sum, a) => sum + Number(a.purchasePrice || 0), 0);
-  const depreciation = totalPurchaseValue - totalAssetValue;
+  const totalPurchaseValue = assets.reduce((sum, a) => sum + Number(a.purchasePrice || 0), 0); // Assuming purchasePrice is the original value
+  const depreciation = totalPurchaseValue - (assets.reduce((sum, a) => sum + Number(a.currentValue || a.purchasePrice || 0), 0)); 
 
   const assetsByStatus = {
     AVAILABLE: assets.filter((a) => a.status === "AVAILABLE").length,
@@ -53,6 +55,136 @@ export default function ReportsPage() {
     .filter((m) => m.status === "COMPLETED")
     .reduce((sum, m) => sum + (m.cost || 0), 0);
 
+  const generateReport = (reportType: string) => {
+    const doc = new jsPDF();
+    const today = new Date().toLocaleDateString();
+
+    doc.setFontSize(20);
+    doc.text(reportType, 14, 22);
+    
+    doc.setFontSize(11);
+    doc.text(`Generated on: ${today}`, 14, 30);
+    doc.text(`Period: ${reportPeriod.charAt(0).toUpperCase() + reportPeriod.slice(1)}`, 14, 36);
+
+    let startY = 45;
+
+    if (reportType === "Summary Report" || reportType === "Financial Summary") {
+       const summaryData = [
+         ['Total Assets', `${assets.length}`],
+         ['Total Asset Value', `$${totalAssetValue.toLocaleString()}`],
+         ['Total Depreciation', `$${Math.abs(depreciation).toLocaleString()}`], // Use absolute just in case
+         ['Maintenance Costs', `$${maintenanceCosts.toLocaleString()}`],
+         ['Assets Available', `${assetsByStatus.AVAILABLE}`],
+         ['Assets In Use', `${assetsByStatus.IN_USE}`]
+       ];
+
+       autoTable(doc, {
+         startY,
+         head: [['Metric', 'Value']],
+         body: summaryData,
+       });
+       
+       startY = (doc as any).lastAutoTable.finalY + 15;
+       doc.text("Assets by Category", 14, startY);
+       
+       const catData = Object.entries(assetsByCategory).map(([cat, count]) => [cat, count]);
+       autoTable(doc, {
+          startY: startY + 5,
+          head: [['Category', 'Count']],
+          body: catData
+       });
+
+    } else if (reportType === "Asset Inventory Report") {
+       const data = assets.map(a => [
+         a.name, 
+         a.code || '-', 
+         a.category?.name || '-', 
+         a.status, 
+         a.store?.name || 'No Store'
+       ]);
+       autoTable(doc, {
+         startY,
+         head: [['Name', 'Code', 'Category', 'Status', 'Location']],
+         body: data,
+       });
+
+    } else if (reportType === "Depreciation Report") {
+       const data = assets.map(a => {
+         const purchase = Number(a.purchasePrice || 0);
+         const current = Number(a.currentValue || purchase); 
+         const dep = purchase - current;
+         return [
+           a.name,
+           `$${purchase.toLocaleString()}`,
+           `$${current.toLocaleString()}`,
+           `$${dep.toLocaleString()}`,
+           a.status
+         ];
+       });
+       autoTable(doc, {
+         startY,
+         head: [['Asset', 'Purchase Price', 'Current Value', 'Depreciation', 'Status']],
+         body: data,
+       });
+
+    } else if (reportType === "Maintenance History") {
+       const data = maintenanceRecords.map(m => [
+         m.asset?.name || 'Unknown Asset',
+         m.type,
+         m.status,
+         new Date(m.maintenanceDate || m.createdAt).toLocaleDateString(),
+         `$${(m.cost || 0).toLocaleString()}`
+       ]);
+       autoTable(doc, {
+         startY,
+         head: [['Asset', 'Type', 'Status', 'Date', 'Cost']],
+         body: data,
+       });
+
+    } else if (reportType === "Assignment Report") {
+       const data = assets
+         .filter(a => a.assignedToUser || a.status === 'IN_USE')
+         .map(a => [
+           a.name,
+           a.code || '-',
+           a.assignedToUser?.firstName || 'Unknown User',
+           a.assignedToUser?.email || '-'
+         ]);
+       
+       if (data.length === 0) {
+         doc.text("No active assignments found.", 14, startY);
+       } else {
+         autoTable(doc, {
+           startY,
+           head: [['Asset', 'Code', 'Assigned To', 'Email']],
+           body: data,
+         });
+       }
+
+    } else if (reportType === "Disposal Report") {
+       const data = assets
+         .filter(a => a.status === 'DISPOSED')
+         .map(a => [
+           a.name,
+           a.code || '-',
+           a.category?.name || '-',
+           `$${(a.purchasePrice || 0).toLocaleString()}`
+         ]);
+         
+       if (data.length === 0) {
+         doc.text("No disposed assets found.", 14, startY);
+       } else {
+         autoTable(doc, {
+           startY,
+           head: [['Asset', 'Code', 'Category', 'Original Value']],
+           body: data,
+         });
+       }
+    }
+
+    doc.save(`${reportType.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -72,7 +204,7 @@ export default function ReportsPage() {
                 <SelectItem value="year">This Year</SelectItem>
               </SelectContent>
             </Select>
-            <Button>
+            <Button onClick={() => generateReport("Summary Report")}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
@@ -267,7 +399,11 @@ export default function ReportsPage() {
                   <p className="text-sm text-muted-foreground">
                     {report.description}
                   </p>
-                  <Button variant="link" className="mt-2 h-auto p-0 text-sm">
+                  <Button 
+                    variant="link" 
+                    className="mt-2 h-auto p-0 text-sm"
+                    onClick={() => generateReport(report.title)}
+                  >
                     Generate Report
                   </Button>
                 </div>

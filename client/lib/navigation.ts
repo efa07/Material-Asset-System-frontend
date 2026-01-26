@@ -105,12 +105,7 @@ export const navigationConfig: NavItem[] = [
     icon: 'Package',
     roles: ['asset-manager'],
   },
-  {
-    title: 'Categories',
-    href: '/dashboard/asset-manager/categories',
-    icon: 'FolderTree',
-    roles: ['asset-manager'],
-  },
+
   {
     title: 'Asset Assignments',
     href: '/dashboard/asset-manager/assignments',
