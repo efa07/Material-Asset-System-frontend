@@ -210,6 +210,12 @@ model AssetReturn {
   @@map("asset_returns")
 }
 
+enum DisposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model AssetDisposal {
   id           String   @id @default(uuid())
   assetId      String
@@ -218,6 +224,7 @@ model AssetDisposal {
   reason       String?
   method       String? // SALE, SCRAP, DONATION
   value        Decimal?
+  status       DisposalStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

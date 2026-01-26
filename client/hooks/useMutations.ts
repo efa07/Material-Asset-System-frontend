@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { toast } from 'sonner';
 import {
     CreateAssignmentRequest,
     CreateAssetRequest,
@@ -23,8 +24,13 @@ export const useCreateAssignment = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Asset assigned successfully');
             queryClient.invalidateQueries({ queryKey: ['assignments'] });
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to assign asset';
+            toast.error(message);
         },
     });
 };
@@ -37,8 +43,13 @@ export const useCreateShelf = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Shelf created');
             queryClient.invalidateQueries({ queryKey: ['shelves'] });
             queryClient.invalidateQueries({ queryKey: ['stores'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to create shelf';
+            toast.error(message);
         },
     });
 };
@@ -51,7 +62,12 @@ export const useCreateAsset = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Asset created');
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to create asset';
+            toast.error(message);
         },
     });
 };
@@ -64,7 +80,12 @@ export const useUpdateAsset = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Asset updated');
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update asset';
+            toast.error(message);
         },
     });
 };
@@ -77,7 +98,12 @@ export const useDeleteAsset = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Asset deleted');
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to delete asset';
+            toast.error(message);
         },
     });
 };
@@ -90,7 +116,12 @@ export const useCreateAssetCategory = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Category created');
             queryClient.invalidateQueries({ queryKey: ['categories'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to create category';
+            toast.error(message);
         },
     });
 };
@@ -103,7 +134,12 @@ export const useUpdateAssetCategory = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Category updated');
             queryClient.invalidateQueries({ queryKey: ['categories'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update category';
+            toast.error(message);
         },
     });
 };
@@ -116,7 +152,12 @@ export const useDeleteAssetCategory = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Category deleted');
             queryClient.invalidateQueries({ queryKey: ['categories'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to delete category';
+            toast.error(message);
         },
     });
 };
@@ -131,7 +172,12 @@ export const useUpdateMaintenanceTask = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Maintenance task updated');
             queryClient.invalidateQueries({ queryKey: ['maintenance-tasks'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update maintenance task';
+            toast.error(message);
         },
     });
 };
@@ -144,7 +190,12 @@ export const useCreateMaintenanceTask = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Maintenance task created');
             queryClient.invalidateQueries({ queryKey: ['maintenance-tasks'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to create maintenance task';
+            toast.error(message);
         },
     });
 };
@@ -157,8 +208,49 @@ export const useCreateDisposal = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Disposal requested');
+            queryClient.invalidateQueries({ queryKey: ['disposals'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to request disposal';
+            toast.error(message);
+        },
+    });
+};
+
+export const useApproveDisposal = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.patch(`/asset-disposals/${id}/approve`, {});
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Disposal approved');
             queryClient.invalidateQueries({ queryKey: ['disposals'] });
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to approve disposal';
+            toast.error(message);
+        },
+    });
+};
+
+export const useRejectDisposal = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.patch(`/asset-disposals/${id}/reject`, {});
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Disposal rejected');
+            queryClient.invalidateQueries({ queryKey: ['disposals'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to reject disposal';
+            toast.error(message);
         },
     });
 };
@@ -171,7 +263,12 @@ export const useUpdateDisposal = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Disposal updated');
             queryClient.invalidateQueries({ queryKey: ['disposals'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update disposal';
+            toast.error(message);
         },
     });
 };
@@ -184,7 +281,12 @@ export const useDeleteDisposal = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Disposal deleted');
             queryClient.invalidateQueries({ queryKey: ['disposals'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to delete disposal';
+            toast.error(message);
         },
     });
 };
@@ -197,8 +299,13 @@ export const useCreateReturn = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Asset returned');
             queryClient.invalidateQueries({ queryKey: ['asset-returns'] });
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to create return';
+            toast.error(message);
         },
     });
 };
@@ -211,7 +318,12 @@ export const useUpdateReturn = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Return updated');
             queryClient.invalidateQueries({ queryKey: ['asset-returns'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update return';
+            toast.error(message);
         },
     });
 };
@@ -224,7 +336,12 @@ export const useDeleteReturn = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Return deleted');
             queryClient.invalidateQueries({ queryKey: ['asset-returns'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to delete return';
+            toast.error(message);
         },
     });
 };
@@ -237,8 +354,13 @@ export const useCreateTransfer = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Transfer submitted');
             queryClient.invalidateQueries({ queryKey: ['transfer-requests'] });
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to create transfer';
+            toast.error(message);
         },
     });
 };
@@ -251,7 +373,12 @@ export const useUpdateTransfer = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Transfer updated');
             queryClient.invalidateQueries({ queryKey: ['transfer-requests'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update transfer';
+            toast.error(message);
         },
     });
 };
@@ -264,7 +391,12 @@ export const useDeleteTransfer = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Transfer deleted');
             queryClient.invalidateQueries({ queryKey: ['transfer-requests'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to delete transfer';
+            toast.error(message);
         },
     });
 };
@@ -277,7 +409,12 @@ export const useCreateStore = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Store created');
             queryClient.invalidateQueries({ queryKey: ['stores'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to create store';
+            toast.error(message);
         },
     });
 };
@@ -290,7 +427,12 @@ export const useUpdateStore = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Store updated');
             queryClient.invalidateQueries({ queryKey: ['stores'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update store';
+            toast.error(message);
         },
     });
 };
@@ -303,7 +445,12 @@ export const useDeleteStore = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Store deleted');
             queryClient.invalidateQueries({ queryKey: ['stores'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to delete store';
+            toast.error(message);
         },
     });
 };
@@ -316,8 +463,13 @@ export const useUpdateAssignment = () => {
             return response.data;
         },
         onSuccess: () => {
+            toast.success('Assignment updated');
             queryClient.invalidateQueries({ queryKey: ['assignments'] });
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update assignment';
+            toast.error(message);
         },
     });
 };

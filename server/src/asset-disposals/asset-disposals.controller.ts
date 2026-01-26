@@ -23,6 +23,18 @@ export class AssetDisposalsController {
     return this.service.create(createDto);
   }
 
+  @Patch(':id/approve')
+  @ApiOperation({ summary: 'Approve disposal' })
+  approve(@Param('id') id: string) {
+    return this.service.approve(id);
+  }
+
+  @Patch(':id/reject')
+  @ApiOperation({ summary: 'Reject disposal' })
+  reject(@Param('id') id: string) {
+    return this.service.reject(id);
+  }
+
   @Get()
   @ApiOperation({ summary: 'Get all disposal records' })
   findAll() {

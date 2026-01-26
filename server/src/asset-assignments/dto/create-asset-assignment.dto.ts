@@ -12,6 +12,7 @@ export enum AssignmentStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
   RETURNED = 'RETURNED',
+  REJECTED = 'REJECTED',
 }
 
 export class CreateAssetAssignmentDto {

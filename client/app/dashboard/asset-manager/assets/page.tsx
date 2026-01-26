@@ -152,7 +152,7 @@ export default function AssetManagerAssetsPage() {
         userId: assignmentData.userId,
         dueDate: assignmentData.dueDate || undefined,
         notes: assignmentData.notes || undefined,
-        status: "ACTIVE",
+        status: "PENDING",
       },
       {
         onSuccess: () => {
@@ -456,16 +456,7 @@ export default function AssetManagerAssetsPage() {
                             Transfer
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setActionAsset(asset);
-                              setDisposeDialogOpen(true);
-                            }}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Dispose
-                          </DropdownMenuItem>
+                        
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -557,7 +548,6 @@ export default function AssetManagerAssetsPage() {
             <Button variant="outline" onClick={() => setSelectedAsset(null)}>
               Close
             </Button>
-            <Button>Edit Asset</Button>
           </DialogFooter>
         </DialogContent>
     </Dialog>

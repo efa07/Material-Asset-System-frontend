@@ -1,136 +1,56 @@
-# AI Agent Instructions – Material Asset Management System
+# AI Agent Instructions – Material & Asset Management System (MAMS)
 
-You are working inside a **production‑grade full‑stack system** called **Material Asset Management System**. This is not a toy app. Treat it like an enterprise codebase: clean architecture, strict typing, and predictable patterns are mandatory.
+These rules make AI agents productive and safe in this codebase. Keep changes minimal, typed, and consistent with existing patterns.
 
-Your job as an AI agent is to **extend, refactor, or debug** this system **without breaking existing flows**, while following the rules below.
+## Big Picture
+- **Frontend:** Next.js App Router (client/), TypeScript strict, Tailwind + shadcn/ui.
+- **Backend:** NestJS (server/), Prisma + PostgreSQL, Swagger docs at `/docs`.
+- **Contract:** `.github/api-spec.json` is the single source of truth; never guess endpoints or DTOs.
+- **DB Schema:** See `server/prisma/schema.prisma` for relationships before changing anything.
 
----
+## Core Conventions
+- **Data fetching:** Use `client/hooks/` (`useQueries.ts`, `useMutations.ts`). No `useEffect` for API calls.
+- **HTTP client:** All calls go through `client/lib/api.ts` (Axios) which attaches NextAuth `accessToken` to `Authorization`.
+- **State:** Use Zustand. Persist only UI prefs (`theme`, `sidebarCollapsed`) via `useAppStore` partialize. Do not persist auth tokens.
+- **Types:** Mirror backend DTOs in `client/types/`. If DTOs change, update types and queries/mutations together.
+- **Nest controllers:** Routing + DTO validation only. Business logic in `*.service.ts`. Use `PrismaService`; no raw SQL.
 
-## 1. Project Overview (Big Picture)
+## Patterns Seen In Code
+- **Query keys:** `assets`, `users`, `stores`, `shelves`, `categories`, `assignments`, `maintenance-tasks`, `transfer-requests`, `disposals`, `dashboard-*`. Mutations must `invalidateQueries` for these keys.
+- **Data shaping examples:**
+   - `useUsers()`: flatten `u.role.name` to kebab-case; compose display `name`.
+   - `useAssets()`: normalize `code` and `currentValue` from various fields.
+- **Auth usage:** Axios `baseURL` uses `NEXT_PUBLIC_API_URL` (default `http://localhost:5000/api/v1`). Backend default `PORT=5000` (`server/src/main.ts`).
 
-The system manages **material assets**, **users**, **roles**, **auditing**, and **secure access control**, designed for an enterprise environment.
+## Build & Run
+- **Backend (5000):**
+   - Install: `cd server && npm install`
+   - Migrate: `npx prisma migrate dev`
+   - Seed (optional): `npm run seed`
+   - Dev: `npm run start:dev` (Swagger at `http://localhost:5000/docs`)
+- **Frontend (3000):**
+   - Install: `cd client && npm install`
+   - Dev: `npm run dev`
+   - Set `NEXT_PUBLIC_API_URL` to point at backend `/api/v1`.
 
-### Tech Stack
+## Testing & Debugging (server)
+- Unit: `npm run test`  • E2E: `npm run test:e2e`  • Coverage: `npm run test:cov`
+- Format/Lint: `npm run format` • `npm run lint`
 
-#### Frontend (`client/`)
-* **Framework**: Next.js 14+ (App Router)
-* **Language**: TypeScript (strict mode)
-* **Styling**: Tailwind CSS + shadcn/ui
-* **State Management**: Zustand (`store/useAppStore.ts`)
-* **Data Fetching**: TanStack React Query via custom hooks
-* **HTTP Client**: Axios (`lib/api.ts`)
+## Change Management
+- Update `.github/api-spec.json` whenever DTOs/controllers change.
+- Keep client/server in sync: update `client/types/`, hooks, and UI where the contract changes.
+- Add DTOs with `class-validator` in `server/src/**/dto/` and wire them via controllers to the service.
 
-#### Backend (`server/`)
-* **Framework**: NestJS (Standard Architecture)
-* **Language**: TypeScript (strict, ES2023)
-* **ORM**: Prisma (`prisma/schema.prisma`)
-* **Database**: PostgreSQL
-* **API Documentation**: OpenAPI/Swagger (Spec at `.github/api-spec.json`)
+## Where To Look First
+- **Examples:** `client/hooks/useQueries.ts`, `client/hooks/useMutations.ts` for React Query patterns.
+- **HTTP:** `client/lib/api.ts` for auth header and base URL.
+- **State:** `client/store/useAppStore.ts` for persisted UI prefs; `client/store/auth.store.ts` for ephemeral auth.
+- **API Surface:** Swagger at `/docs` and `.github/api-spec.json` for endpoints.
 
----
-
-## 2. API & Data Schema (Crucial)
-
-**The single source of truth for the API contract is `.github/api-spec.json`**.
-* **ALWAYS** read `.github/api-spec.json` when implementing frontend API calls or understanding backend capabilities.
-* **NEVER** guess endpoints or payload structures.
-* If you modify the backend `*.controller.ts` or DTOs, you imply a change to this contract.
-
-**Database Schema**:
-* The `server/prisma/schema.prisma` file defines the database structure.
-* When adding features, check this file first to understand relationships.
-
----
-
-## 3. High‑Level Architecture Rules (DO NOT VIOLATE)
-
-### Frontend Rules
-* ❌ **NO `useEffect` for data fetching**. Use `useQuery` or `useMutation`.
-* ✅ **ONLY** use custom hooks in `client/hooks/`. Create new ones if needed.
-* ✅ API calls strictly go through `lib/api.ts` which uses the Axios instance.
-* ❌ No global state in React Context. Use **Zustand** (`store/useAppStore.ts`) for app-wide state (auth, theme, notifications).
-* ✅ Use `persist` middleware in Zustand only for user preferences (theme, sidebar), not sensitive data.
-* ✅ Types in `client/types/` must mirror backend DTOs.
-
-### Backend Rules
-* ❌ No business logic in controllers. Controllers are for DTO validation and routing only.
-* ✅ Logic lives in `*.service.ts`.
-* ✅ Database access is **exclusively** via `PrismaService`.
-* ❌ No raw SQL. Use Prisma's methods.
-* ✅ **DTOs are mandatory** for all inputs. Validation decorators (`class-validator`) are required.
-* ✅ All modules are imported in `app.module.ts`.
-
----
-
-## 4. Folder Responsibilities
-
-### Frontend (`client/`)
-* `app/`: Next.js App Router pages. `(auth)` group for public auth pages. `dashboard/` for protected routes.
-* `components/ui/`: shadcn/ui primitives. **Do not modify** unless theming.
-* `components/<feature>/`: Feature-specific UI logic.
-* `hooks/`: **All** data fetching logic (`useQueries.ts`, `useMutations.ts`).
-* `store/`: Zustand stores. `headers` and `auth` logic often interact here.
-* `lib/`: Utilities. `api.ts` (Axios setup), `auth.ts` (Helpers).
-
-### Backend (`server/src/`)
-* Each feature (e.g., `assets`, `users`) has its own module folder.
-* `dto/`: Request/Response data transfer objects.
-* `common/`: Shared guards, filters, interceptors.
-* `prisma/`: Database connection service.
-
----
-
-## 5. Development Workflow
-
-### Builds & Execution
-* **Frontend**: `cd client && npm run dev` (Port 3000)
-* **Backend**: `cd server && npm run start:dev` (Port 3000/API). *Note: Ensure ports don't conflict, default Nest port is 3000, Next is 3000. Check `server/src/main.ts` or env vars.*
-
-### Database
-* **Migration**: `cd server && npx prisma migrate dev`
-* **Studio**: `cd server && npx prisma studio` (to view data)
-
-### Type Synchronization
-If you change `schema.prisma` or Backend DTOs:
-1. Run migration.
-2. Update backend `*.entity.ts` or DTOs.
-3. Update `.github/api-spec.json` (if automated) or manually ensure consistency.
-4. **Update Frontend Types** in `client/types/` to match. The frontend **will break** if types drift.
-
----
-
-## 6. Authentication & Authorization
-
-* **Mechanism**: JWT-based.
-* **Backend**: Guards in `common/guards`. Role checks using `@Roles()` decorator.
-* **Frontend**: `store/auth.store.ts` (or `useAppStore.ts`) holds user state.
-* **RBAC**: Server-side enforcement is primary. Client-side hiding is for UX only.
-
----
-
-## 7. Implementation Guidelines
-
-1. **When implementing a new feature**:
-   * **Read** `schema.prisma` to model data.
-   * **Read** `.github/api-spec.json` to stick to naming conventions (RESTful).
-   * **Create** Backend: Module -> Controller -> Service -> DTOs.
-   * **Create** Frontend: Type definition -> specialized React Query hook -> UI Component.
-
-2. **When Refactoring**:
-   * Check for breaking changes in the API contract.
-   * Ensure `useAppStore` logic remains consistent.
-   * Keep components pure where possible.
-
-3. **Common Pitfalls**:
-   * Importing server code in client (strict separation required).
-   * forgetting `export class` in DTOs.
-   * Not handling loading/error states in React Query hooks.
-
----
-
-## 8. When You Are Unsure
-
-* Check existing patterns in `server/src/users/` (Standard Backend Module) or `client/hooks/` (Standard Frontend Data Fetching).
-* Ask/Check for the latest API spec if the frontend call fails.
-* **Do not invent new architectural patterns.** Consistency is key.
+## Guardrails
+- Don’t introduce Context for global state; use Zustand.
+- Don’t add business logic in Nest controllers; put it in services.
+- Don’t store sensitive tokens in persisted state.
+- Don’t change query keys casually; they drive cache invalidation throughout the app.
 

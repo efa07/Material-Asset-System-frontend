@@ -1872,15 +1872,15 @@
               "ACTIVE",
               "PENDING",
               "COMPLETED",
-              "RETURNED"
+              "RETURNED",
+              "REJECTED"
             ],
             "default": "PENDING"
           }
         },
         "required": [
           "assetId",
-          "userId",
-          "status"
+          "userId"
         ]
       },
       "UpdateAssetAssignmentDto": {
@@ -2081,7 +2081,8 @@
       "UpdateMaintenanceDto": {
         "type": "object",
         "properties": {
-          "assetId": {
+              "RETURNED",
+              "REJECTED"
             "type": "string"
           },
           "type": {

@@ -80,6 +80,12 @@ export const navigationConfig: NavItem[] = [
     roles: ['store-manager'],
   },
   {
+    title: 'Disposal Approvals',
+    href: '/dashboard/store-manager/disposals',
+    icon: 'Trash2',
+    roles: ['store-manager'],
+  },
+  {
     title: 'Notifications',
     href: '/dashboard/store-manager/notifications',
     icon: 'Bell',
@@ -103,12 +109,6 @@ export const navigationConfig: NavItem[] = [
     title: 'Categories',
     href: '/dashboard/asset-manager/categories',
     icon: 'FolderTree',
-    roles: ['asset-manager'],
-  },
-  {
-    title: 'Register Asset',
-    href: '/dashboard/asset-manager/register',
-    icon: 'PackagePlus',
     roles: ['asset-manager'],
   },
   {

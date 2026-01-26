@@ -6,6 +6,7 @@ import { SessionProvider } from 'next-auth/react';
 import { AuthSync } from '@/components/auth/auth-sync';
 
 import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from 'sonner';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -41,6 +42,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           disableTransitionOnChange
         >
           {children}
+          <Toaster richColors closeButton position="top-right" />
         </ThemeProvider>
       </QueryClientProvider>
     </SessionProvider>

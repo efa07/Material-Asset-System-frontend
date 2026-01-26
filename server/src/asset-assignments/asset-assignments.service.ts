@@ -1,52 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Logger, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAssetAssignmentDto } from './dto/create-asset-assignment.dto';
 import { UpdateAssetAssignmentDto } from './dto/update-asset-assignment.dto';
 
 @Injectable()
 export class AssetAssignmentsService {
+  private readonly logger = new Logger(AssetAssignmentsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(createDto: CreateAssetAssignmentDto) {
     const { dueDate, ...rest } = createDto;
 
-    return this.prisma.$transaction(async (tx) => {
-      const assignment = await tx.assetAssignment.create({
-        data: {
-          ...rest,
-          dueDate: dueDate ? new Date(dueDate) : undefined,
-        },
-        include: {
-          asset: true,
-          user: true,
-        },
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const asset = await tx.asset.findUnique({ where: { id: rest.assetId } });
+        if (!asset) {
+          throw new NotFoundException('Asset not found');
+        }
+
+        const user = await tx.user.findUnique({ where: { id: rest.userId } });
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
+
+        if (asset.status === 'DISPOSED' || asset.status === 'RETIRED' || asset.status === 'LOST') {
+          throw new BadRequestException(`Cannot assign asset with status ${asset.status}`);
+        }
+
+        const assignment = await tx.assetAssignment.create({
+          data: {
+            ...rest,
+            status: 'PENDING',
+            dueDate: dueDate ? new Date(dueDate) : undefined,
+          },
+          include: {
+            asset: true,
+            user: true,
+          },
+        });
+
+        return assignment;
       });
-
-      if (assignment.status === 'ACTIVE') {
-        // Close any existing active assignments for this asset
-        await tx.assetAssignment.updateMany({
-          where: {
-            assetId: rest.assetId,
-            status: 'ACTIVE',
-            id: { not: assignment.id },
-          },
-          data: {
-            status: 'RETURNED',
-            returnedAt: new Date(),
-          },
-        });
-
-        await tx.asset.update({
-          where: { id: rest.assetId },
-          data: {
-            assignedToUserId: rest.userId,
-            status: 'IN_USE',
-          },
-        });
+    } catch (error) {
+      this.logger.error(`Failed to create assignment: ${error.message}`, error.stack);
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
       }
-
-      return assignment;
-    });
+      throw new InternalServerErrorException('Failed to create assignment due to server error');
+    }
   }
 
   findAll() {
@@ -85,6 +87,19 @@ export class AssetAssignmentsService {
       });
 
       if (assignment.status === 'ACTIVE') {
+        // Close any other active assignments for the same asset
+        await tx.assetAssignment.updateMany({
+          where: {
+            assetId: assignment.assetId,
+            status: 'ACTIVE',
+            id: { not: assignment.id },
+          },
+          data: {
+            status: 'RETURNED',
+            returnedAt: new Date(),
+          },
+        });
+
         await tx.asset.update({
           where: { id: assignment.assetId },
           data: {
@@ -103,6 +118,8 @@ export class AssetAssignmentsService {
             status: 'AVAILABLE',
           },
         });
+      } else if (assignment.status === 'PENDING' || assignment.status === 'REJECTED') {
+        // Leave asset unchanged for pending/rejected states
       }
 
       return assignment;

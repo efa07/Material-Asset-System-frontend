@@ -1,27 +1,29 @@
 'use client';
 
-import { Archive, Package, ClipboardCheck, ArrowLeftRight, AlertCircle, TrendingUp } from 'lucide-react';
+import { Archive, Package, ClipboardCheck, ArrowLeftRight, AlertCircle, TrendingUp, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { StatusBadge } from '@/components/dashboard/status-badge';
 import { Progress } from '@/components/ui/progress';
 import { AreaChartGradient } from '@/components/dashboard/area-chart-gradient';
-import { useStores, useAssets, useAssignmentRequests, useTransferRequests, useDashboardCharts } from '@/hooks/useQueries';
+import { useStores, useAssets, useAssignmentRequests, useTransferRequests, useDashboardCharts, useDisposals } from '@/hooks/useQueries';
 
 export default function StoreManagerDashboard() {
   const { data: stores, isLoading: storesLoading } = useStores();
   const { data: assets, isLoading: assetsLoading } = useAssets();
   const { data: assignmentRequests, isLoading: assignmentsLoading } = useAssignmentRequests();
   const { data: transferRequests, isLoading: transfersLoading } = useTransferRequests();
+  const { data: disposals, isLoading: disposalsLoading } = useDisposals();
   const { data: charts, isLoading: chartsLoading } = useDashboardCharts();
 
-  if (storesLoading || assetsLoading || assignmentsLoading || transfersLoading || chartsLoading) {
+  if (storesLoading || assetsLoading || assignmentsLoading || transfersLoading || chartsLoading || disposalsLoading) {
     return <div>Loading...</div>;
   }
 
   const pendingAssignments = (assignmentRequests || []).filter((r) => r.status === 'PENDING').length;
   const pendingTransfers = (transferRequests || []).filter((r) => r.status === 'PENDING').length;
+  const pendingDisposals = (disposals || []).filter((r: any) => r.status === 'PENDING').length;
   const totalAssets = assets?.length || 0;
   const totalShelves = stores?.reduce((acc, store) => acc + (store.shelves?.length || 0), 0) || 0;
 
@@ -35,7 +37,7 @@ export default function StoreManagerDashboard() {
       />
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <StatsCard
           title="Total Shelves"
           value={totalShelves}
@@ -58,6 +60,12 @@ export default function StoreManagerDashboard() {
           title="Pending Transfers"
           value={pendingTransfers}
           icon={<ArrowLeftRight className="h-5 w-5" />}
+          description="Awaiting approval"
+        />
+        <StatsCard
+          title="Pending Disposals"
+          value={pendingDisposals}
+          icon={<Trash2 className="h-5 w-5" />}
           description="Awaiting approval"
         />
       </div>

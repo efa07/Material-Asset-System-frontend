@@ -219,7 +219,7 @@ export interface Assignment {
   userId: string;
   asset?: Asset;
   user?: User;
-  status: 'ACTIVE' | 'PENDING' | 'COMPLETED' | 'RETURNED';
+  status: 'ACTIVE' | 'PENDING' | 'COMPLETED' | 'RETURNED' | 'REJECTED';
   assignedAt: string;
   dueDate?: string;
   notes?: string;
@@ -230,7 +230,7 @@ export interface CreateAssignmentRequest {
   userId: string;
   notes?: string;
   dueDate?: string;
-  status?: 'PENDING' | "ACTIVE";
+  status?: 'PENDING';
 }
 
 export interface CreateAssetRequest {
@@ -259,6 +259,19 @@ export interface CreateAssetCategoryRequest {
 
 export interface UpdateAssetCategoryRequest extends Partial<CreateAssetCategoryRequest> {
   id: string;
+}
+
+export interface AssetDisposal {
+  id: string;
+  assetId: string;
+  asset?: Asset;
+  disposalDate: string;
+  reason?: string;
+  method?: string;
+  value?: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateAssetDisposalRequest {

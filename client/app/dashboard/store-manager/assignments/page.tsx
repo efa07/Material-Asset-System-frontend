@@ -51,7 +51,7 @@ export default function AssignmentsPage() {
   const confirmAction = () => {
     if (!selectedRequest || !dialogType) return;
 
-    const status = dialogType === 'approve' ? 'APPROVED' : 'REJECTED';
+    const status = dialogType === 'approve' ? 'ACTIVE' : 'REJECTED';
     
     updateAssignment.mutate({
       id: selectedRequest.id,
