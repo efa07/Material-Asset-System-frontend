@@ -30,7 +30,7 @@ export function Navbar() {
 
   const { data: notificationsData } = useNotifications();
   const notifications = notificationsData || [];
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => n.userId === user?.id && !n.isRead).length;
 
   if (!user) return null;
 
@@ -119,17 +119,20 @@ export function Navbar() {
                 </div>
               ) : (
                 <div className="max-h-[320px] space-y-1 overflow-y-auto">
-                  {notifications.slice(0, 5).map((notification) => (
+                  {notifications
+                    .filter(n => n.userId === user?.id)
+                    .slice(0, 5)
+                    .map((notification) => (
                     <DropdownMenuItem
                       key={notification.id}
                       className={cn(
                         'flex cursor-pointer flex-col gap-1 rounded-xl p-3 transition-colors',
-                        !notification.read && 'bg-accent/70'
+                        !notification.isRead && 'bg-accent/70'
                       )}
                     >
                       <div className="flex w-full items-center gap-2">
                         <span className="text-sm font-medium">{notification.title}</span>
-                        {!notification.read && (
+                        {!notification.isRead && (
                           <span className="ml-auto h-2 w-2 rounded-full bg-primary shadow-[0_0_0_4px] shadow-primary/20" />
                         )}
                       </div>

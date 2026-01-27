@@ -513,6 +513,38 @@ export const useDeleteStore = () => {
         },
     });
 };
+export const useMarkNotificationRead = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            // Assuming the backend has a mark-read endpoint, usually patch with isRead: true
+            const response = await api.patch(`/notifications/${id}`, { isRead: true });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        },
+    });
+};
+
+export const useMarkAllNotificationsRead = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (notificationIds: string[]) => {
+            // Ideally backend has a "mark all" endpoint. If not, parallel requests.
+            // For now, let's assume we loop or send them.
+            // NotificationsController has findAll, create, update, remove.
+            // It doesn't have "mark all".
+            // So I have to loop update.
+            await Promise.all(notificationIds.map(id => api.patch(`/notifications/${id}`, { isRead: true })));
+            return true;
+        },
+        onSuccess: () => {
+            toast.success('All notifications marked as read');
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        },
+    });
+};
 
 export const useUpdateAssignment = () => {
     const queryClient = useQueryClient();

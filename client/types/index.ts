@@ -334,6 +334,7 @@ export interface CreateMaintenanceRequest {
   cost?: number;
   maintenanceDate?: string;
   status?: MaintenanceStatus;
+  reportedByUserId?: string;
 }
 
 export interface UpdateMaintenanceRequest {

@@ -1,12 +1,12 @@
 'use client';
 
-import { Archive, Package, ClipboardCheck, ArrowLeftRight, AlertCircle, TrendingUp, Trash2 } from 'lucide-react';
+import { Archive, Package, ClipboardCheck, ArrowLeftRight, AlertCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { StatusBadge } from '@/components/dashboard/status-badge';
 import { Progress } from '@/components/ui/progress';
-import { AreaChartGradient } from '@/components/dashboard/area-chart-gradient';
+import { PieChartDonut } from '@/components/dashboard/pie-chart-donut';
 import { useStores, useAssets, useAssignmentRequests, useTransferRequests, useDashboardCharts, useDisposals } from '@/hooks/useQueries';
 
 export default function StoreManagerDashboard() {
@@ -27,7 +27,16 @@ export default function StoreManagerDashboard() {
   const totalAssets = assets?.length || 0;
   const totalShelves = stores?.reduce((acc, store) => acc + (store.shelves?.length || 0), 0) || 0;
 
-  const throughputTrend = charts?.assetsTrend || [];
+  const assetsStatusData = (charts?.assetsByStatus || []).map((item: any) => ({
+    name: item.status,
+    value: item.count,
+    color: 
+      item.status === 'AVAILABLE' ? 'var(--chart-1)' :
+      item.status === 'IN_USE' ? 'var(--chart-4)' :
+      item.status === 'MAINTENANCE' ? 'var(--chart-5)' :
+      item.status === 'DISPOSED' ? 'var(--input)' : 
+      'var(--muted)'
+  }));
 
   return (
     <div className="space-y-6">
@@ -72,31 +81,34 @@ export default function StoreManagerDashboard() {
 
       {/* Store Throughput & Capacity */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
-            <CardTitle className="text-base font-medium">Store Throughput</CardTitle>
-            <CardDescription>Items processed across all stores (monthly)</CardDescription>
+            <CardTitle className="text-base font-medium">Asset Status Overview</CardTitle>
+            <CardDescription>Current status distribution of all assets</CardDescription>
           </CardHeader>
-          <CardContent>
-            <AreaChartGradient data={throughputTrend} xKey="month" yKey="throughput" />
+          <CardContent className="flex-1 pb-0">
+            <PieChartDonut data={assetsStatusData} height={300} />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="flex flex-col">
           <CardHeader>
             <CardTitle className="text-base font-medium">Store Asset Distribution</CardTitle>
             <CardDescription>Number of assets per store</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {(stores || []).map((store) => {
                const assetsInStore = assets?.filter(a => a.storeId === store.id).length || 0;
                const percentage = totalAssets > 0 ? Math.round((assetsInStore / totalAssets) * 100) : 0;
               return (
                 <div key={store.id} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{store.name}</span>
-                    <span className="text-muted-foreground">
-                      {assetsInStore} Assets
+                    <div className="flex flex-col">
+                      <span className="font-medium">{store.name}</span>
+                      <span className="text-xs text-muted-foreground">{store.location}</span>
+                    </div>
+                    <span className="text-sm font-bold">
+                      {assetsInStore} <span className="text-muted-foreground font-normal text-xs">Assets</span>
                     </span>
                   </div>
                   <Progress
@@ -142,7 +154,7 @@ export default function StoreManagerDashboard() {
                         <div className="space-y-1">
                           <p className="text-sm font-medium">{asset?.name || 'Unknown Asset'}</p>
                           <p className="text-xs text-muted-foreground line-clamp-1">
-                            {request.reason}
+                            {request.notes || (request as any).reason}
                           </p>
                         </div>
                         <StatusBadge status={request.status} />

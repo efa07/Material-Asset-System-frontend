@@ -41,6 +41,7 @@ model User {
   currentAssets     Asset[]           @relation("CurrentAssetHolder")
   transfersFrom     AssetTransfer[]   @relation("TransferFromUser")
   transfersTo       AssetTransfer[]   @relation("TransferToUser")
+  reportedMaintenance MaintenanceRecord[] @relation("ReportedMaintenance")
 
   @@map("users")
 }
@@ -255,6 +256,9 @@ model MaintenanceRecord {
   performedBy     String? // Could be external vendor or internal user
   status          MaintenanceStatus @default(SCHEDULED)
   nextScheduled   DateTime?
+
+  reportedByUserId String?
+  reportedByUser   User?   @relation("ReportedMaintenance", fields: [reportedByUserId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

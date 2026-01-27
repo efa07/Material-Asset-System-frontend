@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Plus, Search, Filter, Wrench, CheckCircle, Clock } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Plus, Search, Filter, Wrench, CheckCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
@@ -23,6 +23,8 @@ export default function MaintenancePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const [draft, setDraft] = useState({
     assetId: "",
@@ -43,6 +45,13 @@ export default function MaintenancePage() {
       return matchesSearch && matchesStatus;
     });
   }, [records, searchQuery, statusFilter, assets]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const paginatedData = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const scheduledCount = records.filter((r) => r.status === "SCHEDULED").length;
   const inProgressCount = records.filter((r) => r.status === "IN_PROGRESS").length;
@@ -206,18 +215,31 @@ export default function MaintenancePage() {
           {filtered.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground">No records found.</div>
           ) : (
-            filtered.slice(0, 20).map((r) => (
-              <div key={r.id} className="flex items-center justify-between rounded-lg border border-border/50 bg-background/50 p-4">
-                <div className="space-y-1">
-                  <p className="font-medium">{getAssetName(r.assetId)}</p>
-                  <p className="text-sm text-muted-foreground">{r.description}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {r.type} • {r.maintenanceDate ? new Date(r.maintenanceDate).toLocaleDateString() : '—'}
-                  </p>
+            <>
+              {paginatedData.map((r) => (
+                <div key={r.id} className="flex items-center justify-between rounded-lg border border-border/50 bg-background/50 p-4">
+                  <div className="space-y-1">
+                    <p className="font-medium">{getAssetName(r.assetId)}</p>
+                    <p className="text-sm text-muted-foreground">{r.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {r.type} • {r.maintenanceDate ? new Date(r.maintenanceDate).toLocaleDateString() : '—'}
+                    </p>
+                  </div>
+                  <StatusBadge status={r.status} />
                 </div>
-                <StatusBadge status={r.status} />
+              ))}
+              <div className="flex items-center justify-end gap-2 pt-4">
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {currentPage} of {Math.max(1, totalPages)}
+                </span>
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
-            ))
+            </>
           )}
         </CardContent>
       </Card>

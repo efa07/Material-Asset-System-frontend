@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAssets, useMaintenanceTasks } from '@/hooks/useQueries';
 import { useUpdateMaintenanceTask } from '@/hooks/useMutations';
 import { MaintenanceTask, MaintenanceStatus } from "@/types";
@@ -45,6 +46,11 @@ export default function ReportedIssuesPage() {
     });
   }, [reportedIssues, searchQuery, assets]);
 
+  // Group by status into categories
+  const scheduled = useMemo(() => filtered.filter((t) => t.status === "SCHEDULED"), [filtered]);
+  const completed = useMemo(() => filtered.filter((t) => t.status === "COMPLETED"), [filtered]);
+  const canceled = useMemo(() => filtered.filter((t) => t.status === "CANCELLED"), [filtered]);
+
   const handleUpdateStatus = () => {
     if (!selectedTask || !updateStatus) return;
     updateTask({
@@ -71,7 +77,7 @@ export default function ReportedIssuesPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Issues ({filtered.length})</CardTitle>
+            <CardTitle>Issues ({scheduled.length + completed.length + canceled.length})</CardTitle>
             <div className="relative w-64">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -87,44 +93,130 @@ export default function ReportedIssuesPage() {
           <div className="space-y-4">
             {isLoading ? (
                 <div className="text-center py-4">Loading issues...</div>
-            ) : filtered.length === 0 ? (
+            ) : scheduled.length + completed.length + canceled.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <AlertTriangle className="mx-auto h-12 w-12 opacity-20 mb-2" />
                 <p>No reported issues found</p>
               </div>
             ) : (
-              <div className="grid gap-4">
-                {filtered.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="grid gap-1">
-                        <div className="flex items-center gap-2">
-                             <h4 className="font-semibold">{getAssetName(task.assetId)}</h4>
-                             <span className="text-xs text-muted-foreground">{getAssetSerial(task.assetId)}</span>
+              <Tabs defaultValue="SCHEDULED" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="SCHEDULED" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Scheduled ({scheduled.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="COMPLETED" className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Completed ({completed.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="CANCELLED" className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    Canceled ({canceled.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="SCHEDULED" className="mt-4">
+                  <div className="grid gap-4">
+                    {scheduled.map((task) => (
+                      <div
+                        key={task.id}
+                        className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="grid gap-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{getAssetName(task.assetId)}</h4>
+                            <span className="text-xs text-muted-foreground">{getAssetSerial(task.assetId)}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-1">
+                            {task.description || "No description provided"}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <StatusBadge status={task.status} />
+                            <span className="text-xs text-muted-foreground">
+                              Reported: {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : 'N/A'}
+                            </span>
+                          </div>
                         </div>
-                      
-                      <p className="text-sm text-muted-foreground line-clamp-1">
-                        {task.description || "No description provided"}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <StatusBadge status={task.status} />
-                        <span className="text-xs text-muted-foreground">
-                          Reported: {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : 'N/A'}
-                        </span>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedTask(task);
+                          setUpdateStatus(task.status);
+                          setIsDetailsOpen(true);
+                        }}>
+                          View Details
+                        </Button>
                       </div>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={() => {
-                        setSelectedTask(task);
-                        setUpdateStatus(task.status);
-                        setIsDetailsOpen(true);
-                    }}>
-                      View Details
-                    </Button>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </TabsContent>
+
+                <TabsContent value="COMPLETED" className="mt-4">
+                  <div className="grid gap-4">
+                    {completed.map((task) => (
+                      <div
+                        key={task.id}
+                        className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="grid gap-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{getAssetName(task.assetId)}</h4>
+                            <span className="text-xs text-muted-foreground">{getAssetSerial(task.assetId)}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-1">
+                            {task.description || "No description provided"}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <StatusBadge status={task.status} />
+                            <span className="text-xs text-muted-foreground">
+                              Reported: {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : 'N/A'}
+                            </span>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedTask(task);
+                          setUpdateStatus(task.status);
+                          setIsDetailsOpen(true);
+                        }}>
+                          View Details
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="CANCELLED" className="mt-4">
+                  <div className="grid gap-4">
+                    {canceled.map((task) => (
+                      <div
+                        key={task.id}
+                        className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="grid gap-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{getAssetName(task.assetId)}</h4>
+                            <span className="text-xs text-muted-foreground">{getAssetSerial(task.assetId)}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-1">
+                            {task.description || "No description provided"}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <StatusBadge status={task.status} />
+                            <span className="text-xs text-muted-foreground">
+                              Reported: {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : 'N/A'}
+                            </span>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedTask(task);
+                          setUpdateStatus(task.status);
+                          setIsDetailsOpen(true);
+                        }}>
+                          View Details
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+              </Tabs>
             )}
           </div>
         </CardContent>

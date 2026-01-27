@@ -12,7 +12,6 @@ import { MaintenanceService } from './maintenance.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
 
-@ApiTags('maintenance')
 @Controller('api/v1/maintenance')
 export class MaintenanceController {
   constructor(private readonly service: MaintenanceService) {}
@@ -20,7 +19,8 @@ export class MaintenanceController {
   @Post()
   @ApiOperation({ summary: 'Create maintenance record' })
   create(@Body() createDto: CreateMaintenanceDto) {
-    return this.service.create(createDto);
+    // If reportedByUserId is in DTO, it will be used.
+    return this.service.create(createDto, createDto.reportedByUserId);
   }
 
   @Get()

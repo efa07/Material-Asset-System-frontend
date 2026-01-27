@@ -54,4 +54,9 @@ export class CreateMaintenanceDto {
   @IsEnum(MaintenanceStatus)
   @IsOptional()
   status?: MaintenanceStatus;
+
+  @ApiProperty({ required: false })
+  @IsUUID()
+  @IsOptional()
+  reportedByUserId?: string;
 }

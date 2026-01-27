@@ -84,7 +84,8 @@ export default function EmployeeMyAssetsPage() {
       assetId: selectedAsset.id,
       type: "ISSUE_REPORT",
       description: issueDescription,
-      status: "SCHEDULED"
+      status: "SCHEDULED",
+      reportedByUserId: currentUser?.id
     }, {
       onSuccess: () => {
         setIsReportDialogOpen(false);
