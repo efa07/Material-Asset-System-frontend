@@ -28,6 +28,7 @@ export const useCreateMaintenance = () => {
             toast.success('Maintenance request submitted');
             queryClient.invalidateQueries({ queryKey: ['maintenance-tasks'] });
             queryClient.invalidateQueries({ queryKey: ['assets'] });
+            queryClient.invalidateQueries({ queryKey: ['user'] });
         },
         onError: (error: any) => {
             const message = error?.response?.data?.message || 'Failed to submit maintenance request';

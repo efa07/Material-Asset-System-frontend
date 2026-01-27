@@ -27,7 +27,11 @@ export class UsersService {
       where: { id },
       include: {
         role: true,
-        currentAssets: true,
+        currentAssets: {
+          include: {
+            maintenanceLogs: true
+          }
+        },
         assignments: {
           include: {
             asset: true,

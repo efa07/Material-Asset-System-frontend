@@ -105,6 +105,8 @@ export interface Asset {
   assignedToUserId?: string | null;
   assignedToUser?: User;
 
+  maintenanceLogs?: MaintenanceTask[];
+
   createdAt: string;
   updatedAt: string;
 }
