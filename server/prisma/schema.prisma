@@ -37,6 +37,7 @@ model User {
   requestedWorkflows Workflow[]        @relation("Requester")
   auditLogs         AuditLog[]
 
+  // User Assets (Virtual relation)
   currentAssets     Asset[]           @relation("CurrentAssetHolder")
   transfersFrom     AssetTransfer[]   @relation("TransferFromUser")
   transfersTo       AssetTransfer[]   @relation("TransferToUser")

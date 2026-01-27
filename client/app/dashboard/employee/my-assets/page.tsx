@@ -26,19 +26,28 @@ import {
 } from "lucide-react";
 import type { Asset } from "@/types";
 import { useAppStore } from "@/store/useAppStore";
-import { useAssignments } from "@/hooks/useQueries";
+import { useUser } from "@/hooks/useQueries";
+import { useCreateMaintenance } from "@/hooks/useMutations";
 
 export default function EmployeeMyAssetsPage() {
-  const { user } = useAppStore();
-  const { data: assignments = [] } = useAssignments();
+  const { user: currentUser } = useAppStore();
+  const { data: user, isLoading, error } = useUser(currentUser?.id);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [issueDescription, setIssueDescription] = useState("");
 
-  const myAssets = assignments
-    .filter((a) => a.userId === user?.id && a.status === 'ACTIVE' && a.asset)
-    .map((a) => a.asset!);
+  const createMaintenance = useCreateMaintenance();
+
+  const myAssets = (user?.currentAssets || []);
+  console.log(currentUser); 
+  if (isLoading) {
+    return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-500">Error loading assets.</div>;
+  }
 
   const filteredAssets = myAssets.filter((asset) => {
     return (
@@ -48,17 +57,27 @@ export default function EmployeeMyAssetsPage() {
   });
 
   const handleReportIssue = () => {
-    // In a real app, this would create a maintenance request
-    setIsReportDialogOpen(false);
-    setIssueDescription("");
-    setSelectedAsset(null);
+    if (!selectedAsset) return;
+
+    createMaintenance.mutate({
+      assetId: selectedAsset.id,
+      type: "ISSUE_REPORT",
+      description: issueDescription,
+      status: "SCHEDULED"
+    }, {
+      onSuccess: () => {
+        setIsReportDialogOpen(false);
+        setIssueDescription("");
+        setSelectedAsset(null);
+      }
+    });
   };
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="My Assigned Assets"
-        description="View and manage assets assigned to you (mock)"
+        description="View and manage assets assigned to you"
       />
 
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
@@ -196,7 +215,7 @@ export default function EmployeeMyAssetsPage() {
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Category</p>
                     <p className="font-medium capitalize">
-                      {selectedAsset.category.toLowerCase().replace("_", " ")}
+                      {selectedAsset.category?.name || "Unknown"}
                     </p>
                   </div>
                   <div className="space-y-1">

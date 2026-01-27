@@ -20,6 +20,8 @@ export interface User {
   department?: string;
   createdAt: string;
   lastLogin?: string;
+  currentAssets?: Asset[];
+  assignments?: Assignment[];
 }
 
 // Asset Status
@@ -212,6 +214,8 @@ export interface NavItem {
   children?: NavItem[];
 }
 
+export type AssignmentStatus = 'ACTIVE' | 'PENDING' | 'COMPLETED' | 'RETURNED' | 'REJECTED';
+
 // Assignment
 export interface Assignment {
   id: string;
@@ -219,7 +223,7 @@ export interface Assignment {
   userId: string;
   asset?: Asset;
   user?: User;
-  status: 'ACTIVE' | 'PENDING' | 'COMPLETED' | 'RETURNED' | 'REJECTED';
+  status: AssignmentStatus;
   assignedAt: string;
   dueDate?: string;
   notes?: string;
@@ -318,6 +322,16 @@ export interface CreateShelfRequest {
 
 export interface UpdateShelfRequest extends Partial<CreateShelfRequest> {
   id: string;
+}
+
+export interface CreateMaintenanceRequest {
+  assetId: string;
+  type: string;
+  description?: string;
+  performedBy?: string;
+  cost?: number;
+  maintenanceDate?: string;
+  status?: MaintenanceStatus;
 }
 
 export interface UpdateMaintenanceRequest {

@@ -11,7 +11,7 @@ export class AssetAssignmentsService {
 
   async create(createDto: CreateAssetAssignmentDto) {
     const { dueDate, status, ...rest } = createDto;
-    const initialStatus = status || 'PENDING';
+    const initialStatus = 'PENDING';
 
     try {
       return await this.prisma.$transaction(async (tx) => {
@@ -65,6 +65,9 @@ export class AssetAssignmentsService {
         }
 
         return assignment;
+      }, {
+        maxWait: 5000, // default: 2000
+        timeout: 20000, // default: 5000
       });
     } catch (error) {
       this.logger.error(`Failed to create assignment: ${error.message}`, error.stack);

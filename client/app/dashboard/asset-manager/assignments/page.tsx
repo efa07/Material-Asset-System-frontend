@@ -9,6 +9,7 @@ import { Asset } from "@/types";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +32,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, ArrowLeftRight, Loader2 } from "lucide-react";
+import {
+  MoreHorizontal,
+  ArrowLeftRight,
+  Loader2,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 export default function AssetAssignmentsPage() {
@@ -42,8 +52,41 @@ export default function AssetAssignmentsPage() {
   const [reassignAsset, setReassignAsset] = useState<Asset | null>(null);
   const [targetUserId, setTargetUserId] = useState<string>("");
 
+  // Pagination and Search State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   // Filter assets that have an assigned user
   const assignedAssets = assets?.filter((asset) => asset.assignedToUserId) || [];
+
+  // Filter based on search query
+  const filteredAssets = assignedAssets.filter((asset) => {
+    const query = searchQuery.toLowerCase();
+    const assetName = asset.name.toLowerCase();
+    const serial = (asset.serialNumber || "").toLowerCase();
+    const userName = asset.assignedToUser
+      ? `${asset.assignedToUser.firstName || ""} ${asset.assignedToUser.lastName || ""}`.toLowerCase()
+      : "";
+
+    return (
+      assetName.includes(query) ||
+      serial.includes(query) ||
+      userName.includes(query)
+    );
+  });
+
+  // Pagination logic
+  const totalItems = filteredAssets.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const currentAssets = filteredAssets.slice(startIndex, endIndex);
+
+  // Reset page when search changes
+  if (currentPage > totalPages && totalPages > 0) {
+    setCurrentPage(1);
+  }
 
   const handleReassign = () => {
     if (!reassignAsset || !targetUserId) return;
@@ -138,7 +181,11 @@ export default function AssetAssignmentsPage() {
   ];
 
   if (isLoading) {
-    return <div className="p-8">Loading...</div>;
+    return (
+      <div className="flex h-[50vh] w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
@@ -148,11 +195,78 @@ export default function AssetAssignmentsPage() {
         description="Monitor assets currently assigned to employees."
       />
 
-      <DataTable
-        columns={columns}
-        data={assignedAssets}
-        emptyMessage="No assets are currently assigned to any user."
-      />
+      <div className="flex items-center justify-between">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search assets, users, or serial..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      <div className="rounded-md border">
+        <DataTable
+          columns={columns}
+          data={currentAssets}
+          emptyMessage={
+            searchQuery
+              ? "No matching assignments found."
+              : "No assets are currently assigned to any user."
+          }
+          className="border-0 shadow-none"
+        />
+      </div>
+
+      <div className="flex items-center justify-between px-2">
+        <div className="text-sm text-muted-foreground">
+          Showing <strong>{startIndex + 1}</strong>-
+          <strong>{Math.min(endIndex, totalItems)}</strong> of{" "}
+          <strong>{totalItems}</strong> assignments
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="text-sm font-medium w-[100px] text-center">
+             Page {currentPage} of {totalPages || 1}
+          </div>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages || totalPages === 0}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            className="h-8 w-8 p-0"
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages || totalPages === 0}
+          >
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
       <Dialog
         open={!!reassignAsset}

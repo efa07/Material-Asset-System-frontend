@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +44,10 @@ import {
   UserCheck,
   ArrowRightLeft,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 import type { Asset } from "@/types";
 import { useAssets, useCategories, useStores, useUsers } from "@/hooks/useQueries";
@@ -91,17 +95,20 @@ export default function AssetManagerAssetsPage() {
   const [newAsset, setNewAsset] = useState({
     name: "",
     serialNumber: "",
-  categoryId: categories[0]?.id ?? "",
+    categoryId: categories[0]?.id ?? "",
     description: "",
     purchaseDate: "",
     purchasePrice: "",
     storeId: "",
   });
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const filteredAssets = useMemo(() => {
-    const list = assetsData || [];
-    return list.filter((asset) => {
+    const assets = assetsData || [];
+    return assets.filter((asset) => {
       const matchesSearch =
         (asset.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         (asset.serialNumber || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,6 +119,18 @@ export default function AssetManagerAssetsPage() {
       return matchesSearch && matchesStatus && matchesCategory;
     });
   }, [assetsData, searchQuery, statusFilter, categoryFilter]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, categoryFilter]);
+
+  // Pagination Logic
+  const totalItems = filteredAssets.length;
+  const totalPages = Math.ceil(totalItems / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const currentAssets = filteredAssets.slice(startIndex, endIndex);
 
   const handleAddAsset = () => {
     createAsset(

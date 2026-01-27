@@ -16,6 +16,22 @@ export const useAssets = () => {
     });
 };
 
+export const useUser = (id?: string) => {
+    return useQuery<User>({
+        queryKey: ['user', id],
+        queryFn: async () => {
+             if (!id) throw new Error("User ID is required");
+             const { data } = await api.get(`/users/${id}`);
+             return {
+                ...data,
+                name: data.firstName && data.lastName ? `${data.firstName} ${data.lastName}` : (data.name || data.email),
+                role: (data.role?.name || 'employee').toLowerCase().replace(/_/g, '-'),
+             };
+        },
+        enabled: !!id,
+    });
+};
+
 export const useUsers = () => {
     return useQuery<User[]>({
         queryKey: ['users'],
@@ -82,6 +98,8 @@ export const useAuditLogs = () => {
         },
     });
 };
+
+
 
 export const useMaintenanceTasks = () => {
     return useQuery<MaintenanceTask[]>({

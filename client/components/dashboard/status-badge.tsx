@@ -2,9 +2,9 @@
 
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import type { AssetStatus, RequestStatus, MaintenanceStatus } from '@/types';
+import type { AssetStatus, RequestStatus, MaintenanceStatus, AssignmentStatus } from '@/types';
 
-type Status = AssetStatus | RequestStatus | MaintenanceStatus;
+type Status = AssetStatus | RequestStatus | MaintenanceStatus | AssignmentStatus;
 
 interface StatusBadgeProps {
   status: Status;
@@ -12,6 +12,15 @@ interface StatusBadgeProps {
 }
 
 const statusConfig: Record<Status, { label: string; className: string }> = {
+  // Assignment Status
+  ACTIVE: {
+    label: 'Active',
+    className: 'bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 border-emerald-500/25',
+  },
+  RETURNED: {
+    label: 'Returned',
+    className: 'bg-muted text-muted-foreground border-border/70',
+  },
   // Asset Status
   AVAILABLE: {
     label: 'Available',

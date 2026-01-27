@@ -17,6 +17,7 @@ export class UsersService {
     return this.prisma.user.findMany({
       include: {
         role: true,
+        currentAssets: true,
       },
     });
   }
@@ -26,6 +27,12 @@ export class UsersService {
       where: { id },
       include: {
         role: true,
+        currentAssets: true,
+        assignments: {
+          include: {
+            asset: true,
+          },
+        },
       },
     });
   }

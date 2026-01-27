@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppStore } from "@/store/useAppStore";
-import { useAssets, useAssignments, useNotifications } from "@/hooks/useQueries";
+import { useUser, useNotifications } from "@/hooks/useQueries";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatusBadge } from "@/components/dashboard/status-badge";
@@ -21,18 +21,19 @@ import Link from "next/link";
 
 export default function EmployeeDashboard() {
   const { user: currentUser } = useAppStore();
-  const { data: assets = [] } = useAssets();
-  const { data: assignments = [] } = useAssignments();
+  const { data: user } = useUser(currentUser?.id);
   const { data: notifications = [] } = useNotifications();
 
-  const myAssignments = assignments.filter(
-    (a) => a.userId === currentUser?.id && a.status === "ACTIVE"
+  const userAssignments = user?.assignments || [];
+
+  const myAssignments = userAssignments.filter(
+    (a) => a.status === "ACTIVE"
   );
-  const pendingRequests = assignments.filter(
-    (a) => a.userId === currentUser?.id && a.status === "PENDING"
+  const pendingRequests = userAssignments.filter(
+    (a) => a.status === "PENDING"
   );
   const myNotifications = notifications.filter(
-    (n) => n.userId === currentUser?.id && !n.read
+    (n) => n.userId === currentUser?.id && !n.isRead
   );
 
   const engagementTrend = [
@@ -43,10 +44,6 @@ export default function EmployeeDashboard() {
     { month: "May", requests: 11 },
     { month: "Jun", requests: 10 },
   ];
-
-  const getAssetDetails = (assetId: string) => {
-    return assets.find((a) => a.id === assetId);
-  };
 
   return (
     <div className="space-y-6">
@@ -78,9 +75,7 @@ export default function EmployeeDashboard() {
         />
         <StatsCard
           title="Total Assigned"
-          value={
-            assignments.filter((a) => a.userId === currentUser?.id).length
-          }
+          value={userAssignments.length}
           icon={<CheckCircle className="h-5 w-5" />}
           description="All time"
           trend={{ value: 2.1, label: "lifetime growth" }}
@@ -125,7 +120,7 @@ export default function EmployeeDashboard() {
                 </div>
               ) : (
                 myAssignments.slice(0, 5).map((assignment) => {
-                  const asset = getAssetDetails(assignment.assetId);
+                  const asset = assignment.asset;
                   return (
                     <div
                       key={assignment.id}
@@ -148,7 +143,7 @@ export default function EmployeeDashboard() {
                         <StatusBadge status={assignment.status} />
                         <p className="mt-1 text-xs text-muted-foreground">
                           Since{" "}
-                          {new Date(assignment.assignedDate).toLocaleDateString()}
+                          {new Date(assignment.assignedAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -180,7 +175,7 @@ export default function EmployeeDashboard() {
                 </div>
               ) : (
                 pendingRequests.slice(0, 5).map((request) => {
-                  const asset = getAssetDetails(request.assetId);
+                  const asset = request.asset;
                   return (
                     <div
                       key={request.id}
@@ -196,7 +191,7 @@ export default function EmployeeDashboard() {
                           </p>
                           <p className="text-sm text-muted-foreground">
                             Requested{" "}
-                            {new Date(request.assignedDate).toLocaleDateString()}
+                            {new Date(request.assignedAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -209,40 +204,6 @@ export default function EmployeeDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="h-auto flex-col py-4 bg-transparent" asChild>
-              <Link href="/dashboard/employee/request">
-                <Plus className="mb-2 h-6 w-6" />
-                <span>Request Asset</span>
-              </Link>
-            </Button>
-            <Button variant="outline" className="h-auto flex-col py-4 bg-transparent" asChild>
-              <Link href="/dashboard/employee/my-assets">
-                <Package className="mb-2 h-6 w-6" />
-                <span>My Assets</span>
-              </Link>
-            </Button>
-            <Button variant="outline" className="h-auto flex-col py-4 bg-transparent" asChild>
-              <Link href="/dashboard/employee/report-issue">
-                <FileText className="mb-2 h-6 w-6" />
-                <span>Report Issue</span>
-              </Link>
-            </Button>
-            <Button variant="outline" className="h-auto flex-col py-4 bg-transparent" asChild>
-              <Link href="/dashboard/employee/notifications">
-                <Bell className="mb-2 h-6 w-6" />
-                <span>Notifications</span>
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

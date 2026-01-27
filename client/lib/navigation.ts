@@ -10,44 +10,7 @@ export interface NavItem {
 }
 
 export const navigationConfig: NavItem[] = [
-  // Admin Navigation
-  {
-    title: 'Admin Dashboard',
-    href: '/dashboard/admin',
-    icon: 'LayoutDashboard',
-    roles: ['admin'],
-  },
-  {
-    title: 'User Management',
-    href: '/dashboard/admin/users',
-    icon: 'Users',
-    roles: ['admin'],
-  },
-  {
-    title: 'Roles & Permissions',
-    href: '/dashboard/admin/roles',
-    icon: 'Shield',
-    roles: ['admin'],
-  },
-  {
-    title: 'Store Registration',
-    href: '/dashboard/admin/stores',
-    icon: 'Building2',
-    roles: ['admin'],
-  },
-  {
-    title: 'Audit Logs',
-    href: '/dashboard/admin/audit-logs',
-    icon: 'FileText',
-    roles: ['admin'],
-  },
-  {
-    title: 'System Settings',
-    href: '/dashboard/admin/settings',
-    icon: 'Settings',
-    roles: ['admin'],
-  },
-
+ 
   // Store Manager Navigation
   {
     title: 'Store Dashboard',
@@ -73,12 +36,7 @@ export const navigationConfig: NavItem[] = [
     icon: 'ClipboardCheck',
     roles: ['store-manager'],
   },
-  {
-    title: 'Transfer Approvals',
-    href: '/dashboard/store-manager/transfers',
-    icon: 'ArrowLeftRight',
-    roles: ['store-manager'],
-  },
+
   {
     title: 'Disposal Approvals',
     href: '/dashboard/store-manager/disposals',
@@ -119,9 +77,9 @@ export const navigationConfig: NavItem[] = [
     roles: ['asset-manager'],
   },
   {
-    title: 'Status Tracking',
-    href: '/dashboard/asset-manager/tracking',
-    icon: 'Activity',
+    title: 'Reported Issues',
+    href: '/dashboard/asset-manager/reported-issues',
+    icon: 'AlertTriangle',
     roles: ['asset-manager'],
   },
   {
@@ -134,12 +92,6 @@ export const navigationConfig: NavItem[] = [
     title: 'Reports',
     href: '/dashboard/asset-manager/reports',
     icon: 'FileBarChart',
-    roles: ['asset-manager'],
-  },
-  {
-    title: 'Asset History',
-    href: '/dashboard/asset-manager/history',
-    icon: 'History',
     roles: ['asset-manager'],
   },
 
@@ -176,24 +128,7 @@ export const navigationConfig: NavItem[] = [
     icon: 'LayoutDashboard',
     roles: ['employee'],
   },
-  {
-    title: 'Request Assignment',
-    href: '/dashboard/employee/request-assignment',
-    icon: 'PackagePlus',
-    roles: ['employee'],
-  },
-  {
-    title: 'Request Transfer',
-    href: '/dashboard/employee/request-transfer',
-    icon: 'ArrowLeftRight',
-    roles: ['employee'],
-  },
-  {
-    title: 'Request Return',
-    href: '/dashboard/employee/request-return',
-    icon: 'RotateCcw',
-    roles: ['employee'],
-  },
+
   {
     title: 'My Assets',
     href: '/dashboard/employee/my-assets',
@@ -207,25 +142,6 @@ export const navigationConfig: NavItem[] = [
     roles: ['employee'],
   },
 
-  // Auditor Navigation
-  {
-    title: 'Audit Dashboard',
-    href: '/dashboard/auditor',
-    icon: 'LayoutDashboard',
-    roles: ['auditor'],
-  },
-  {
-    title: 'Asset Lifecycle',
-    href: '/dashboard/auditor/lifecycle',
-    icon: 'GitBranch',
-    roles: ['auditor'],
-  },
-  {
-    title: 'Activity Logs',
-    href: '/dashboard/auditor/activity',
-    icon: 'ScrollText',
-    roles: ['auditor'],
-  },
 ];
 
 export function getNavigationForRole(role: UserRole): NavItem[] {

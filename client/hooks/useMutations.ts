@@ -14,7 +14,27 @@ import {
     CreateAssetTransferRequest,
     UpdateAssetTransferRequest,
     CreateShelfRequest,
+    CreateMaintenanceRequest,
 } from '@/types';
+
+export const useCreateMaintenance = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (data: CreateMaintenanceRequest) => {
+            const response = await api.post('/maintenance', data);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Maintenance request submitted');
+            queryClient.invalidateQueries({ queryKey: ['maintenance-tasks'] });
+            queryClient.invalidateQueries({ queryKey: ['assets'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to submit maintenance request';
+            toast.error(message);
+        },
+    });
+};
 
 export const useCreateAssignment = () => {
     const queryClient = useQueryClient();
@@ -49,6 +69,44 @@ export const useCreateShelf = () => {
         },
         onError: (error: any) => {
             const message = error?.response?.data?.message || 'Failed to create shelf';
+            toast.error(message);
+        },
+    });
+};
+
+
+export const useUpdateShelf = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, ...data }: { id: string, name: string, description?: string, storeId: string }) => {
+            const response = await api.patch(`/shelves/${id}`, data);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Shelf updated');
+            queryClient.invalidateQueries({ queryKey: ['shelves'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to update shelf';
+            toast.error(message);
+        },
+    });
+};
+
+export const useDeleteShelf = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.delete(`/shelves/${id}`);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Shelf deleted');
+            queryClient.invalidateQueries({ queryKey: ['shelves'] });
+            queryClient.invalidateQueries({ queryKey: ['stores'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to delete shelf';
             toast.error(message);
         },
     });
