@@ -185,18 +185,18 @@ export default function EmployeeMyAssetsPage() {
             <Card 
               key={asset.id} 
               className={cn(
-                "group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-border/50 bg-card/50 backdrop-blur-sm",
+                "group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/50 border-border/50 bg-card",
                 "animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards"
               )}
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none" />
+              <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all duration-300" />
               
               <CardHeader className="p-5 pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-background border shadow-sm group-hover:border-primary/30 group-hover:shadow-md transition-all">
-                      <Box className="h-6 w-6 text-primary" />
+                    <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <Box className="h-6 w-6" />
                        {hasActiveIssue && (
                           <span className="absolute -top-1 -right-1 flex h-3 w-3">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>

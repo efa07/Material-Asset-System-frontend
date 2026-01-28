@@ -173,46 +173,50 @@ export default function AssetOverviewPage() {
 
 			{/* Quick Stats */}
 			<div className="grid gap-4 md:grid-cols-4">
-				<Card className="hover:shadow-md transition-shadow">
+				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/50">
+          <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all duration-300" />
 					<CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">
 						  <div className="text-2xl font-bold">{statusCounts.total}</div>
 						  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Total Assets</p>
             </div>
-            <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
               <Package className="h-6 w-6" />
             </div>
 					</CardContent>
 				</Card>
-				<Card className="hover:shadow-md transition-shadow border-emerald-500/20 bg-emerald-500/5">
+				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-emerald-500/50 border-emerald-500/20 bg-emerald-500/5">
+          <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/0 group-hover:bg-emerald-600 transition-all duration-300" />
 					<CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">
 						  <div className="text-2xl font-bold text-emerald-600">{statusCounts.available}</div>
 						  <p className="text-xs text-emerald-600/80 font-medium uppercase tracking-wide">Available</p>
             </div>
-            <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+            <div className="h-12 w-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
               <CheckCircle2 className="h-6 w-6" />
             </div>
 					</CardContent>
 				</Card>
-				<Card className="hover:shadow-md transition-shadow border-blue-500/20 bg-blue-500/5">
+				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-blue-500/50 border-blue-500/20 bg-blue-500/5">
+          <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/0 group-hover:bg-blue-600 transition-all duration-300" />
 					<CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">
 						  <div className="text-2xl font-bold text-blue-600">{statusCounts.inUse}</div>
 						  <p className="text-xs text-blue-600/80 font-medium uppercase tracking-wide">In Use</p>
             </div>
-             <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+             <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
               <Activity className="h-6 w-6" />
             </div>
 					</CardContent>
 				</Card>
-				<Card className="hover:shadow-md transition-shadow border-amber-500/20 bg-amber-500/5">
+				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-amber-500/50 border-amber-500/20 bg-amber-500/5">
+          <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/0 group-hover:bg-amber-600 transition-all duration-300" />
 					<CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">
 						  <div className="text-2xl font-bold text-amber-600">{statusCounts.maintenance}</div>
 						  <p className="text-xs text-amber-600/80 font-medium uppercase tracking-wide">In Maintenance</p>
             </div>
-             <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
+             <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
               <AlertCircle className="h-6 w-6" />
             </div>
 					</CardContent>

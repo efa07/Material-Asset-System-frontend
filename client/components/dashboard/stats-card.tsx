@@ -43,10 +43,11 @@ export function StatsCard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden border border-border/50 bg-card shadow-sm transition-all duration-200 hover:shadow-md',
+        'group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/50',
         className
       )}
     >
+      <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all duration-300" />
       <CardContent className="p-6">
         <div className="flex justify-between items-start">
           <div className="space-y-4">
@@ -86,10 +87,7 @@ export function StatsCard({
 
           {icon && (
             <div
-              className="flex h-12 w-12 items-center justify-center rounded-xl border border-border/50 bg-secondary/50"
-              style={{
-                color: accent,
-              }}
+              className={`flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors`}
             >
               {icon}
             </div>

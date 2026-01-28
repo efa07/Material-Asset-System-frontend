@@ -68,11 +68,12 @@ export default function StoreDisposalsPage() {
       <PageHeader title="Disposal Approvals" description="Review and approve asset disposal requests" />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all hover:shadow-md hover:border-amber-500/50">
+          <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/0 group-hover:bg-amber-500 transition-all duration-300" />
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
-                <Clock className="h-5 w-5 text-amber-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <Clock className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{pending}</p>
@@ -81,11 +82,12 @@ export default function StoreDisposalsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all hover:shadow-md hover:border-emerald-500/50">
+          <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/0 group-hover:bg-emerald-500 transition-all duration-300" />
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
-                <CheckCircle className="h-5 w-5 text-emerald-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                <CheckCircle className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{approved}</p>
@@ -94,11 +96,12 @@ export default function StoreDisposalsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+        <Card className="group relative overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm transition-all hover:shadow-md hover:border-red-500/50">
+          <div className="absolute top-0 left-0 w-1 h-full bg-red-500/0 group-hover:bg-red-500 transition-all duration-300" />
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10">
-                <X className="h-5 w-5 text-red-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10 text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                <X className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{rejected}</p>

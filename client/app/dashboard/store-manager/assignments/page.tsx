@@ -72,12 +72,13 @@ export default function AssignmentsPage() {
     const requester = (request as any).user || users.find((u) => u.id === (request as any).userId || u.id === (request as any).requesterId);
 
     return (
-      <Card key={request.id} className="transition-all hover:shadow-md">
+      <Card key={request.id} className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/50">
+        <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all duration-300" />
         <CardContent className="p-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-primary" />
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <User className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium text-sm">{requester?.name || requester?.firstName || 'Unknown User'}</p>
