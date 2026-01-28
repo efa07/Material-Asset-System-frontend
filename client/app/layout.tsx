@@ -22,7 +22,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'INSA Asset Management System',
   description: 'Enterprise Material & Asset Management System for government security organization',
-  generator: 'v0.app',
+  
   icons: {
     icon: [
       {
@@ -49,7 +49,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
-      <body className="font-sans antialiased bg-background text-foreground">
+      <body className="font-sans antialiased bg-background text-foreground relative">
+        <div className="fixed inset-0 pointer-events-none bg-grid [mask-image:linear-gradient(to_bottom,white,transparent)]" />
         <Providers>{children}</Providers>
         <Analytics />
       </body>

@@ -35,11 +35,28 @@ export function Navbar() {
   if (!user) return null;
 
   const handleLogout = async () => {
-    // Clear stores
-    useAuthStore.getState().clearAuth();
-    logout(); // useAppStore logout (from hook destructuring)
-    
-    await signOut({ callbackUrl: '/login' });
+    try {
+      const response = await fetch('/api/auth/logout');
+      const data = await response.json();
+
+      // Clear stores
+      useAuthStore.getState().clearAuth();
+      logout(); // useAppStore logout (from hook destructuring)
+      
+      await signOut({ redirect: false });
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback
+      useAuthStore.getState().clearAuth();
+      logout();
+      await signOut({ callbackUrl: '/login' });
+    }
   };
 
   const initials = user.name

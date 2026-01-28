@@ -47,11 +47,15 @@ export default function AssetManagerDashboard() {
 
   const lifecycleTrend = (() => {
     const now = new Date();
-    const months = Array.from({ length: 6 }, (_, index) => {
-      const date = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
+    const weeks = Array.from({ length: 8 }, (_, index) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (7 - index) * 7);
+      const weekStart = new Date(d.setDate(d.getDate() - d.getDay())); // Start of week (Sunday)
       return {
-        key: `${date.getFullYear()}-${date.getMonth() + 1}`,
-        month: date.toLocaleString("default", { month: "short" }),
+        start: weekStart,
+        end: new Date(new Date(weekStart).setDate(weekStart.getDate() + 6)),
+        label: `W${index + 1}`, // Simplified label or use date
+        displayDate: weekStart.toLocaleDateString("default", { day: "numeric", month: "short" }),
         onboarded: 0,
       };
     });
@@ -59,12 +63,11 @@ export default function AssetManagerDashboard() {
     (assets || []).forEach((asset) => {
       if (!asset.createdAt) return;
       const created = new Date(asset.createdAt);
-      const key = `${created.getFullYear()}-${created.getMonth() + 1}`;
-      const bucket = months.find((m) => m.key === key);
+      const bucket = weeks.find((w) => created >= w.start && created <= w.end);
       if (bucket) bucket.onboarded += 1;
     });
 
-    return months.map(({ key, ...rest }) => rest);
+    return weeks.map((w) => ({ week: w.displayDate, onboarded: w.onboarded }));
   })();
 
   return (
@@ -109,7 +112,7 @@ export default function AssetManagerDashboard() {
           <div>
             <CardTitle className="text-lg font-semibold">Asset Velocity</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Onboarded assets over the last 6 months
+              Onboarded assets over the last 8 weeks
             </p>
           </div>
           <Button variant="ghost" size="sm" className="gap-2">
@@ -118,7 +121,7 @@ export default function AssetManagerDashboard() {
           </Button>
         </CardHeader>
         <CardContent>
-          <AreaChartGradient data={lifecycleTrend} xKey="month" yKey="onboarded" />
+          <AreaChartGradient data={lifecycleTrend} xKey="week" yKey="onboarded" />
         </CardContent>
       </Card>
 

@@ -21,6 +21,7 @@ function requestRefreshOfAccessToken(token: JWT) {
         return {
             ...token,
             accessToken: tokens.access_token,
+            idToken: (tokens.id_token as string) ?? token.idToken,
             expiresAt: Math.floor(Date.now() / 1000 + (tokens.expires_in as number)),
             refreshToken: tokens.refresh_token ?? token.refreshToken,
         };
@@ -49,6 +50,7 @@ export const authOptions: NextAuthOptions = {
         // Save the access token and refresh token in the JWT on the initial login
         return {
           accessToken: account.access_token,
+          idToken: account.id_token,
           expiresAt: account.expires_at,
           refreshToken: account.refresh_token,
           user: token,
@@ -69,6 +71,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       // Send properties to the client, like an access_token from a provider.
       session.accessToken = token.accessToken;
+      session.idToken = token.idToken;
       session.error = token.error;
       return session;
     },
