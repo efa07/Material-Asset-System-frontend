@@ -10,12 +10,12 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('dashboard/stats')
+  @Get('api/v1/dashboard/stats')
   getDashboardStats() {
     return this.appService.getDashboardStats();
   }
 
-  @Get('dashboard/charts')
+  @Get('api/v1/dashboard/charts')
   async getDashboardCharts() {
     const stats: any = await this.appService.getDashboardStats();
 

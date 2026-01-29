@@ -185,7 +185,8 @@ export default function AssetOverviewPage() {
             </div>
 					</CardContent>
 				</Card>
-				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-emerald-500/50 border-emerald-500/20 bg-emerald-500/5">
+
+				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-emerald-500/50 border-emerald-500/20 bg-card">
           <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/0 group-hover:bg-emerald-600 transition-all duration-300" />
 					<CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">
@@ -197,7 +198,7 @@ export default function AssetOverviewPage() {
             </div>
 					</CardContent>
 				</Card>
-				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-blue-500/50 border-blue-500/20 bg-blue-500/5">
+				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-blue-500/50 border-blue-500/20 bg-card">
           <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/0 group-hover:bg-blue-600 transition-all duration-300" />
 					<CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">
@@ -209,7 +210,7 @@ export default function AssetOverviewPage() {
             </div>
 					</CardContent>
 				</Card>
-				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-amber-500/50 border-amber-500/20 bg-amber-500/5">
+				<Card className="group relative overflow-hidden transition-all hover:shadow-md hover:border-amber-500/50 border-amber-500/20 bg-card">
           <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/0 group-hover:bg-amber-600 transition-all duration-300" />
 					<CardContent className="p-6 flex items-center justify-between">
             <div className="space-y-1">

@@ -63,7 +63,7 @@ export function PieChartDonut({ data, height = 300 }: PieChartDonutProps) {
           />
           <Legend 
             verticalAlign="bottom" 
-            height={36} 
+            height={42} 
             iconType="circle"
           />
         </PieChart>

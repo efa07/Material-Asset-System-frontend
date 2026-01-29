@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  providers: [],
-  exports: [],
+  imports: [PassportModule.register({ defaultStrategy: 'jwt' }), ConfigModule],
+  providers: [JwtStrategy],
+  exports: [PassportModule],
 })
-export class AuthModule {
-  // TODO: Implement Keycloak integration
-  // This is a placeholder module for future authentication logic
-}
+export class AuthModule {}

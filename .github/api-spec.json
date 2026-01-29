@@ -15,7 +15,7 @@
         ]
       }
     },
-    "/dashboard/stats": {
+    "/api/v1/dashboard/stats": {
       "get": {
         "operationId": "AppController_getDashboardStats",
         "parameters": [],
@@ -29,7 +29,7 @@
         ]
       }
     },
-    "/dashboard/charts": {
+    "/api/v1/dashboard/charts": {
       "get": {
         "operationId": "AppController_getDashboardCharts",
         "parameters": [],

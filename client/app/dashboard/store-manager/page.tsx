@@ -34,7 +34,7 @@ export default function StoreManagerDashboard() {
       item.status === 'AVAILABLE' ? 'var(--chart-1)' :
       item.status === 'IN_USE' ? 'var(--chart-4)' :
       item.status === 'MAINTENANCE' ? 'var(--chart-5)' :
-      item.status === 'DISPOSED' ? 'var(--input)' : 
+      item.status === 'DISPOSED' ? 'var(--destructive)' : 
       'var(--muted)'
   }));
 

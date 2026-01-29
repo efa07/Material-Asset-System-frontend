@@ -19,9 +19,17 @@ import { PerformanceModule } from './performance/performance.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AuditModule } from './audit/audit.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'; // for brute-force and DDOS protection 
 
 @Module({
   imports: [
+     ThrottlerModule.forRoot([{
+      ttl: 60000, // 1 minute
+      limit: 100, // 100 requests per minute
+    }]),
+    
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -44,6 +52,12 @@ import { AuditModule } from './audit/audit.module';
     AuditModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,{
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },{
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    }],
 })
 export class AppModule {}

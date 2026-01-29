@@ -38,6 +38,9 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.KEYCLOAK_CLIENT_ID!,
       clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
       issuer: process.env.KEYCLOAK_ISSUER!,
+      httpOptions: {
+        timeout: 10000,
+      },
     }),
   ],
   session: {
@@ -54,9 +57,7 @@ export const authOptions: NextAuthOptions = {
           expiresAt: account.expires_at,
           refreshToken: account.refresh_token,
           user: token,
-          // Extract roles if needed, depends on Keycloak config. 
-          // Often in resource_access or realm_access. 
-          // For now, let's assume decoding happens client side or we pass the token.
+         
         };
       }
 
