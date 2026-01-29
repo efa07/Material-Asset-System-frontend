@@ -182,20 +182,21 @@ export default function AssetAssignmentsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[50vh] w-full items-center justify-center">
+      <div className="flex h-[50vh] w-full items-center justify-center bg-blue-300">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 p-4">
       <PageHeader
         title="Asset Assignments"
         description="Monitor assets currently assigned to employees."
+        className="mb-8"
       />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between py-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -205,7 +206,7 @@ export default function AssetAssignmentsPage() {
               setSearchQuery(e.target.value);
               setCurrentPage(1);
             }}
-            className="pl-9"
+            className="pl-8"
           />
         </div>
       </div>
@@ -219,23 +220,21 @@ export default function AssetAssignmentsPage() {
               ? "No matching assignments found."
               : "No assets are currently assigned to any user."
           }
-          className="border-0 shadow-none"
         />
       </div>
 
-      <div className="flex items-center justify-between px-2">
+      <div className="flex items-center justify-between py-4">
         <div className="text-sm text-muted-foreground">
-          Showing <strong>{startIndex + 1}</strong>-
-          <strong>{Math.min(endIndex, totalItems)}</strong> of{" "}
-          <strong>{totalItems}</strong> assignments
+          Showing {startIndex + 1}-{Math.min(endIndex, totalItems)} of {totalItems} assignments
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 lg:flex"
             onClick={() => setCurrentPage(1)}
             disabled={currentPage === 1}
           >
+            <span className="sr-only">Go to first page</span>
             <ChevronsLeft className="h-4 w-4" />
           </Button>
           <Button
@@ -244,25 +243,30 @@ export default function AssetAssignmentsPage() {
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
           >
+            <span className="sr-only">Go to previous page</span>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="text-sm font-medium w-[100px] text-center">
+          
+          <div className="text-sm font-medium">
              Page {currentPage} of {totalPages || 1}
           </div>
+
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages || totalPages === 0}
           >
+            <span className="sr-only">Go to next page</span>
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 lg:flex"
             onClick={() => setCurrentPage(totalPages)}
             disabled={currentPage === totalPages || totalPages === 0}
           >
+            <span className="sr-only">Go to last page</span>
             <ChevronsRight className="h-4 w-4" />
           </Button>
         </div>

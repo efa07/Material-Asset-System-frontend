@@ -50,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased bg-background text-foreground relative">
-        <div className="fixed inset-0 pointer-events-none bg-grid [mask-image:linear-gradient(to_bottom,white,transparent)]" />
+        <div className="fixed inset-0 pointer-events-none bg-dots [mask-image:linear-gradient(to_bottom,white,transparent)]" />
         <Providers>{children}</Providers>
         <Analytics />
       </body>
