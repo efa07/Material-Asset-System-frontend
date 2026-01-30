@@ -21,7 +21,7 @@ import Link from "next/link";
 
 export default function EmployeeDashboard() {
   const { user: currentUser } = useAppStore();
-  const { data: user } = useUser(currentUser?.id);
+  const { data: user } = useUser(currentUser?.email);
   const { data: notifications = [] } = useNotifications();
 
   const userAssignments = user?.assignments || [];

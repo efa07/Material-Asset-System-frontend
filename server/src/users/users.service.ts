@@ -41,6 +41,25 @@ export class UsersService {
     });
   }
 
+  findOneByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+      include: {
+        role: true,
+        currentAssets: {
+          include: {
+            maintenanceLogs: true
+          }
+        },
+        assignments: {
+          include: {
+            asset: true,
+          },
+        },
+      },
+    });
+  }
+
   update(id: string, updateUserDto: UpdateUserDto) {
     return this.prisma.user.update({
       where: { id },

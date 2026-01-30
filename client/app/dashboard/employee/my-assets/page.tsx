@@ -38,6 +38,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import type { Asset } from "@/types";
 import { useAppStore } from "@/store/useAppStore";
@@ -47,25 +54,56 @@ import { cn } from "@/lib/utils";
 
 export default function EmployeeMyAssetsPage() {
   const { user: currentUser } = useAppStore();
-  const { data: user, isLoading, error } = useUser(currentUser?.id);
+  const { data: user, isLoading, error } = useUser(currentUser?.email);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [issueDescription, setIssueDescription] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("name-asc");
 
   const createMaintenance = useCreateMaintenance();
 
   const myAssets = user?.currentAssets || [];
 
+  const statusOptions = Array.from(
+    new Set(myAssets.map((asset) => asset.status).filter(Boolean))
+  ) as string[];
+
   const filteredAssets = myAssets.filter((asset) => {
     const searchLower = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = (
       asset.name.toLowerCase().includes(searchLower) ||
       (asset.serialNumber || "").toLowerCase().includes(searchLower) ||
       (asset.category?.name || "").toLowerCase().includes(searchLower)
     );
+    const matchesStatus = statusFilter === "all" || asset.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
+
+  const sortedAssets = [...filteredAssets].sort((a, b) => {
+    if (sortBy === "name-asc") return a.name.localeCompare(b.name);
+    if (sortBy === "name-desc") return b.name.localeCompare(a.name);
+    if (sortBy === "category-asc")
+      return (a.category?.name || "").localeCompare(b.category?.name || "");
+    if (sortBy === "category-desc")
+      return (b.category?.name || "").localeCompare(a.category?.name || "");
+    if (sortBy === "assigned-desc")
+      return (b.createdAt || "").localeCompare(a.createdAt || "");
+    if (sortBy === "assigned-asc")
+      return (a.createdAt || "").localeCompare(b.createdAt || "");
+    return 0;
+  });
+
+  const assetsWithActiveIssues = myAssets.filter((asset) =>
+    asset.maintenanceLogs?.some(
+      (log) =>
+        (log.status === "SCHEDULED" || log.status === "IN_PROGRESS") &&
+        log.type === "ISSUE_REPORT"
+    )
+  ).length;
 
   const handleReportIssue = (asset: Asset) => {
     setSelectedAsset(asset);
@@ -119,18 +157,115 @@ export default function EmployeeMyAssetsPage() {
           title="My Assets"
           description="Manage and track the equipment assigned to you."
         />
-        <div className="flex w-full md:w-auto items-center gap-2">
-          <div className="relative flex-1 md:w-72">
-             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
-            <Input
-              placeholder="Search assets..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-background/50 border-input/50 backdrop-blur-sm focus-visible:bg-background transition-all shadow-sm"
-            />
-          </div>
-        </div>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Total assets</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-2xl font-semibold">{myAssets.length}</div>
+            <div className="rounded-full bg-primary/10 p-2 text-primary">
+              <Package className="h-4 w-4" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Active issue reports</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-2xl font-semibold">{assetsWithActiveIssues}</div>
+            <div className="rounded-full bg-yellow-500/10 p-2 text-yellow-600">
+              <AlertTriangle className="h-4 w-4" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Unique categories</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-2xl font-semibold">
+              {new Set(myAssets.map((asset) => asset.category?.name).filter(Boolean)).size}
+            </div>
+            <div className="rounded-full bg-primary/10 p-2 text-primary">
+              <Layers className="h-4 w-4" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Status types</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between">
+            <div className="text-2xl font-semibold">{statusOptions.length}</div>
+            <div className="rounded-full bg-primary/10 p-2 text-primary">
+              <Activity className="h-4 w-4" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-border/50">
+        <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 items-center gap-2">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, serial, category"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            {(searchQuery || statusFilter !== "all") && (
+              <Button
+                variant="ghost"
+                className="hidden sm:inline-flex"
+                onClick={() => {
+                  setSearchQuery("");
+                  setStatusFilter("all");
+                }}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[170px]">
+                <SelectValue placeholder="Filter status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {statusOptions.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-[190px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name-asc">Name (A → Z)</SelectItem>
+                <SelectItem value="name-desc">Name (Z → A)</SelectItem>
+                <SelectItem value="category-asc">Category (A → Z)</SelectItem>
+                <SelectItem value="category-desc">Category (Z → A)</SelectItem>
+                <SelectItem value="assigned-desc">Assigned (newest)</SelectItem>
+                <SelectItem value="assigned-asc">Assigned (oldest)</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="text-xs text-muted-foreground sm:pl-2">
+              {filteredAssets.length} result{filteredAssets.length !== 1 ? "s" : ""}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {isLoading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -168,15 +303,22 @@ export default function EmployeeMyAssetsPage() {
                 : "You don't have any assets assigned to you at the moment."}
             </p>
           </div>
-          {searchQuery && (
-            <Button variant="outline" onClick={() => setSearchQuery("")} className="mt-2">
-              Clear Search
+          {(searchQuery || statusFilter !== "all") && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("");
+                setStatusFilter("all");
+              }}
+              className="mt-2"
+            >
+              Clear Filters
             </Button>
           )}
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredAssets.map((asset, index) => {
+          {sortedAssets.map((asset, index) => {
              const hasActiveIssue = asset.maintenanceLogs?.some(
               (log) => (log.status === "SCHEDULED" || log.status === "IN_PROGRESS") && log.type === "ISSUE_REPORT"
             );
@@ -214,6 +356,11 @@ export default function EmployeeMyAssetsPage() {
                       </CardDescription>
                     </div>
                   </div>
+                  {hasActiveIssue && (
+                    <Badge variant="outline" className="text-[10px] text-yellow-600 border-yellow-200 bg-yellow-50">
+                      Needs attention
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
 
@@ -235,6 +382,24 @@ export default function EmployeeMyAssetsPage() {
                     <div className="flex">
                       <StatusBadge status={asset.status} />
                     </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
+                      <Calendar className="h-3 w-3" /> Assigned
+                    </span>
+                    <p className="text-xs font-medium">
+                      {asset.createdAt ? format(new Date(asset.createdAt), "PP") : "N/A"}
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
+                      <Package className="h-3 w-3" /> Condition
+                    </span>
+                    <p className="text-xs font-medium capitalize">
+                      {asset.condition || "Good"}
+                    </p>
                   </div>
                 </div>
               </CardContent>

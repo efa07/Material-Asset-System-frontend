@@ -35,19 +35,19 @@ export const useAssets = () => {
     });
 };
 
-export const useUser = (id?: string) => {
+export const useUser = (email?: string) => {
     return useQuery<User>({
-        queryKey: ['user', id],
+        queryKey: ['user', email],
         queryFn: async () => {
-             if (!id) throw new Error("User ID is required");
-             const { data } = await api.get(`/users/${id}`);
+             if (!email) throw new Error("User email is required");
+             const { data } = await api.get(`/users/email/${email}`);
              return {
                 ...data,
                 name: data.firstName && data.lastName ? `${data.firstName} ${data.lastName}` : (data.name || data.email),
                 role: (data.role?.name || 'employee').toLowerCase().replace(/_/g, '-'),
              };
         },
-        enabled: !!id,
+        enabled: !!email,
     });
 };
 
