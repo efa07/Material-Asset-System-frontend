@@ -105,14 +105,14 @@
   --chart-axis-label: hsl(215, 20%, 65%);
   
   /* Sidebar */
-  --sidebar: hsl(222, 47%, 7%);
-  --sidebar-foreground: hsl(210, 40%, 98%);
-  --sidebar-primary: hsl(252, 100%, 72%);
-  --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(217, 32%, 18%);
-  --sidebar-accent-foreground: hsl(210, 40%, 98%);
-  --sidebar-border: hsl(217, 32%, 18%);
-  --sidebar-ring: hsl(252, 100%, 72%);
+  --sidebar: hsl(240, 10%, 3.9%);
+  --sidebar-foreground: hsl(240, 5%, 64.9%);
+  --sidebar-primary: hsl(0, 0%, 98%);
+  --sidebar-primary-foreground: hsl(240, 5.9%, 10%);
+  --sidebar-accent: hsl(240, 3.7%, 15.9%);
+  --sidebar-accent-foreground: hsl(0, 0%, 98%);
+  --sidebar-border: hsl(240, 3.7%, 15.9%);
+  --sidebar-ring: hsl(240, 4.9%, 83.9%);
 
   /* Custom tokens */
   --success: hsl(150, 60%, 45%);
