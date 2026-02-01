@@ -101,6 +101,43 @@ Material-Asset-System/
    npm run dev
    ```
 
+## 🐳 Containerized Setup
+
+The stack runs via Docker for a zero-install setup.
+
+1. **Environment files**
+   - Backend: copy or update [server/.env](server/.env) with your existing values (Keycloak, API secrets, etc.).
+   - Frontend: copy or update [client/.env](client/.env) with your existing values. `NEXT_PUBLIC_API_URL` is overridden to point at the server container by default.
+   - Database: optional, set these in a root `.env` (same folder as [docker-compose.yml](docker-compose.yml)) if you want custom Postgres creds:
+     ```env
+     POSTGRES_USER=postgres
+     POSTGRES_PASSWORD=postgres
+     POSTGRES_DB=mams
+     # Optional: use a remote DB instead of the bundled container
+     # DATABASE_URL=postgresql://<user>:<password>@<host>:5432/<db>?sslmode=require
+     ```
+
+2. **Build and start**
+   ```bash
+   docker compose up --build
+   ```
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000 (Swagger at `/docs`)
+   - Postgres: exposed on localhost:5432
+
+3. **How it wires together**
+   - [docker-compose.yml](docker-compose.yml) starts three services: `db` (Postgres 16), `server` (NestJS), and `client` (Next.js).
+   - `server` reads envs from `server/.env` and overrides `DATABASE_URL` to point at `db` unless you provide your own `DATABASE_URL`.
+   - `client` reads envs from `client/.env` and overrides `NEXT_PUBLIC_API_URL` to `http://server:5000/api/v1` for in-network calls.
+
+4. **Using your Neon database**
+   - Set `DATABASE_URL` in the root `.env` to your Neon connection string. This bypasses the local Postgres container while keeping the rest of the stack running.
+
+5. **Rebuilding after dependency changes**
+   ```bash
+   docker compose build --no-cache
+   ```
+
 ## 📜 Business Use Cases (BUCs)
 This project implements the following core business requirements:
 1. **Store Registration:** Management of storage facilities.

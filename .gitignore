@@ -88,3 +88,8 @@ server/prisma/migrations/
 .cache/
 .turbo/
 .parcel-cache/
+
+
+.github
+.github/
+.gitignore
