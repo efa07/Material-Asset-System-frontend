@@ -67,33 +67,33 @@
 
 .dark {
   /* Modern Dark - Clean Neutral */
-  --background: hsl(240, 10%, 3.9%);
+  --background: hsl(230, 18%, 8%);
   --foreground: hsl(0, 0%, 98%);
   
-  --card: hsl(240, 10%, 3.9%);
+  --card: hsl(230, 18%, 10%);
   --card-foreground: hsl(0, 0%, 98%);
   
-  --popover: hsl(240, 10%, 3.9%);
+  --popover: hsl(230, 18%, 10%);
   --popover-foreground: hsl(0, 0%, 98%);
   
-  --primary: hsl(0, 0%, 98%);
-  --primary-foreground: hsl(240, 5.9%, 10%);
+  --primary: hsl(251, 100%, 55%);
+  --primary-foreground: hsl(0, 0%, 100%);
   
-  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary: hsl(210, 40%, 16%);
   --secondary-foreground: hsl(0, 0%, 98%);
   
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
+  --muted: hsl(125, 41%, 16%);
+  --muted-foreground: hsl(215, 16%, 70%);
   
-  --accent: hsl(240, 3.7%, 15.9%);
+  --accent: hsl(138, 39%, 18%);
   --accent-foreground: hsl(0, 0%, 98%);
   
-  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive: hsl(0, 100%, 50%);
   --destructive-foreground: hsl(0, 0%, 98%);
   
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --ring: hsl(240, 4.9%, 83.9%);
+  --border: hsl(230, 18%, 18%);
+  --input: hsl(230, 18%, 18%);
+  --ring: hsl(251, 100%, 55%);
   
   /* Charts - Updated for better contrast against dark bg */
   --chart-1: hsl(220, 70%, 50%);
@@ -105,14 +105,14 @@
   --chart-axis-label: hsl(215, 20%, 65%);
   
   /* Sidebar */
-  --sidebar: hsl(240, 10%, 3.9%);
-  --sidebar-foreground: hsl(240, 5%, 64.9%);
-  --sidebar-primary: hsl(0, 0%, 98%);
-  --sidebar-primary-foreground: hsl(240, 5.9%, 10%);
-  --sidebar-accent: hsl(240, 3.7%, 15.9%);
+  --sidebar: hsl(230, 18%, 10%);
+  --sidebar-foreground: hsl(0, 0%, 98%);
+  --sidebar-primary: hsl(251, 100%, 55%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(230, 18%, 14%);
   --sidebar-accent-foreground: hsl(0, 0%, 98%);
-  --sidebar-border: hsl(240, 3.7%, 15.9%);
-  --sidebar-ring: hsl(240, 4.9%, 83.9%);
+  --sidebar-border: hsl(230, 18%, 18%);
+  --sidebar-ring: hsl(251, 100%, 55%);
 
   /* Custom tokens */
   --success: hsl(150, 60%, 45%);

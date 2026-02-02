@@ -12,8 +12,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (status === 'authenticated') {
       // Let the AuthSync component handle the redirection based on roles
-      // Or simply redirect to home which will then redirect to dashboard
-      // router.replace('/'); 
+      // or redirect to /
       return; 
     }
 

@@ -24,6 +24,7 @@ function requestRefreshOfAccessToken(token: JWT) {
             idToken: (tokens.id_token as string) ?? token.idToken,
             expiresAt: Math.floor(Date.now() / 1000 + (tokens.expires_in as number)),
             refreshToken: tokens.refresh_token ?? token.refreshToken,
+
         };
     })
     .catch((error) => {
@@ -69,6 +70,7 @@ export const authOptions: NextAuthOptions = {
       // Access token has expired, try to update it
       return requestRefreshOfAccessToken(token);
     },
+    
     async session({ session, token }) {
       // Send properties to the client, like an access_token from a provider.
       session.accessToken = token.accessToken;

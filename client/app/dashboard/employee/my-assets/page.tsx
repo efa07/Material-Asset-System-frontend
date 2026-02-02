@@ -160,49 +160,64 @@ export default function EmployeeMyAssetsPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total assets</CardTitle>
+        <Card className="relative overflow-hidden border-border/40 bg-card/60 backdrop-blur transition-all duration-300 hover:shadow-[0_0_20px_-12px_var(--primary)] hover:border-primary/30 group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Package className="h-20 w-20 transform -rotate-12 translate-x-4 -translate-y-4 text-primary" />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total assets</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-2xl font-semibold">{myAssets.length}</div>
-            <div className="rounded-full bg-primary/10 p-2 text-primary">
-              <Package className="h-4 w-4" />
+          <CardContent className="flex items-center justify-between relative z-10">
+            <div className="text-3xl font-bold tracking-tight text-foreground">{myAssets.length}</div>
+            <div className="rounded-xl bg-primary/10 p-2.5 text-primary ring-1 ring-inset ring-primary/20 group-hover:scale-110 transition-transform duration-300">
+              <Package className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Active issue reports</CardTitle>
+
+        <Card className="relative overflow-hidden border-border/40 bg-card/60 backdrop-blur transition-all duration-300 hover:shadow-[0_0_20px_-12px_rgba(234,179,8,0.5)] hover:border-yellow-500/30 group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <AlertTriangle className="h-20 w-20 transform -rotate-12 translate-x-4 -translate-y-4 text-yellow-500" />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Active issues</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-2xl font-semibold">{assetsWithActiveIssues}</div>
-            <div className="rounded-full bg-yellow-500/10 p-2 text-yellow-600">
-              <AlertTriangle className="h-4 w-4" />
+          <CardContent className="flex items-center justify-between relative z-10">
+            <div className="text-3xl font-bold tracking-tight text-foreground">{assetsWithActiveIssues}</div>
+            <div className="rounded-xl bg-yellow-500/10 p-2.5 text-yellow-600 ring-1 ring-inset ring-yellow-500/20 group-hover:scale-110 transition-transform duration-300">
+              <AlertTriangle className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Unique categories</CardTitle>
+
+        <Card className="relative overflow-hidden border-border/40 bg-card/60 backdrop-blur transition-all duration-300 hover:shadow-[0_0_20px_-12px_var(--primary)] hover:border-primary/30 group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Layers className="h-20 w-20 transform -rotate-12 translate-x-4 -translate-y-4 text-primary" />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Categories</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-2xl font-semibold">
+          <CardContent className="flex items-center justify-between relative z-10">
+            <div className="text-3xl font-bold tracking-tight text-foreground">
               {new Set(myAssets.map((asset) => asset.category?.name).filter(Boolean)).size}
             </div>
-            <div className="rounded-full bg-primary/10 p-2 text-primary">
-              <Layers className="h-4 w-4" />
+            <div className="rounded-xl bg-primary/10 p-2.5 text-primary ring-1 ring-inset ring-primary/20 group-hover:scale-110 transition-transform duration-300">
+              <Layers className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Status types</CardTitle>
+
+        <Card className="relative overflow-hidden border-border/40 bg-card/60 backdrop-blur transition-all duration-300 hover:shadow-[0_0_20px_-12px_var(--primary)] hover:border-primary/30 group">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <Activity className="h-20 w-20 transform -rotate-12 translate-x-4 -translate-y-4 text-primary" />
+          </div>
+          <CardHeader className="pb-2 relative z-10">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Status types</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-between">
-            <div className="text-2xl font-semibold">{statusOptions.length}</div>
-            <div className="rounded-full bg-primary/10 p-2 text-primary">
-              <Activity className="h-4 w-4" />
+          <CardContent className="flex items-center justify-between relative z-10">
+            <div className="text-3xl font-bold tracking-tight text-foreground">{statusOptions.length}</div>
+            <div className="rounded-xl bg-primary/10 p-2.5 text-primary ring-1 ring-inset ring-primary/20 group-hover:scale-110 transition-transform duration-300">
+              <Activity className="h-5 w-5" />
             </div>
           </CardContent>
         </Card>
@@ -319,103 +334,106 @@ export default function EmployeeMyAssetsPage() {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {sortedAssets.map((asset, index) => {
-             const hasActiveIssue = asset.maintenanceLogs?.some(
+            const hasActiveIssue = asset.maintenanceLogs?.some(
               (log) => (log.status === "SCHEDULED" || log.status === "IN_PROGRESS") && log.type === "ISSUE_REPORT"
             );
             
             return (
-            <Card 
-              key={asset.id} 
-              className={cn(
-                "group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/50 border-border/50 bg-card",
-                "animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards"
-              )}
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <div className="absolute top-0 left-0 w-1 h-full bg-primary/0 group-hover:bg-primary transition-all duration-300" />
-              
-              <CardHeader className="p-5 pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      <Box className="h-6 w-6" />
-                       {hasActiveIssue && (
-                          <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
-                          </span>
-                       )}
-                    </div>
-                    <div className="space-y-1">
-                      <CardTitle className="text-base font-semibold leading-none truncate max-w-[140px]" title={asset.name}>
-                        {asset.name}
-                      </CardTitle>
-                      <CardDescription className="text-xs truncate max-w-[140px] flex items-center gap-1.5">
-                        <Layers className="h-3 w-3" />
-                        {asset.category?.name || "Uncategorized"}
-                      </CardDescription>
-                    </div>
-                  </div>
-                  {hasActiveIssue && (
-                    <Badge variant="outline" className="text-[10px] text-yellow-600 border-yellow-200 bg-yellow-50">
-                      Needs attention
-                    </Badge>
-                  )}
-                </div>
-              </CardHeader>
+              <Card 
+                key={asset.id} 
+                className={cn(
+                  "group relative overflow-hidden transition-all duration-500",
+                  "border-border/40 bg-card/60 backdrop-blur-md",
+                  "hover:border-primary/50 hover:shadow-[0_8px_30px_-10px_rgba(var(--primary),0.2)]",
+                  "hover:-translate-y-1",
+                  "animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards"
+                )}
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                {/* Futuristic Gradient overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Decorative top glow */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/60 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700 ease-out" />
 
-              <CardContent className="p-5 pt-2 space-y-4">
-                <div className="h-px w-full bg-border/50" />
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
-                      <Barcode className="h-3 w-3" /> Serial
-                    </span>
-                    <p className="font-mono text-xs font-medium truncate bg-muted/50 p-1 px-2 rounded-md border border-border/50" title={asset.serialNumber || "N/A"}>
-                      {asset.serialNumber || "N/A"}
-                    </p>
+                <CardHeader className="p-5 pb-3 relative z-10">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3.5">
+                      <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-muted/50 to-muted/10 border border-white/10 shadow-inner group-hover:from-primary/20 group-hover:to-primary/5 group-hover:border-primary/30 transition-all duration-300">
+                        <Box className="h-6 w-6 text-foreground/70 group-hover:text-primary transition-colors duration-300" />
+                         {hasActiveIssue && (
+                            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
+                            </span>
+                         )}
+                      </div>
+                      <div className="space-y-1">
+                        <CardTitle className="text-base font-bold tracking-tight leading-none truncate max-w-[140px] group-hover:text-primary transition-colors duration-300" title={asset.name}>
+                          {asset.name}
+                        </CardTitle>
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary/40 group-hover:bg-primary group-hover:shadow-[0_0_8px_rgba(var(--primary),0.6)] transition-all duration-300" />
+                            <span className="truncate max-w-[120px]">{asset.category?.name || "Uncategorized"}</span>
+                        </div>
+                      </div>
+                    </div>
+                     <div className="scale-90 origin-right transition-transform group-hover:scale-100">
+                       <StatusBadge status={asset.status} />
+                     </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
-                       <Activity className="h-3 w-3" /> Status
-                    </span>
-                    <div className="flex">
-                      <StatusBadge status={asset.status} />
+                </CardHeader>
+
+                <CardContent className="p-5 pt-2 space-y-4 relative z-10">
+                  {/* Tech divider */}
+                  <div className="h-px w-full bg-gradient-to-r from-transparent via-border/60 to-transparent" />
+                  
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-2">
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] uppercase tracking-widest text-muted-foreground/70 font-semibold flex items-center gap-1.5">
+                        <Barcode className="h-3 w-3 text-primary/60" /> Serial
+                      </span>
+                      <div className="font-mono text-[10px] text-foreground/90 truncate bg-primary/5 border border-primary/10 rounded-md px-2 py-1.5 relative overflow-hidden group-hover:border-primary/30 transition-colors">
+                        <span className="relative z-10">{asset.serialNumber || "N/A"}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] uppercase tracking-widest text-muted-foreground/70 font-semibold flex items-center gap-1.5">
+                        <Package className="h-3 w-3 text-primary/60" /> Condition
+                      </span>
+                       <p className="text-xs font-medium text-foreground/90 pl-1 capitalize flex items-center h-full">
+                        {asset.condition || "Good"}
+                       </p>
+                    </div>
+
+                    <div className="space-y-1.5 col-span-2">
+                       <span className="text-[9px] uppercase tracking-widest text-muted-foreground/70 font-semibold flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3 text-primary/60" /> Assigned
+                      </span>
+                      <p className="text-xs font-medium text-foreground/80 pl-1">
+                         {asset.createdAt ? format(new Date(asset.createdAt), "PPP") : "N/A"}
+                      </p>
                     </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
-                      <Calendar className="h-3 w-3" /> Assigned
-                    </span>
-                    <p className="text-xs font-medium">
-                      {asset.createdAt ? format(new Date(asset.createdAt), "PP") : "N/A"}
-                    </p>
-                  </div>
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
-                      <Package className="h-3 w-3" /> Condition
-                    </span>
-                    <p className="text-xs font-medium capitalize">
-                      {asset.condition || "Good"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
+                </CardContent>
 
-              <CardFooter className="p-4 pt-0 bg-transparent">
-                <Button 
-                  className="w-full gap-2 transition-all bg-secondary/50 hover:bg-secondary text-secondary-foreground border-0 shadow-none hover:shadow-sm" 
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleViewDetails(asset)}
-                >
-                  View Details
-                </Button>
-              </CardFooter>
+                <CardFooter className="p-4 pt-0 bg-transparent relative z-10">
+                  <Button 
+                    className="w-full group/btn relative overflow-hidden border-primary/20 hover:border-primary/50 text-foreground hover:text-primary-foreground bg-background hover:bg-primary transition-all duration-300" 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewDetails(asset)}
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      View Details 
+                      <Layers className="h-3 w-3 group-hover/btn:rotate-180 transition-transform duration-500" />
+                    </span>
+                  </Button>
+                </CardFooter>
             </Card>
-          )})}
+            );
+          })}
         </div>
       )}
 

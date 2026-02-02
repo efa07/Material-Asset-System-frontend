@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User, UserRole, Notification, Asset, Assignment, MaintenanceTask } from '@/types';
+import type { User, Notification, Asset, Assignment, MaintenanceTask } from '@/types';
 
 interface AppState {
   // Auth

@@ -17,18 +17,12 @@ export function AuthSync() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Determine if we should force login
-    // Note: It is better to use Middleware for route protection, 
-    // but to match previous client-side behavior:
     const isPublicRoute = pathname === '/login';
 
     if (status === 'unauthenticated' && !isPublicRoute) {
        signIn("keycloak");
        return;
     }
-
-    // NOTE: We do NOT redirect blindly if the role doesn't match dashboard access
-    // This logic relies on middleware or role-based guards on specific pages
 
     if (status === 'authenticated' && session?.accessToken) {
         try {
