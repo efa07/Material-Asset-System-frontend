@@ -40,7 +40,7 @@ export const useAppStore = create<AppState>()(
       // Initial state
       user: null,
       isAuthenticated: false,
-      sidebarCollapsed: false,
+      sidebarCollapsed: true,
       theme: 'light',
       notifications: [],
       unreadCount: 0,

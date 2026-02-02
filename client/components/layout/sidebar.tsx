@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 import { getNavigationForRole, getRoleDisplayName } from '@/lib/navigation';
-import { Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import {
   LayoutDashboard,
   Users,
@@ -33,7 +33,6 @@ import {
   Trash2,
   FileBarChart,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -65,7 +64,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, sidebarCollapsed, toggleSidebar } = useAppStore();
+  const { user, sidebarCollapsed, setSidebarCollapsed } = useAppStore();
 
   if (!user) return null;
 
@@ -75,9 +74,11 @@ export function Sidebar() {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          'fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border/70 bg-sidebar/95 backdrop-blur supports-[backdrop-filter]:bg-sidebar/80 shadow-lg transition-all duration-300 ease-in-out',
+          'fixed left-0 top-0 z-40 h-screen overflow-hidden border-r border-sidebar-border/70 bg-sidebar/95 backdrop-blur supports-[backdrop-filter]:bg-sidebar/80 shadow-lg transition-[width] duration-[860ms] ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[width]',
           sidebarCollapsed ? 'w-[76px]' : 'w-64'
         )}
+        onMouseEnter={() => setSidebarCollapsed(false)}
+        onMouseLeave={() => setSidebarCollapsed(true)}
       >
         {/* Logo */}
         <div className="flex h-16 items-center border-b border-sidebar-border/80 px-4">
@@ -165,22 +166,6 @@ export function Sidebar() {
             })}
           </ul>
         </nav>
-
-        {/* Collapse Toggle */}
-        <div className="absolute -right-3 top-20">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-7 w-7 rounded-full border-sidebar-border/80 bg-sidebar shadow-md hover:bg-sidebar-accent"
-            onClick={toggleSidebar}
-          >
-            {sidebarCollapsed ? (
-              <ChevronRight className="h-3 w-3" />
-            ) : (
-              <ChevronLeft className="h-3 w-3" />
-            )}
-          </Button>
-        </div>
       </aside>
     </TooltipProvider>
   );

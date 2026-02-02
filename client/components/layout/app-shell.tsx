@@ -27,7 +27,7 @@ export function AppShell({ children, className }: AppShellProps) {
       >
         <Navbar />
         <main className="relative flex-1 px-6 pb-10 pt-4 lg:px-8">
-          <div className="relative z-10 mx-auto w-full max-w-7xl space-y-6">
+          <div className="relative z-10 w-full space-y-6">
             {children}
           </div>
         </main>

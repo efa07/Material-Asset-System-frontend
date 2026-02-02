@@ -1,9 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Bell, Moon, Sun, Search, LogOut, User, Settings, ChevronDown } from 'lucide-react';
+import { Bell, Moon, Sun, LogOut, User, Settings, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,16 +74,7 @@ export function Navbar() {
 
       {/* Right Side Actions */}
       <div className="ml-auto flex items-center gap-4">
-        {/* Search */}
-        <div className="relative hidden w-64 items-center md:flex">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search resources..."
-            className="h-9 w-full rounded-lg border-border/50 bg-secondary/50 pl-9 pr-12 text-sm transition-all focus:border-primary/50 focus:bg-background/80"
-          />
-        </div>
-
+        
         <div className="flex items-center gap-2">
           {/* Theme Toggle */}
           <Button

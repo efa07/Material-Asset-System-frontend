@@ -20,16 +20,18 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'mb-6 flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 px-5 py-4 shadow-[0_12px_40px_-26px_rgba(47,17,120,0.4)] md:flex-row md:items-center md:justify-between',
+        'relative -mx-6 -mt-4 mb-8 flex flex-col gap-4 border-b border-border/40 bg-gradient-to-br from-primary/10 via-background to-accent/20 px-6 py-8 md:flex-row md:items-center md:justify-between lg:-mx-8 lg:px-8',
         className
       )}
     >
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2">
-          <span className="h-1.5 w-6 rounded-full bg-primary" aria-hidden />
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">
+      {/* Decorative background accent */}
+      <div className="absolute right-0 top-0 -z-10 h-full w-1/3 bg-gradient-to-l from-primary/5 to-transparent blur-3xl" />
+      
+      <div className="space-y-1.5 relative z-10">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="flex h-5 items-center justify-center rounded-full bg-primary/10 px-2.5 text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm ring-1 ring-inset ring-primary/20">
             Overview
-          </span>
+          </div>
         </div>
         <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground">
           {title}
