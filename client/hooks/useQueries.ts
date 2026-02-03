@@ -6,14 +6,6 @@ export const useNotifications = () => {
     return useQuery<Notification[]>({
         queryKey: ['notifications'],
         queryFn: async () => {
-            // Check if user is logged in first or handle in api interceptor?
-            // api should handle it. But the backend findAll returns ALL notifications if not filtered by user.
-            // Oh, I forgot to filter by user in NotificationsService.findAll!
-            // I should fix that in Backend or filter in Frontend (bad).
-            // Let's assume Backend handles it or I'll fix it.
-            // Correct approach: Frontend calls /notifications, Backend uses user context to return only mine.
-            // But Backend has no Auth context. So backend returns ALL.
-            // I should filter in frontend for now as temporary measure, matching `EmployeeNotificationsPage.myNotifications`.
             const { data } = await api.get('/notifications');
             return data;
         },

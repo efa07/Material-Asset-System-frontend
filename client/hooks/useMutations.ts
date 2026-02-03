@@ -225,8 +225,7 @@ export const useUpdateMaintenanceTask = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async ({ id, ...data }: {id: string, description?: string, status?: any}) => {
-             // Mapping notes to description if needed.
-             // The form has "notes".
+           
             const response = await api.patch(`/maintenance/${id}`, data);
             return response.data;
         },
@@ -517,7 +516,6 @@ export const useMarkNotificationRead = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (id: string) => {
-            // Assuming the backend has a mark-read endpoint, usually patch with isRead: true
             const response = await api.patch(`/notifications/${id}`, { isRead: true });
             return response.data;
         },
@@ -531,11 +529,7 @@ export const useMarkAllNotificationsRead = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (notificationIds: string[]) => {
-            // Ideally backend has a "mark all" endpoint. If not, parallel requests.
-            // For now, let's assume we loop or send them.
-            // NotificationsController has findAll, create, update, remove.
-            // It doesn't have "mark all".
-            // So I have to loop update.
+        
             await Promise.all(notificationIds.map(id => api.patch(`/notifications/${id}`, { isRead: true })));
             return true;
         },

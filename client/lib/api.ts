@@ -17,7 +17,7 @@ api.interceptors.request.use(async (config) => {
             (config.headers as any).Authorization = `Bearer ${session.accessToken}`;
         }
     } catch (err) {
-        // ignore in SSR or if session unavailable
+        console.log('Error fetching session for API request:', err);
     }
     return config;
 });
