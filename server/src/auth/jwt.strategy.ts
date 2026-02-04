@@ -15,7 +15,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         jwksUri: `${config.get('KEYCLOAK_ISSUER')}/protocol/openid-connect/certs`,
       }),
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // audience: config.get('KEYCLOAK_CLIENT_ID'), // Disabled to prevent 401 if Keycloak uses 'account' as aud
       issuer: config.get('KEYCLOAK_ISSUER'), 
       algorithms: ['RS256'],
     });

@@ -17,10 +17,8 @@ export class AppService {
     const lowStockItems = 0; // Logic for low stock if needed
     const pendingMaintenance = await this.prisma.maintenanceRecord.count({
       where: { type: 'PENDING' },
-    }); // Assuming type or status logic
-    // Based on MockDbService logic if I knew it. But standard counts are good.
+    }); 
 
-    // Also fetch assetsByStatus for chart logic
     const assetsByStatus = await this.prisma.asset.groupBy({
       by: ['status'],
       _count: {
@@ -33,7 +31,7 @@ export class AppService {
       activeAssignments,
       lowStockItems,
       pendingMaintenance,
-      assetsByStatus, // included as it was returned by mockDb.getDashboardStats()
+      assetsByStatus, 
     };
   }
 }

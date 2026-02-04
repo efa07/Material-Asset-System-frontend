@@ -1,7 +1,9 @@
 'use client';
 
-import { Archive, Package, ClipboardCheck, ArrowLeftRight, AlertCircle, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { Archive, Package, ClipboardCheck, ArrowLeftRight, AlertCircle, Trash2, Plus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/dashboard/page-header';
 import { StatsCard } from '@/components/dashboard/stats-card';
 import { StatusBadge } from '@/components/dashboard/status-badge';
@@ -43,7 +45,14 @@ export default function StoreManagerDashboard() {
       <PageHeader
         title="Store Dashboard"
         description="Overview of store operations and pending approvals"
-      />
+      >
+        <Link href="/dashboard/store-manager/register-store">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Register Store
+          </Button>
+        </Link>
+      </PageHeader>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
