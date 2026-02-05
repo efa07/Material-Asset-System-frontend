@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import type { Asset, User, Store, AssetCategory, Notification, AuditLog, MaintenanceTask, DashboardStats, Shelf, Assignment } from '@/types';
+import type { Asset, User, Store, AssetCategory, Notification, AuditLog, MaintenanceTask, DashboardStats, Shelf, Assignment, AssetReturn } from '@/types';
 
 export const useNotifications = () => {
     return useQuery<Notification[]>({
@@ -174,6 +174,16 @@ export const useDisposals = () => {
         queryKey: ['disposals'],
         queryFn: async () => {
              const { data } = await api.get('/asset-disposals');
+             return data;
+        },
+    });
+};
+
+export const useAssetReturns = () => {
+    return useQuery<AssetReturn[]>({
+        queryKey: ['asset-returns'],
+        queryFn: async () => {
+             const { data } = await api.get('/asset-returns');
              return data;
         },
     });

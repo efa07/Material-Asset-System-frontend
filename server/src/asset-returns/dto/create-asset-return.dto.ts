@@ -27,4 +27,9 @@ export class CreateAssetReturnDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @ApiProperty({ required: false })
+  @IsUUID()
+  @IsOptional()
+  userId?: string;
 }

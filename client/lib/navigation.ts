@@ -19,6 +19,12 @@ export const navigationConfig: NavItem[] = [
     roles: ['store-manager'],
   },
   {
+    title: 'Register Store',
+    href: '/dashboard/store-manager/register-store',
+    icon: 'Building2',
+    roles: ['store-manager'],
+  },
+  {
     title: 'Shelf Management',
     href: '/dashboard/store-manager/shelves',
     icon: 'Archive',
@@ -34,6 +40,12 @@ export const navigationConfig: NavItem[] = [
     title: 'Assignment Approvals',
     href: '/dashboard/store-manager/assignments',
     icon: 'ClipboardCheck',
+    roles: ['store-manager'],
+  },
+  {
+    title: 'Returned Assets',
+    href: '/dashboard/store-manager/returned-assets',
+    icon: 'RotateCcw',
     roles: ['store-manager'],
   },
 

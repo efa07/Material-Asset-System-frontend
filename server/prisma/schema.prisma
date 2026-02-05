@@ -37,6 +37,8 @@ model User {
   requestedWorkflows Workflow[]        @relation("Requester")
   auditLogs         AuditLog[]
 
+  assetReturns      AssetReturn[]
+
   // User Assets (Virtual relation)
   currentAssets     Asset[]           @relation("CurrentAssetHolder")
   transfersFrom     AssetTransfer[]   @relation("TransferFromUser")
@@ -205,6 +207,10 @@ model AssetReturn {
   returnDate DateTime @default(now())
   condition  String? // GOOD, DAMAGED, 
   notes      String?
+  status     String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

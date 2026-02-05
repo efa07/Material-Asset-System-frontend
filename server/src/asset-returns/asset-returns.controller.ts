@@ -35,6 +35,12 @@ export class AssetReturnsController {
     return this.service.findOne(id);
   }
 
+  @Patch(':id/approve')
+  @ApiOperation({ summary: 'Approve asset return' })
+  approve(@Param('id') id: string) {
+    return this.service.approve(id);
+  }
+
   @Patch(':id')
   @ApiOperation({ summary: 'Update asset return' })
   update(@Param('id') id: string, @Body() updateDto: UpdateAssetReturnDto) {

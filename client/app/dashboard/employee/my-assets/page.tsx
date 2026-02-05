@@ -49,7 +49,7 @@ import {
 import type { Asset } from "@/types";
 import { useAppStore } from "@/store/useAppStore";
 import { useUser } from "@/hooks/useQueries";
-import { useCreateMaintenance } from "@/hooks/useMutations";
+import { useCreateMaintenance, useCreateReturn } from "@/hooks/useMutations";
 import { cn } from "@/lib/utils";
 
 export default function EmployeeMyAssetsPage() {
@@ -59,11 +59,14 @@ export default function EmployeeMyAssetsPage() {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false);
   const [issueDescription, setIssueDescription] = useState("");
+  const [returnNotes, setReturnNotes] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("name-asc");
 
   const createMaintenance = useCreateMaintenance();
+  const createReturn = useCreateReturn();
 
   const myAssets = user?.currentAssets || [];
 
@@ -110,6 +113,11 @@ export default function EmployeeMyAssetsPage() {
     setIsReportDialogOpen(true);
   };
 
+  const handleReturnAsset = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setIsReturnDialogOpen(true);
+  };
+
   const handleViewDetails = (asset: Asset) => {
     setSelectedAsset(asset);
     setIsDetailsDialogOpen(true);
@@ -128,6 +136,23 @@ export default function EmployeeMyAssetsPage() {
       onSuccess: () => {
         setIsReportDialogOpen(false);
         setIssueDescription("");
+        setSelectedAsset(null);
+      }
+    });
+  };
+
+  const submitReturnRequest = () => {
+    if (!selectedAsset) return;
+
+    createReturn.mutate({
+      assetId: selectedAsset.id,
+      userId: currentUser?.id,
+      notes: returnNotes,
+      returnDate: new Date().toISOString(),
+    }, {
+      onSuccess: () => {
+        setIsReturnDialogOpen(false);
+        setReturnNotes("");
         setSelectedAsset(null);
       }
     });
@@ -418,7 +443,7 @@ export default function EmployeeMyAssetsPage() {
                   </div>
                 </CardContent>
 
-                <CardFooter className="p-4 pt-0 bg-transparent relative z-10">
+                <CardFooter className="p-4 pt-0 bg-transparent relative z-10 grid grid-cols-2 gap-2">
                   <Button 
                     className="w-full group/btn relative overflow-hidden border-primary/20 hover:border-primary/50 text-foreground hover:text-primary-foreground bg-background hover:bg-primary transition-all duration-300" 
                     variant="outline"
@@ -426,8 +451,19 @@ export default function EmployeeMyAssetsPage() {
                     onClick={() => handleViewDetails(asset)}
                   >
                     <span className="relative z-10 flex items-center gap-2">
-                      View Details 
+                      Details 
                       <Layers className="h-3 w-3 group-hover/btn:rotate-180 transition-transform duration-500" />
+                    </span>
+                  </Button>
+                  <Button 
+                    className="w-full group/btn relative overflow-hidden border-destructive/20 hover:border-destructive/50 text-foreground hover:text-destructive-foreground bg-background hover:bg-destructive transition-all duration-300" 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleReturnAsset(asset)}
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                       Return
+                       <Package className="h-3 w-3" />
                     </span>
                   </Button>
                 </CardFooter>
@@ -437,6 +473,47 @@ export default function EmployeeMyAssetsPage() {
         </div>
       )}
 
+      {/* Return Asset Dialog */}
+      <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="p-2 rounded-full bg-primary/10 text-primary">
+                <Package className="h-5 w-5" />
+              </div>
+              Return Asset
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to return <span className="font-medium text-foreground">{selectedAsset?.name}</span>? 
+              This will notify the store manager.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="return-notes">Notes (Optional)</Label>
+              <Textarea
+                id="return-notes"
+                placeholder="Reason for return, condition notes, etc."
+                value={returnNotes}
+                onChange={(e) => setReturnNotes(e.target.value)}
+                className="min-h-[100px] resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsReturnDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={submitReturnRequest} 
+              disabled={createReturn.isPending}
+            >
+              {createReturn.isPending ? "Submitting..." : "Confirm Return"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
       {/* Report Issue Dialog */}
       <Dialog open={isReportDialogOpen} onOpenChange={setIsReportDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">

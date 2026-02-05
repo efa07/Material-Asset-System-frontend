@@ -294,9 +294,24 @@ export interface UpdateAssetDisposalRequest extends Partial<CreateAssetDisposalR
 
 export interface CreateAssetReturnRequest {
   assetId: string;
+  userId?: string;
   returnDate?: string;
   condition?: string;
   notes?: string;
+}
+
+export interface AssetReturn {
+  id: string;
+  assetId: string;
+  asset?: Asset;
+  userId?: string;
+  user?: User;
+  returnDate: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  condition?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UpdateAssetReturnRequest extends Partial<CreateAssetReturnRequest> {

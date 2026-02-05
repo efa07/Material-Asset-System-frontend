@@ -386,6 +386,26 @@ export const useUpdateReturn = () => {
     });
 };
 
+export const useApproveReturn = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.patch(`/asset-returns/${id}/approve`);
+            return response.data;
+        },
+        onSuccess: () => {
+            toast.success('Return approved');
+            queryClient.invalidateQueries({ queryKey: ['asset-returns'] });
+            queryClient.invalidateQueries({ queryKey: ['assets'] });
+            queryClient.invalidateQueries({ queryKey: ['assignments'] });
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message || 'Failed to approve return';
+            toast.error(message);
+        },
+    });
+};
+
 export const useDeleteReturn = () => {
     const queryClient = useQueryClient();
     return useMutation({
