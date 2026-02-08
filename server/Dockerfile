@@ -23,7 +23,6 @@ RUN npm prune --omit=dev
 # final runtime image
 FROM base AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 COPY --from=build /app/dist ./dist
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY prisma ./prisma
