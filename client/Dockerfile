@@ -1,4 +1,3 @@
-# Stage 1: base image
 FROM node:20-alpine AS base
 WORKDIR /app
 ENV NODE_ENV=production
