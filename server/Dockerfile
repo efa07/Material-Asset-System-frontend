@@ -1,6 +1,5 @@
 FROM node:20-alpine AS base
 WORKDIR /app
-ENV NODE_ENV=production
 
 #install dependencies with dev tools for build
 FROM base AS deps
