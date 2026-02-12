@@ -6,15 +6,17 @@ export class AppService {
   constructor(private prisma: PrismaService) {}
 
   getHello(): string {
-    return 'Welcome to Material & Asset Management System!';
+    return 'the backend is working';
   }
 
   async getDashboardStats() {
     const totalAssets = await this.prisma.asset.count();
+
     const activeAssignments = await this.prisma.assetAssignment.count({
       where: { status: 'ACTIVE' },
     });
-    const lowStockItems = 0; // Logic for low stock if needed
+
+    const lowStockItems = 0; 
     const pendingMaintenance = await this.prisma.maintenanceRecord.count({
       where: { type: 'PENDING' },
     }); 

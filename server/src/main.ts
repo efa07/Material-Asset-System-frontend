@@ -8,22 +8,22 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // for security
+  // middleware for security, protects from several common web vulnerabilities
   app.use(helmet());
 
-  // cores
+  // middleware for cors
   app.enableCors();
 
-  // globale validation pipe
+  // middleware for globale validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
+      whitelist: true, // automatically strips out any properties from the request body that are not defined in DTO
+      forbidNonWhitelisted: true, // throws an error if any properties are not defined in DTO
+      transform: true, // automatically transforms the request body into the type defined in DTO
     }),
   );
 
-  // Global exception filter
+  // middleware for global exception filter
   app.useGlobalFilters(new AllExceptionsFilter());
 
   // Swagger configuration

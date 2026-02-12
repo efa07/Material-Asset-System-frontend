@@ -30,6 +30,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'; // for brut
       limit: 100, // 100 requests per minute
     }]),
     
+    // load enviromental variable globally
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -51,13 +52,16 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'; // for brut
     NotificationsModule,
     AuditModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController],  //handle incoming requests for root router
+
+  // busines logic for appcontroller
   providers: [AppService,{
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: JwtAuthGuard, // Protects all endpoints by default, requiring a valid JWT token
     },{
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: ThrottlerGuard, // Enforces the rate limits defined
     }],
 })
+
 export class AppModule {}
