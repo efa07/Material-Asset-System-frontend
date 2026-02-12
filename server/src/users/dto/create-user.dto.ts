@@ -1,6 +1,7 @@
 import {
   IsBoolean,
   IsEmail,
+  IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
@@ -8,6 +9,11 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
+  @ApiProperty({ description: 'The unique ID from Keycloak (sub claim)' })
+  @IsString()
+  @IsNotEmpty()
+  keycloakId: string;
+
   @ApiProperty()
   @IsEmail()
   email: string;

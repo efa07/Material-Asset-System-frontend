@@ -18,11 +18,7 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
 
-    // TODO: When Keycloak is integrated, check user.roles
-    // For now, allow all requests
-    return true;
-
-    // Future implementation:
-    // return requiredRoles.some((role) => user?.roles?.includes(role));
+    // Check if user has required roles (from Keycloak JWT)
+    return requiredRoles.some((role) => user?.roles?.includes(role));
   }
 }

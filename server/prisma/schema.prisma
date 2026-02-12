@@ -21,13 +21,14 @@ enum RoleType {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  keycloakId String   @unique // The unique ID from Keycloak (sub claim)
+  email      String   @unique
+  firstName  String?
+  lastName   String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   roleId String?
   role   Role?   @relation(fields: [roleId], references: [id])
