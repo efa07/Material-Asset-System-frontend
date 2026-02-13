@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
@@ -25,8 +26,8 @@ export class NotificationsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all notifications' })
-  findAll() {
-    return this.service.findAll();
+  findAll(@Req() req) {
+    return this.service.findAll(req.user.id);
   }
 
   @Get(':id')

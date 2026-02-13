@@ -12,7 +12,7 @@ import { useMarkNotificationRead, useMarkAllNotificationsRead } from '@/hooks/us
 
 export default function EmployeeNotificationsPage() {
   const { user } = useAppStore();
-  const { data: notifications, isLoading } = useNotifications();
+  const { data: notifications, isLoading } = useNotifications(user?.id);
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
 

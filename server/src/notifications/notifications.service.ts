@@ -13,7 +13,13 @@ export class NotificationsService {
     });
   }
 
-  findAll() {
+  findAll(userId?: string) {
+    if (userId) {
+      return this.prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+      });
+    }
     return this.prisma.notification.findMany({
       orderBy: { createdAt: 'desc' },
     });

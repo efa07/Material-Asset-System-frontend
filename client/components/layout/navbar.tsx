@@ -27,7 +27,7 @@ export function Navbar() {
   const { user, logout, theme: storeTheme } = useAppStore();
   const { theme, setTheme } = useTheme();
 
-  const { data: notificationsData } = useNotifications();
+  const { data: notificationsData } = useNotifications(user?.id);
   const notifications = notificationsData || [];
   const unreadCount = notifications.filter(n => n.userId === user?.id && !n.isRead).length;
 

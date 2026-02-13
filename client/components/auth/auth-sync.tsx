@@ -7,7 +7,8 @@ import { useAppStore } from "@/store/useAppStore";
 import { jwtDecode } from "jwt-decode";
 import { useRouter, usePathname } from "next/navigation";
 import { getRoleDashboardPath } from "@/lib/navigation";
-import type { UserRole } from "@/types";
+import type { UserRole, User } from "@/types";
+import { useUser } from "@/hooks/useQueries";
 
 export function AuthSync() {
   const { data: session, status } = useSession();
@@ -15,6 +16,9 @@ export function AuthSync() {
   const loginApp = useAppStore((state) => state.login);
   const router = useRouter();
   const pathname = usePathname();
+
+  const userEmail = session?.user?.email || (session?.accessToken ? (jwtDecode(session.accessToken) as any).email : undefined);
+  const { data: dbUser } = useUser(userEmail);
 
   useEffect(() => {
     const isPublicRoute = pathname === '/login';
@@ -48,14 +52,21 @@ export function AuthSync() {
 
             const primaryRole = mappedRoles[0] as UserRole | undefined;
             if (primaryRole) {
-                loginApp({
+                // If we have the DB user, prefer it (has correct database ID). 
+                // Otherwise fallback to token data (ID is Keycloak ID).
+                const userToSync: User = dbUser ? {
+                    ...dbUser,
+                    role: primaryRole, // Maintain role from token as authority
+                } : {
                     id: decoded.sub || 'unknown',
                     email: decoded.email || '',
                     name: decoded.preferred_username || decoded.name || 'User',
                     role: primaryRole,
                     createdAt: new Date().toISOString(),
                     lastLogin: new Date().toISOString(),
-                });
+                };
+
+                loginApp(userToSync);
 
                 // Redirect only if we are on the root page or login page
                 // And prevent loop by checking if we are already on a dashboard
@@ -68,7 +79,7 @@ export function AuthSync() {
             console.error("Error syncing auth state", error);
         }
     }
-  }, [session, status, setAuth, loginApp, router, pathname]);
+  }, [session, status, setAuth, loginApp, router, pathname, dbUser]);
 
   return null;
 }

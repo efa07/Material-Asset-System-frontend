@@ -2,14 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import type { Asset, User, Store, AssetCategory, Notification, AuditLog, MaintenanceTask, DashboardStats, Shelf, Assignment, AssetReturn } from '@/types';
 
-export const useNotifications = () => {
+export const useNotifications = (userId?: string) => {
     return useQuery<Notification[]>({
-        queryKey: ['notifications'],
+        queryKey: ['notifications', userId],
         queryFn: async () => {
+            if (!userId) return [];
             const { data } = await api.get('/notifications');
             return data;
         },
+        enabled: !!userId,
         refetchInterval: 5000,
+        retry: false,
     });
 };
 
