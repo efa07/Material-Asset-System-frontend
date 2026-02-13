@@ -26,7 +26,7 @@ export class NotificationsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all notifications' })
-  findAll(@Req() req) {
+  findAll(@Req() req: any) {
     return this.service.findAll(req.user.id);
   }
 
