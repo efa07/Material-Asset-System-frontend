@@ -33,8 +33,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <SessionProvider>
-      <AuthSync />
       <QueryClientProvider client={queryClient}>
+        <AuthSync />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

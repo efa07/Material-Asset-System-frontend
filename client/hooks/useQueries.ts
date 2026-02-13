@@ -6,24 +6,12 @@ export const useNotifications = (userId?: string) => {
     return useQuery<Notification[]>({
         queryKey: ['notifications', userId],
         queryFn: async () => {
-            if (!userId) {
-                console.log('useNotifications: No userId provided');
-                return [];
-            }
-            console.log('useNotifications: Fetching for userId:', userId);
-            try {
-                const { data } = await api.get('/notifications');
-                console.log('useNotifications: Data received:', data);
-                return data;
-            } catch (error) {
-                console.error('useNotifications: Error fetching:', error);
-                throw error;
-            }
+            const { data } = await api.get('/notifications');
+            return data;
         },
         enabled: !!userId,
         refetchInterval: 5000,
         retry: false,
-        placeholderData: keepPreviousData,
     });
 };
 
