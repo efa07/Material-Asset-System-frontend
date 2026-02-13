@@ -29,7 +29,8 @@ export function Navbar() {
 
   const { data: notificationsData } = useNotifications(user?.id);
   const notifications = notificationsData || [];
-  const unreadCount = notifications.filter(n => n.userId === user?.id && !n.isRead).length;
+  // Backend returns only current user's notifications
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   if (!user) return null;
 
@@ -127,7 +128,6 @@ export function Navbar() {
               ) : (
                 <div className="max-h-[320px] space-y-1 overflow-y-auto">
                   {notifications
-                    .filter(n => n.userId === user?.id)
                     .slice(0, 5)
                     .map((notification) => (
                     <DropdownMenuItem

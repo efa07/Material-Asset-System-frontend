@@ -16,10 +16,10 @@ export default function EmployeeNotificationsPage() {
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
 
+  // Backend already filters by user, so we just use the data directly
   const myNotifications = useMemo(() => {
-    if (!user || !notifications) return [];
-    return notifications.filter((n) => n.userId === user.id);
-  }, [notifications, user]);
+    return notifications || [];
+  }, [notifications]);
 
   const unreadCount = useMemo(() => {
     return myNotifications.filter((n) => !n.isRead).length;
