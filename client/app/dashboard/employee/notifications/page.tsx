@@ -12,14 +12,15 @@ import { useMarkNotificationRead, useMarkAllNotificationsRead } from '@/hooks/us
 
 export default function EmployeeNotificationsPage() {
   const { user } = useAppStore();
-  const { data: notifications, isLoading } = useNotifications(user?.id);
+  const { data: notifications, isLoading, isPending } = useNotifications(user?.id);
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
 
   // Backend already filters by user, so we just use the data directly
   const myNotifications = useMemo(() => {
+    // console.log('Rendering details:', { userId: user?.id, notifications, isPending, isLoading });
     return notifications || [];
-  }, [notifications]);
+  }, [notifications, user?.id]);
 
   const unreadCount = useMemo(() => {
     return myNotifications.filter((n) => !n.isRead).length;
@@ -32,7 +33,8 @@ export default function EmployeeNotificationsPage() {
     }
   };
 
-  if (isLoading) {
+  // Improved loading state handling
+  if (isLoading || (isPending && !notifications)) {
     return (
         <div className="flex h-96 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

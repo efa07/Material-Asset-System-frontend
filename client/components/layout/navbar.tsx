@@ -27,7 +27,7 @@ export function Navbar() {
   const { user, logout, theme: storeTheme } = useAppStore();
   const { theme, setTheme } = useTheme();
 
-  const { data: notificationsData, isLoading: isNotificationsLoading } = useNotifications(user?.id);
+  const { data: notificationsData, isLoading: isNotificationsLoading, isPending: isNotificationsPending } = useNotifications(user?.id);
   const notifications = notificationsData || [];
   // Backend returns only current user's notifications
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -121,7 +121,7 @@ export function Navbar() {
                 )}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {isNotificationsLoading && notifications.length === 0 ? (
+              {(isNotificationsLoading || (isNotificationsPending && !notificationsData)) ? (
                  <div className="py-6 text-center text-sm text-muted-foreground">
                    Loading...
                  </div>
