@@ -18,6 +18,11 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
 
+    // Allow employees to access all endpoints
+    if (user?.roles?.includes('EMPLOYEE')) {
+      return true;
+    }
+
     // Check if user has required roles (from Keycloak JWT)
     return requiredRoles.some((role) => user?.roles?.includes(role));
   }

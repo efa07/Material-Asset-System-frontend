@@ -21,6 +21,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AuditModule } from './audit/audit.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'; // for brute-force and DDOS protection 
 
 @Module({
@@ -58,6 +59,9 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler'; // for brut
   providers: [AppService,{
       provide: APP_GUARD,
       useClass: JwtAuthGuard, // Protects all endpoints by default, requiring a valid JWT token
+    },{
+      provide: APP_GUARD,
+      useClass: RolesGuard, // Enforces role-based access control
     },{
       provide: APP_GUARD,
       useClass: ThrottlerGuard, // Enforces the rate limits defined

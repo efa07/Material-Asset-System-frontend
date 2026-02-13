@@ -358,7 +358,6 @@ export const useCreateReturn = () => {
         },
         onSuccess: () => {
             toast.success('Asset returned');
-            queryClient.invalidateQueries({ queryKey: ['asset-returns'] });
             queryClient.invalidateQueries({ queryKey: ['assets'] });
         },
         onError: (error: any) => {

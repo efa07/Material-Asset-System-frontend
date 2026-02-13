@@ -51,7 +51,7 @@ import {
 } from "lucide-react";
 import type { Asset } from "@/types";
 import { useAssets, useCategories, useStores, useUsers } from "@/hooks/useQueries";
-import { useCreateAsset, useCreateAssignment, useCreateTransfer, useCreateDisposal } from "@/hooks/useMutations";
+import { useCreateAsset, useCreateAssignment, useCreateTransfer, useCreateDisposal, useCreateAssetCategory } from "@/hooks/useMutations";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,6 +70,7 @@ export default function AssetManagerAssetsPage() {
   const { mutate: assignAsset, isPending: isAssigning } = useCreateAssignment();
   const { mutate: transferAsset, isPending: isTransferring } = useCreateTransfer();
   const { mutate: disposeAsset, isPending: isDisposing } = useCreateDisposal();
+    const { mutate: createCategory, isPending: isCreatingCategory } = useCreateAssetCategory();
 
   const stores = storesData || [];
   const categories = categoriesData || [];
@@ -91,6 +92,8 @@ export default function AssetManagerAssetsPage() {
   const [assignmentData, setAssignmentData] = useState({ userId: "", dueDate: "", notes: "" });
   const [transferData, setTransferData] = useState({ toStoreId: "", reason: "" });
   const [disposalData, setDisposalData] = useState({ reason: "", method: "", value: "" });
+
+  const [newCategory, setNewCategory] = useState({ name: "", description: "" });
 
   const [newAsset, setNewAsset] = useState({
     name: "",
@@ -124,6 +127,32 @@ export default function AssetManagerAssetsPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, statusFilter, categoryFilter]);
+
+  // Auto-select first category when available
+  useEffect(() => {
+    if (!newAsset.categoryId && categories[0]?.id) {
+      setNewAsset((prev) => ({ ...prev, categoryId: categories[0].id }));
+    }
+  }, [categories, newAsset.categoryId]);
+
+  const handleCreateCategory = () => {
+    if (!newCategory.name.trim()) return;
+
+    createCategory(
+      {
+        name: newCategory.name.trim(),
+        description: newCategory.description.trim() || undefined,
+      },
+      {
+        onSuccess: (created) => {
+          setNewCategory({ name: "", description: "" });
+          if (created?.id) {
+            setNewAsset((prev) => ({ ...prev, categoryId: created.id }));
+          }
+        },
+      }
+    );
+  };
 
   // Pagination Logic
   const totalItems = filteredAssets.length;
@@ -283,6 +312,9 @@ export default function AssetManagerAssetsPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {categories.length === 0 && (
+                      <p className="text-xs text-muted-foreground">No categories yet. Create one below.</p>
+                    )}
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="store">Store</Label>
@@ -301,6 +333,44 @@ export default function AssetManagerAssetsPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+                <div className="rounded-md border border-dashed border-border/60 bg-muted/30 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Quick create category</p>
+                      <p className="text-xs text-muted-foreground">Add a new category without leaving this flow.</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="grid gap-1">
+                      <Label htmlFor="new-category-name" className="text-xs">Name</Label>
+                      <Input
+                        id="new-category-name"
+                        value={newCategory.name}
+                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                        placeholder="e.g., Laptops"
+                      />
+                    </div>
+                    <div className="grid gap-1">
+                      <Label htmlFor="new-category-description" className="text-xs">Description</Label>
+                      <Input
+                        id="new-category-description"
+                        value={newCategory.description}
+                        onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                        placeholder="Optional"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCreateCategory}
+                      disabled={isCreatingCategory || !newCategory.name.trim()}
+                    >
+                      {isCreatingCategory ? "Creating..." : "Create Category"}
+                    </Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -339,7 +409,7 @@ export default function AssetManagerAssetsPage() {
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleAddAsset} disabled={!newAsset.name.trim() || isCreating}>
+                <Button onClick={handleAddAsset} disabled={!newAsset.name.trim() || !newAsset.categoryId || isCreating}>
                   Add Asset
                 </Button>
               </DialogFooter>
