@@ -131,7 +131,7 @@ export default function EmployeeMyAssetsPage() {
       type: "ISSUE_REPORT",
       description: issueDescription,
       status: "SCHEDULED",
-      reportedByUserId: currentUser?.id
+      reportedByUserId: user?.id
     }, {
       onSuccess: () => {
         setIsReportDialogOpen(false);
@@ -146,7 +146,7 @@ export default function EmployeeMyAssetsPage() {
 
     createReturn.mutate({
       assetId: selectedAsset.id,
-      userId: currentUser?.id,
+      userId: user?.id,
       notes: returnNotes,
       returnDate: new Date().toISOString(),
     }, {
